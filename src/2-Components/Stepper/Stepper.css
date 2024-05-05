@@ -1,0 +1,19 @@
+.step-item:not(:first-child):before {
+    @apply content-[url('./largechevron.svg')] absolute left-[-20%];
+}
+
+.step-item:last-child {
+    @apply pl-3;
+}
+
+.stepicon {
+    @apply border-2 border-secondary-50;
+}
+
+.active .stepicon {
+    @apply border-2 border-primary-500;
+}
+
+.active .title {
+    @apply text-primary-500;
+}

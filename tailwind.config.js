@@ -128,6 +128,7 @@ export default {
   important: "#root",
   theme: {
     colors: {
+      transparent: "transparent",
       ...themeSettings.palette,
     },
     extend: {},
