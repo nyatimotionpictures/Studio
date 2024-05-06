@@ -14,7 +14,7 @@ const StepperCustom = ({ stepperData, currentStep, stepsAllComplete }) => {
     setCurrentIndex(() => getCurrentIndex);
   }, [currentStep]);
   return (
-    <div className="flex flex-row h-40 w-full ml-0 relative justify-between">
+    <div className="flex flex-row h-20 w-full ml-0 relative justify-between">
       {stepperData?.map((step, i) => {
         return (
           <div

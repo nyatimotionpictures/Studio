@@ -11,6 +11,8 @@ import ContentDetails from "../../../2-Components/Forms/ContentDetails.jsx";
 import StepperControls from "../../../2-Components/Stepper/StepperControls.jsx";
 import CastCrew from "../../../2-Components/Forms/CastCrew.jsx";
 import Audience from "../../../2-Components/Forms/Audience.jsx";
+import TrailersForm from "../../../2-Components/Forms/TrailersForm.jsx";
+import ReviewForm from "../../../2-Components/Forms/ReviewForm.jsx";
 
 const Dashboard = () => {
   let navigate = useNavigate();
@@ -101,22 +103,24 @@ const Dashboard = () => {
   /** handle form display change */
   const FormDisplay = (step) => {
     switch (step) {
+      case "Video":
+        return (
+          <UploadVideo innerref={formRef} handleStepNext={handleStepNext} />
+        );
       case "Content Details":
         return (
-          <UploadVideo innerref={formRef} handleStepNext={handleStepNext} />
+          <ContentDetails innerref={formRef} handleStepNext={handleStepNext} />
         );
+      case "Cast & Crew":
+        return <CastCrew innerref={formRef} handleStepNext={handleStepNext} />;
       case "Audience, Visibility...":
-        return (
-          <UploadVideo innerref={formRef} handleStepNext={handleStepNext} />
-        );
+        return <Audience innerref={formRef} handleStepNext={handleStepNext} />;
       case "Trailer & Thumbnails":
         return (
-          <UploadVideo innerref={formRef} handleStepNext={handleStepNext} />
+          <TrailersForm innerref={formRef} handleStepNext={handleStepNext} />
         );
       case "Preview":
-        return (
-          <UploadVideo innerref={formRef} handleStepNext={handleStepNext} />
-        );
+        return <ReviewForm />;
       default:
         return null;
     }
@@ -191,13 +195,13 @@ const Dashboard = () => {
         <div className="fixed inset-0 border rounded-xl bg-secondary-50 bg-opacity-75 transition-opacity"></div>
 
         <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
-          <div className="relative transform overflow-hidden rounded-lg bg-secondary-400 text-left shadow-xl transition-all">
-            <div className="bg-secondary-900 h-screen px-16 pt-0 overflow-y-auto">
+          <div className="relative transform overflow-y-auto rounded-lg bg-secondary-400 h-screen text-left shadow-xl transition-all">
+            <div className="bg-secondary-900 px-16 pt-0 min-h-screen h-max">
               {/** video form */}
               {/** <UploadVideo innerref={formRef} />  */}
 
               {/** forms with stepper */}
-              <div className="flex flex-col w-full h-full text-whites-40 gap-6 ">
+              <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
                 <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
                   <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
                     New Movie Upload
@@ -205,21 +209,19 @@ const Dashboard = () => {
 
                   <div className="flex gap-5">
                     <Button className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700">
-                      SAVE & CLOSE
+                      CANCEL & CLOSE
                     </Button>
                   </div>
                 </CustomStack>
 
                 {/** stepper show case */}
-
                 <StepperCustom
                   stepperData={stepperArray}
                   currentStep={currentStep}
                   stepsAllComplete={stepsAllComplete}
                 />
-
                 {/** form */}
-                <div className="mb-3">
+                <div className="block mb-3 h-full">
                   {/**  <ContentDetails
                     innerref={formRef}
                     handleStepNext={handleStepNext}
@@ -232,14 +234,33 @@ const Dashboard = () => {
                   />
                 */}
 
-                  <Audience
+                  {/**
+                  <TrailersForm
                     innerref={formRef}
                     handleStepNext={handleStepNext}
                   />
+                     *  
+                     *  <Audience
+                    innerref={formRef}
+                    handleStepNext={handleStepNext}
+                  />
+                     */}
+                  {/**
+ <TrailersForm
+                    innerref={formRef}
+                    handleStepNext={handleStepNext}
+                  />
+
+*/}
+
+                  {/** 
+                <ReviewForm />
+                */}
+                  <UploadVideo innerref={formRef} />
                 </div>
 
                 {/** stepper control */}
-                <div className="border-t-2 border-t-secondary-500">
+                <div className="border-t-2 border-t-secondary-500 relative">
                   <StepperControls
                     handleStepNext={handleStepNext}
                     stepperData={stepperArray}

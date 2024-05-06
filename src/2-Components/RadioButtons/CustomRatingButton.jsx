@@ -11,20 +11,22 @@ const CustomRatingButton = ({
   return (
     <label
       htmlFor={ratedId}
-      className="flex flex-col relative h-40 bg-[#E5E7EB]  text-secondary-900 rounded-lg w-80 p-4 gap-0"
+      className="flex flex-col  relative h-44 bg-[#E5E7EB]  text-secondary-900 rounded-lg min-w-80 w-max p-4 gap-3"
     >
       <div className="flex items-center h-5 w-full justify-between">
-        <Typography className="font-[Inter-Medium] text-base uppercase">
+        <Typography className="font-[Inter-Medium] text-sm uppercase">
           {btntitle}
         </Typography>
         <input name={radiogroupName} type="radio" id={ratedId} />
       </div>
 
-      <div className="h-11">
-        <img className="h-full" src={btnImg} alt="" />
+      <div className="h-[45px] w-[133px] relative overflow-hidden">
+        <img className="h-full w-full object-contain" src={btnImg} alt="" />
       </div>
 
-      <Typography>{btnText}</Typography>
+      <Typography className="font-[Inter-Bold] text-xs w-[289px]">
+        {btnText}
+      </Typography>
     </label>
   );
 };

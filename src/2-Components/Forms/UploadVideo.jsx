@@ -2,47 +2,100 @@ import React from "react";
 import CustomStack from "../Stacks/CustomStack";
 import { Typography } from "@mui/material";
 import Button from "../Buttons/Button";
+import { Field, Form, Formik } from "formik";
+import * as yup from "yup";
+import FilmPreview from "../Previews/FilmPreview";
 
-const UploadVideo = () => {
+const UploadVideo = ({ innerref, handleStepNext }) => {
+  const [videoUrl, setVideoUrl] = React.useState("")
+  let vidInputRef = React.useRef()
+  const validationSchema = yup.object().shape({
+    filmVideo: yup.mixed().required("Please select a video to upload").test("FILE_TYPE", "Invalid file format selected", (val)=> val && val.type==="video/mp4"),
+  });
+
+  const initialValues = {
+    filmVideo: null,
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  }
+
+  const handleDrop = (e, setFieldValue) => {
+    e.preventDefault();
+    console.log("e", e.dataTransfer.files);
+    setFieldValue("filmVideo", e.dataTransfer.files[0]);
+  };
   return (
-    <div className="flex flex-col w-full h-full text-whites-40 gap-6">
-      <CustomStack className="z-40 w-full justify-between items-center py-2 sticky top-0">
-        <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-          New Movie Upload
-        </Typography>
+    <Formik
+      innerRef={innerref}
+      initialValues={initialValues}
+      validationSchema={validationSchema}
+      onSubmit={(values, helpers) => {
+        //handleStepNext();
+        console.log(values);
+      }}
+    >
+      {({
+        values,
+        handleChange,
+        errors,
+        touched,
+        setFieldValue,
+        handleSubmit,
+      }) => (
+        <Form>
+          <div className="flex flex-col w-full h-full text-whites-40 gap-6">
+            <CustomStack className="flex flex-col gap-6">
+              <Typography className="text-whites-40 font-[Inter-Regular] text-xl">
+                Upload Video
+              </Typography>
+             
+                  <CustomStack
+                    onClick={() => vidInputRef.current.click()}
+                    onDragOver={(e) => handleDragOver(e)}
+                    onDrop={(e) => handleDrop(e, setFieldValue)}
+                    className="flex flex-col justify-center items-center min-h-[45vh] w-full border-2 rounded-xl border-dashed gap-6"
+                  >
+                    <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
+                    <CustomStack className="flex-col gap-2 items-center">
+                      <Typography className="font-[Inter-SemiBold] text-[#76757A] text-lg">
+                        <span className="text-primary-500">Select a file</span>{" "}
+                        Drag and drop a video files to upload
+                      </Typography>
+                      <Typography className="font-[Inter-Regular] text-lg text-[#76757A]">
+                        Your videos will be private until you publish them.
+                      </Typography>
+                    </CustomStack>
+                    <input
+                      type="file"
+                      name="filmVideo"
+                      hidden
+                      ref={vidInputRef}
+                      onChange={(event) => {
+                        setFieldValue("filmVideo", event.target.files[0]);
+                        handleSubmit();
+                      }}
+                    />
+                  </CustomStack>
+             
 
-        <div className="flex gap-5">
-          <Button className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700">
-            CANCEL & CLOSE
-          </Button>
-        </div>
-      </CustomStack>
+              {errors && errors.filmVideo ? (
+                <Typography className="text-[red]">
+                  {errors.filmVideo}
+                </Typography>
+              ) : null}
+            </CustomStack>
 
-      <CustomStack className="flex flex-col gap-6">
-        <Typography className="text-whites-40 font-[Inter-Regular] text-xl">
-          Upload Video
-        </Typography>
+            {/** video  */}
 
-        <CustomStack className="flex flex-col justify-center items-center min-h-[65vh] w-full border-2 rounded-xl border-dashed gap-6">
-          <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
-          <CustomStack className="flex-col gap-2">
-            <Typography className="font-[Inter-SemiBold] text-[#76757A] text-lg">
-              <span className="text-primary-500">Select a file</span> Drag and
-              drop a video files to upload
-            </Typography>
-            <Typography className="font-[Inter-Regular] text-lg text-[#76757A]">
-              Your videos will be private until you publish them.
-            </Typography>
-          </CustomStack>
-        </CustomStack>
-
-        {/** next button */}
-
-        <div className="w-full flex flex-row justify-end">
-          <Button className="px-8 rounded-full font-[Inter-Medium]">Next</Button>
-        </div>
-      </CustomStack>
-    </div>
+            {values.filmVideo !== null && !errors && !errors.filmVideo ? (
+              <FilmPreview filed={values.filmVideo} />
+            ) : null}
+          </div>
+        </Form>
+      )}
+    </Formik>
   );
 };
 
