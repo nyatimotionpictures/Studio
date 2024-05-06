@@ -13,6 +13,7 @@ import CastCrew from "../../../2-Components/Forms/CastCrew.jsx";
 import Audience from "../../../2-Components/Forms/Audience.jsx";
 import TrailersForm from "../../../2-Components/Forms/TrailersForm.jsx";
 import ReviewForm from "../../../2-Components/Forms/ReviewForm.jsx";
+import { FilmFormContext } from "../../../5-Store/FilmFormsContext.js";
 
 const Dashboard = () => {
   let navigate = useNavigate();
@@ -51,6 +52,9 @@ const Dashboard = () => {
   ];
   const [currentStep, setCurrentStep] = useState(null);
   const [stepsAllComplete, setStepsAllComplete] = useState(false);
+  const [videoData, setVideoData] = useState({
+    filmVideo: null
+  })
 
   const formRef = React.useRef();
 
@@ -256,7 +260,10 @@ const Dashboard = () => {
                   {/** 
                 <ReviewForm />
                 */}
-                  <UploadVideo innerref={formRef} />
+                  <FilmFormContext.Provider value={{videoData, setVideoData}}>
+                  {FormDisplay(stepsAllComplete ? "complete":currentStep)}
+                  </FilmFormContext.Provider>
+                  
                 </div>
 
                 {/** stepper control */}
