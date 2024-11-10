@@ -8,21 +8,14 @@ import React, {
 import Cookies from 'js-cookie';
 import { invoke } from '../lib/axios';
 import { jwtDecode, JwtPayload } from 'jwt-decode';
-
-type AuthedUser = {
-  id?: string;
-  firstname?: string;
-  lastname?: string;
-  email?: string;
-  role?: string;
-};
+import { ADMIN } from '../lib/types';
 
 type Payload = {
   id: string;
 } & JwtPayload;
 
 type AuthContextType = {
-  user: AuthedUser | null;
+  user: ADMIN | null;
   loading: boolean;
   fetching: boolean;
   login: () => void;
@@ -33,7 +26,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [admin, setAdmin] = useState<AuthedUser | null>(null);
+  const [admin, setAdmin] = useState<ADMIN | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
   const [fetching, setFetching] = useState<boolean>(false);
   const authToken = Cookies.get('_auth_token');
@@ -59,7 +52,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    const response = await invoke({
+    const response = await invoke<{
+      token: string;
+      user: ADMIN;
+    }>({
       method: 'POST',
       endpoint: `${endpoint}/login`,
       data: credentials,
@@ -68,8 +64,10 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       setLoading(false);
       throw new Error(response.error);
     }
-    Cookies.set('_auth_token', response?.res.token);
-    setAdmin(response?.res.user);
+    Cookies.set('_auth_token', response?.res?.token ?? '', {
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7), // 7 days
+    });
+    setAdmin(response?.res?.user ?? null);
     setLoading(false);
   };
 
@@ -106,7 +104,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
 
     setFetching(true);
     const payload = jwtDecode<Payload>(authToken);
-    const response = await invoke({
+    const response = await invoke<{ admin: ADMIN }>({
       method: 'GET',
       endpoint: `${endpoint}/me/${payload?.id}`,
     });
@@ -116,7 +114,7 @@ function AuthProvider({ children }: { children: React.ReactNode }) {
       throw new Error(response.error);
     }
 
-    setAdmin(response?.res.admin);
+    setAdmin(response?.res?.admin ?? null);
 
     setFetching(false);
   }, [authToken, endpoint, admin?.email]);

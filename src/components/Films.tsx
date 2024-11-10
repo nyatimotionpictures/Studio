@@ -39,21 +39,24 @@ type Poster = {
 
 const useFilms = () => {
   const { user } = useAuth();
-  const [films, setFilms] = React.useState([]);
+  const [films, setFilms] = React.useState<FILM[]>([]);
 
   const fetchFilms = useCallback(async () => {
-    const response = await invoke({ method: 'GET', endpoint: '/film/all' });
+    const response = await invoke<{ films: FILM[] }>({
+      method: 'GET',
+      endpoint: '/film/all',
+    });
     if (response?.error) {
       throw new Error(response.error);
     }
-    setFilms(response?.res?.films);
+    setFilms(response?.res?.films ?? []);
   }, []);
 
   const deleteFilm = async (filmId: string) => {
     if (!filmId) {
       throw new Error('Film ID is required');
     }
-    const response = await invoke({
+    const response = await invoke<{ message: string | null }>({
       method: 'DELETE',
       endpoint: `/film/delete/${filmId}`,
       data: { adminId: user?.id },

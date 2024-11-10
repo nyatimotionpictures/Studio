@@ -86,9 +86,8 @@ function FilmDetailsForm({
   });
 
   const onSubmit = async (data: FormValues) => {
-    console.log(data);
     setLoading(true);
-    const response = await invoke({
+    const response = await invoke<{ film: Film }>({
       method: 'POST',
       endpoint: '/film/create',
       data: {
@@ -103,7 +102,7 @@ function FilmDetailsForm({
     }
 
     if (response?.res) {
-      storeFilm(response.res.film);
+      storeFilm(response.res?.film);
     }
 
     console.log('response', response);
@@ -187,7 +186,7 @@ function FilmDetailsForm({
   );
 }
 
-function UploadFilmForm({
+export function UploadFilmForm({
   film,
   moveToNextTab,
 }: {
@@ -195,13 +194,13 @@ function UploadFilmForm({
   moveToNextTab: () => void;
 }) {
   const { user } = useAuth();
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState(0);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      console.log('acceptedFiles', acceptedFiles);
+      if (!user?.id || !film?.id) return;
       setLoading(true);
       const formData = new FormData();
       formData.append('film', acceptedFiles[0]);
@@ -260,7 +259,7 @@ function UploadFilmForm({
   );
 }
 
-function UploadPosterForm({ film }: { film: Film | null }) {
+export function UploadPosterForm({ film }: { film: Film | null }) {
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -269,6 +268,7 @@ function UploadPosterForm({ film }: { film: Film | null }) {
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
+      if (!user?.id || !film?.id) return;
       console.log('acceptedFiles', acceptedFiles);
       setLoading(true);
       const formData = new FormData();

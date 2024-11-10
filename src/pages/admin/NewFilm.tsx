@@ -5,6 +5,7 @@ import { Tab, Tabs, TabList, TabPanel } from 'react-tabs';
 import { invoke } from '../../lib/axios';
 import { useState, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
+import { FILM, POSTER } from '../../lib/types';
 
 type Film = {
   id: string;
@@ -91,7 +92,7 @@ function FilmDetailsForm({
   const onSubmit = async (data: FormValues) => {
     console.log(data);
     setLoading(true);
-    const response = await invoke({
+    const response = await invoke<{ film: FILM }>({
       method: 'POST',
       endpoint: '/film/create',
       data: {
@@ -286,13 +287,12 @@ function UploadPosterForm({
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
-      console.log('acceptedFiles', acceptedFiles);
       setLoading(true);
       const formData = new FormData();
       formData.append('poster', acceptedFiles[0]);
       formData.append('adminId', user?.id ?? '');
       formData.append('isCover', 'true');
-      const response = await invoke({
+      const response = await invoke<{ poster: POSTER }>({
         method: 'POST',
         endpoint: `/film/poster/${film?.id}`,
         data: formData,
@@ -314,10 +314,12 @@ function UploadPosterForm({
         throw new Error(response.error);
       }
 
-      console.log('response', response);
       // navigate to admin page
       setLoading(false);
-      setPosters((prev) => [response?.res?.poster, ...prev]);
+      const poster = response?.res?.poster as Poster;
+      if (poster) {
+        setPosters((prev) => [poster, ...prev]);
+      }
       setProgress(0);
       alert('Poster uploaded successfully');
     },

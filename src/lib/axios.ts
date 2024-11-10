@@ -3,7 +3,6 @@ import axios, {
   AxiosError,
   AxiosResponse,
   AxiosRequestConfig,
-  AxiosRequestHeaders,
 } from 'axios';
 import Cookies from 'js-cookie';
 
@@ -20,21 +19,20 @@ type invokeParams = {
   options?: AxiosRequestConfig;
 };
 
-interface InvokeResponse {
-  res: unknown | null;
-  status: number;
-  headers: AxiosRequestHeaders | null;
-  error: Error | string | null;
-}
+export type InvokeResponse<T> = Promise<{
+  res: T | null;
+  status?: number | undefined;
+  error: string | null;
+}>;
 
-export async function invoke({
+export async function invoke<T>({
   method,
   endpoint,
   data,
   isStream,
   isAdmin = true,
   options,
-}: invokeParams) {
+}: invokeParams): InvokeResponse<T> {
   const config: config = {
     headers: {
       'Content-Type': 'application/json',
@@ -62,11 +60,7 @@ export async function invoke({
   const { headers: optionHeaders, ...opts } = options || {};
 
   try {
-    const {
-      data: res,
-      status,
-      headers,
-    }: AxiosResponse = await axios({
+    const { data: res, status }: AxiosResponse = await axios({
       method,
       url: requestURL,
       data,
@@ -78,35 +72,44 @@ export async function invoke({
       ...opts,
     });
 
-    return { res, status, headers, error: null };
-  } catch (error) {
+    return { res, status, error: null };
+  } catch (error: unknown) {
     if (error instanceof AxiosError) {
       if (error?.response) {
-        if (error.response.data.message) {
+        if (error.response.data.message || error.response.data.detail) {
+          const message =
+            error.response.data.message || error.response.data.detail;
           return {
             res: null,
-            headers: error.response.headers ?? null,
-            status: 500,
-            error: new Error(error.response.data.message),
+            status: error.response.status,
+            error: message,
           };
         }
 
-        return { res: null, status: 500, error: error.response.data };
+        return {
+          res: null,
+          status: error.response.status,
+          error: error.response.data,
+        };
       } else if (error.request) {
         return {
           res: null,
-          headers: error.response?.headers ?? null,
-          status: 500,
+          status: error.response?.status,
           error: 'Error: No response received from the request',
         };
       } else {
         return {
           res: null,
-          headers: error.response?.headers ?? null,
-          status: 500,
+          status: error.response?.status,
           error: error.message,
         };
       }
     }
+
+    return {
+      res: null,
+      status: 500,
+      error: 'An error occurred',
+    };
   }
 }

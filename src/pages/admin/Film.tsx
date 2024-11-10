@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { invoke } from '../../lib/axios';
 import VideoStream from '../../components/VideoStream';
+import { FILM } from '../../lib/types';
 
 function Film() {
   const { film: filmId } = useParams();
@@ -14,12 +15,14 @@ function Film() {
 
   if (isLoading) return <h1>Loading film...</h1>;
 
+  const posterURL = film?.posters?.[0]?.url;
+
   return (
     <div className="text-white w-full space-y-4">
       <div className="flex items-start justify-start w-full gap-5">
         <div className="w-60 h-72 bg-slate-800 rounded-md">
           <img
-            src={film?.posters[0]?.url}
+            src={posterURL}
             alt="Film poster"
             className="w-full h-full object-cover rounded"
           />
@@ -52,40 +55,6 @@ function Film() {
   );
 }
 
-type Poster = {
-  id: string;
-  url: string;
-  type: string;
-  isCover?: boolean;
-  isBackdrop?: boolean;
-  filmId?: string;
-};
-
-type FILM = {
-  id: string;
-  title: string;
-  overview: string;
-  plotSummary: string;
-  releaseDate: Date;
-  comingSoon: boolean;
-  yearOfProduction?: number;
-  released?: string;
-  runtime?: string;
-  genre?: string;
-  tags: string[];
-  type: string;
-  embeddedSubtitles?: boolean;
-  createdAt?: Date;
-  country?: string;
-  copyright?: string;
-  audienceTarget?: string;
-  audienceAgeGroup?: string;
-  visibility?: string;
-  filmModel?: string;
-  status?: string;
-  posters: Poster[];
-};
-
 function useFilm() {
   const [film, setFilm] = useState<FILM | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -95,7 +64,7 @@ function useFilm() {
       throw new Error('Film ID is required');
     }
     setIsLoading(true);
-    const response = await invoke({
+    const response = await invoke<{ film: FILM }>({
       method: 'GET',
       endpoint: `/film/${filmId}`,
     });
@@ -103,7 +72,7 @@ function useFilm() {
       setIsLoading(false);
       throw new Error(response.error);
     }
-    setFilm(response?.res?.film);
+    setFilm(response?.res?.film ?? null);
     setIsLoading(false);
   }, []);
 

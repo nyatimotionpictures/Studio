@@ -34,16 +34,25 @@ function ErrorFallback({
   );
 }
 
+type USER = {
+  id: string;
+  firstname: string;
+  email: string;
+};
+
 function Users() {
-  const [users, setUsers] = useState([]);
-  const [error, setError] = useState<Error | null>(null);
+  const [users, setUsers] = useState<USER[]>([]);
+  const [error, setError] = useState('');
   const handleUsersFetch = async () => {
-    const response = await invoke({ method: 'GET', endpoint: '/user/findall' });
+    const response = await invoke<{ users: USER[] }>({
+      method: 'GET',
+      endpoint: '/user/findall',
+    });
     if (response?.error) {
-      setError(response.error);
+      setError(response?.error);
       return;
     }
-    setUsers(response?.res?.users);
+    setUsers(response?.res?.users ?? []);
   };
 
   if (error) {
