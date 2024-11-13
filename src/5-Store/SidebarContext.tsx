@@ -43,19 +43,23 @@ export function SidebarProvider({ children }: SidebarProviderProps) {
     if (isScreenSmall()) {
       setIsSmallOpen((e) => !e);
     } else {
-        setIsLargeOpen(e => !e)
+      setIsLargeOpen((e) => !e);
     }
-    };
-    
-    const close = () => {
-        if (isScreenSmall()) {
-            setIsSmallOpen(false)
-        } else {
-            setIsLargeOpen(false)
-        }
-    };
+  };
 
-    return (
-        <SidebarContext.Provider value={{ isLargeOpen, isSmallOpen, toggle, close }}>{children}</SidebarContext.Provider>
-    )
+  const close = () => {
+    if (isScreenSmall()) {
+      setIsSmallOpen(false);
+    } else {
+      setIsLargeOpen(false);
+    }
+  };
+
+  return (
+    <SidebarContext.Provider
+      value={{ isLargeOpen, isSmallOpen, toggle, close }}
+    >
+      {children}
+    </SidebarContext.Provider>
+  );
 }

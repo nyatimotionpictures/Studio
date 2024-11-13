@@ -6,7 +6,10 @@ import { PageHeaderFirstSection } from './PageHeader.tsx';
 import CustomStack from '../Stacks/CustomStack.jsx';
 import { Avatar, Typography } from '@mui/material';
 import Logo from "../../1-Assets/logos/Logo.png";
+import { NavLink } from 'react-router-dom';
 
+
+{/** small sidebar --- starts here */}
 type SmallSidebarItemProps = {
   Icon: string;
   title: string;
@@ -16,11 +19,23 @@ type SmallSidebarItemProps = {
 [/** items - smallbarItems */]
 const SmallSidebarItem = ({ Icon, title, url }: SmallSidebarItemProps) => {
     return (
-        <a href={url} className={twMerge(buttonStyles({variant:"ghost"}), "py-4 px-1 flex flex-col items-center text-whites-500 rounded-lg gap-1")}>
-          <span className={`${Icon} w-6 h-6 text-whites-200`} />
-            <div className='text-xs'>{title}</div>
-          </a>
-    )
+      <NavLink
+        to={url}
+        className={({ isActive }) =>
+          twMerge(
+            buttonStyles({ variant: "ghost" }),
+            `py-4 px-1 flex flex-col items-center text-whites-500 rounded-lg gap-1 ${
+              isActive
+                ? "font-bold bg-tertiary-40 hover:bg-tertiary-40 text-primary-500"
+                : undefined
+            }`
+          )
+        }
+      >
+        <span className={`${Icon} w-6 h-6 `} />
+        <div className="text-xs">{title}</div>
+      </NavLink>
+    );
 }
 
 type LargeSidebarSectionProps = {
@@ -75,11 +90,11 @@ type LargeSidebarItemProps = {
   isActive?: boolean;
 }
 
-const LargeSidebarItem = ({ Icon, title, url, isActive=false}: LargeSidebarItemProps) => {
+const LargeSidebarItem = ({ Icon, title, url}: LargeSidebarItemProps) => {
   return (
-    <a
-      href={url}
-      className={twMerge(
+    <NavLink
+      to={url}
+      className={({isActive})=>twMerge(
         buttonStyles({ variant: "ghost" }),
         `w-full flex items-center rounded-lg gap-4 p-3 text-whites-200 hover:text-primary-500 hover:font-bold hover:bg-tertiary-40 ${
           isActive
@@ -92,7 +107,7 @@ const LargeSidebarItem = ({ Icon, title, url, isActive=false}: LargeSidebarItemP
       <div className="whitespace-nowrap  overflow-hidden text-ellipsis hover:text-primary-500 ">
         {title}
       </div>
-    </a>
+    </NavLink>
   );
 }
 
@@ -107,25 +122,35 @@ const Sidebar = () => {
         }`}
       >
         <SmallSidebarItem
-          Icon={"icon-[solar--home-linear]"}
+          Icon={"icon-[carbon--home]"}
           title={"Dashboard"}
           url={"/"}
         />
         <SmallSidebarItem
-          Icon={"icon-[solar--video-library-linear]"}
-          title="Content Repo"
+          Icon={"icon-[carbon--media-library]"}
+          title="Content"
           url="/content"
+        />
+        <SmallSidebarItem
+          Icon={"icon-[carbon--receipt]"}
+          title="Subscriptions"
+          url="/subscriptions"
+        />
+        <SmallSidebarItem
+          Icon={"icon-[carbon--purchase]"}
+          title="Donations"
+          url="/donations"
         />
 
         <SmallSidebarItem
-          Icon={"icon-[solar--users-group-two-rounded-linear]"}
+          Icon={"icon-[carbon--user-multiple]"}
           title="People"
-          url="/content"
+          url="/people"
         />
         <SmallSidebarItem
-          Icon={"icon-[solar--ticket-linear]"}
-          title="Tickets & events"
-          url="/content"
+          Icon={"icon-[carbon--settings]"}
+          title="Account Settings"
+          url="/setting"
         />
       </aside>
 
@@ -147,25 +172,34 @@ const Sidebar = () => {
         </div>
         <LargeSidebarSection>
           <LargeSidebarItem
-            isActive
-            Icon={"icon-[solar--home-linear]"}
+            Icon={"icon-[carbon--home]"}
             title={"Dashboard"}
             url={"/"}
           />
           <LargeSidebarItem
-            Icon={"icon-[solar--video-library-linear]"}
+            Icon={"icon-[carbon--media-library]"}
             title={"Content Repository"}
-            url={"/"}
+            url={"/content"}
           />
           <LargeSidebarItem
-            Icon={"icon-[solar--users-group-two-rounded-linear]"}
-            title={"People"}
-            url={"/"}
+            Icon={"icon-[carbon--receipt]"}
+            title="Subscriptions"
+            url="/subscriptions"
           />
           <LargeSidebarItem
-            Icon={"icon-[solar--ticket-linear]"}
-            title={"Tickets & events"}
-            url={"/"}
+            Icon={"icon-[carbon--purchase]"}
+            title="Donations"
+            url="/donations"
+          />
+          <LargeSidebarItem
+            Icon={"icon-[carbon--user-multiple]"}
+            title="People"
+            url="/people"
+          />
+          <LargeSidebarItem
+            Icon={"icon-[carbon--settings]"}
+            title="Account Settings"
+            url="/setting"
           />
         </LargeSidebarSection>
 

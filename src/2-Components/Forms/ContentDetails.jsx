@@ -19,7 +19,7 @@ const ContentDetails = ({ innerref, handleStepNext }) => {
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values, helpers) => {
-        handleStepNext();
+        handleStepNext(values);
       }}
     >
       {({ values, handleChange, errors, touched, setFieldValue }) => (
@@ -27,10 +27,10 @@ const ContentDetails = ({ innerref, handleStepNext }) => {
           <CustomStack className="h-full w-full flex flex-col gap-5">
             {/** title */}
             <FormContainer>
-              <label className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
+              <label htmlFor="title" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
                 Title name (required)
               </label>
-              <input />
+              <input id="title" value={values.title} name="title" onChange={handleChange} />
             </FormContainer>
             {/** type */}
             <FormContainer>

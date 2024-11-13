@@ -8,7 +8,13 @@ import { themeSettings } from './theme';
 import { StyledEngineProvider } from "@mui/material/styles";
 import OrdinaryRoutes from './4-Routes/OrdinaryRoutes.jsx';
 import ProtectedRoutes from './4-Routes/ProtectedRoutes.jsx';
-import Dashboard from './6-Views/Studio/studio-dashboard/Dashboard.jsx';
+import Dashboard from './6-Views/Studio/studio-dashboard/1Dashboard/Dashboard.jsx';
+import ContentRepo from './6-Views/Studio/studio-dashboard/2ContentRepo/ContentRepo.jsx';
+import Subscriptions from './6-Views/Studio/studio-dashboard/3Subscriptions/index.jsx';
+import Donations from './6-Views/Studio/studio-dashboard/4Donations/index.jsx';
+import People from './6-Views/Studio/studio-dashboard/5People/index.jsx';
+import Setting from './6-Views/Studio/studio-dashboard/6Setting/index.jsx';
+import ViewFilmContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewFilmContent.jsx';
 function App() {
 let theme = useMemo(()=>createTheme(themeSettings), []);
   return (
@@ -18,11 +24,21 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
           <CssBaseline />
           <Routes>
             <Route
-              element={<ProtectedRoutes />}
-              
+             // element={<ProtectedRoutes />}
+              element={<OrdinaryRoutes />}
             >
               <Route path="/" element={<Dashboard />} />
+              <Route path="/content" element={<ContentRepo />} />
+              <Route path="/content/view/:id" element={<ViewFilmContent />} />
+              <Route path="/subscriptions" element={<Subscriptions />} />
+              <Route path="/donations" element={<Donations />} />
+              <Route path="/people" element={<People />} />
+              <Route path="/setting" element={<Setting />} />
+
+             
             </Route>
+
+           
 
             <Route
               element={<OrdinaryRoutes />}

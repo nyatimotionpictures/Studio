@@ -181,7 +181,7 @@ const VideoListTable = () => {
     {
       header: "Year",
       accessorKey: "Year",
-      footer: "Content",
+      footer: "Content"
     },
     {
       header: "Date Published",

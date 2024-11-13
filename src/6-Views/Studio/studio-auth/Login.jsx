@@ -27,10 +27,10 @@ const Login = () => {
 
   const validationSchema = yup.object().shape({
     username: yup.string().required("required"),
-    password: yup.string().required("required"),
+    password: yup.string().required("password is required"),
   });
   return (
-    <div className="max-h-screen w-full flex flex-row gap-0">
+    <div className="max-h-screen w-full flex flex-row gap-0 ">
       {/** form */}
       <Box
         component={"section"}
@@ -41,12 +41,13 @@ const Login = () => {
           initialValues={initialValues}
           onSubmit={async (values, helpers) => {
             try {
+              //console.log("values", values)
               const res = await apiRequest.post("/admin/auth/login", values);
 
               updateUser(res.data)
               routeNavigate("/", { replace: true });
             } catch (error) {
-              console.log("error")
+              console.log("error", error)
             }
            // console.log("values", values)
            // alert("login completed");
@@ -118,7 +119,7 @@ const Login = () => {
                     <Button
                       onClick={handleSubmit}
                       type="button"
-                      className="rounded-full py-2 px-4 text-[14.35px]"
+                      className="rounded-full py-2 px-4 text-[14.35px] "
                       variant="default"
                     >
                       Sign In

@@ -12,11 +12,15 @@ const UploadVideo = ({ innerref, handleStepNext }) => {
   const validationSchema = yup.object().shape({
     filmVideo: yup
       .mixed()
-      .required("Please select a video to upload")
+      .required("video required")
       .test(
-        "FILE_TYPE",
+        "is-valid-type",
         "Invalid file format selected",
-        (val) => val && val.type !== "video/mp4"
+        (val) => {
+          console.log("valuedddd", val.type);
+          return val && val.type !== "video/mp4"
+
+        }
       ),
   });
 
@@ -42,9 +46,10 @@ const UploadVideo = ({ innerref, handleStepNext }) => {
     <Formik
       innerRef={innerref}
       initialValues={initialValues}
+      validationSchema={validationSchema}
       onSubmit={(values, helpers) => {
-        //handleStepNext();
-        console.log(values);
+        handleStepNext();
+        // console.log(values);
       }}
     >
       {({
