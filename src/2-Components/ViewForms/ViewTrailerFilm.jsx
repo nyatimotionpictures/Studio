@@ -6,8 +6,8 @@ const ViewTrailerFilm = () => {
       <div className="flex flex-col h-full w-full gap-14 max-w-[1000px]">
           {/** Trailer */}
           <div className='flex flex-col  gap-6'>
-              <div className="flex flex-row  gap-8 items-center">
-                  <div className="flex flex-col gap-[7px] min-w-[150px] max-w-[80%]">
+              <div className="flex flex-row  gap-8 items-center max-w-[80%]">
+                  <div className="flex flex-col gap-[7px] min-w-[150px] ">
                       <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">Trailer</h1>
                       <p className="font-[Inter-Regular] text-base text-[#706E72]">You can upload a file that contains full-motion (digital video) that is at least 1-3 minute video</p>
                   </div>
@@ -46,7 +46,7 @@ const ViewTrailerFilm = () => {
 
           {/** SD */}
           <div className='flex flex-col  gap-6'>
-              <div className='flex items-center gap-8'>
+              <div className='flex items-center gap-8 max-w-[80%]'>
                       <div className="flex flex-col gap-[7px] min-w-[150px]">
                   <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">SD (480P)</h1>
                   <p className="font-[Inter-Regular] text-base text-[#706E72]">Please upload a file that contains a digital video in SD (480p) format for optimal playback and compatibility.</p>
@@ -88,7 +88,7 @@ const ViewTrailerFilm = () => {
           </div>
           {/** hd */}
           <div className='flex flex-col  gap-6'>
-              <div className="flex gap-8">
+              <div className="flex items-center gap-8 max-w-[80%]">
               <div className="flex flex-col gap-[7px] min-w-[150px]">
                   <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">HD (720P)</h1>
                   <p className="font-[Inter-Regular] text-base text-[#706E72]">Please upload a file that contains a digital video in HD (720p) format for optimal playback and compatibility.</p>
@@ -130,10 +130,16 @@ const ViewTrailerFilm = () => {
           </div>
           {/** fullhd */}
           <div className='flex flex-col  gap-6'>
-              <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">Full HD (1080P)</h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">Please upload a file that contains a digital video in Full HD (1080p) format for optimal playback and compatibility.</p>
+              <div className='flex items-center gap-8 max-w-[80%]'>
+                  <div className="flex flex-col gap-[7px] min-w-[150px]">
+                      <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">Full HD (1080P)</h1>
+                      <p className="font-[Inter-Regular] text-base text-[#706E72]">Please upload a file that contains a digital video in Full HD (1080p) format for optimal playback and compatibility.</p>
+                  </div>
+                  <div className="">
+                      <Button className="w-max min-w-[150px]">Upload File</Button>
+                  </div>
               </div>
+             
 
               <div className="flex flex-col gap-5">
                   {/** price */}
@@ -165,10 +171,17 @@ const ViewTrailerFilm = () => {
           </div>
           {/** ultrahd */}
           <div className='flex flex-col  gap-6'>
-              <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">Ultra HD (2160p)</h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">Please upload a file that contains a digital video in Ultra HD (2160p) format for optimal playback and compatibility.</p>
+              <div className="flex items-center gap-8 max-w-[80%]">
+              
+                  <div className="flex flex-col gap-[7px] min-w-[150px]">
+                      <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">Ultra HD (2160p)</h1>
+                      <p className="font-[Inter-Regular] text-base text-[#706E72]">Please upload a file that contains a digital video in Ultra HD (2160p) format for optimal playback and compatibility.</p>
+                  </div>
+                  <div className="">
+                      <Button className="w-max min-w-[150px]">Upload File</Button>
+                  </div>
               </div>
+             
 
               <div className="flex flex-col gap-5">
                   {/** price */}

@@ -15,6 +15,9 @@ import Donations from './6-Views/Studio/studio-dashboard/4Donations/index.jsx';
 import People from './6-Views/Studio/studio-dashboard/5People/index.jsx';
 import Setting from './6-Views/Studio/studio-dashboard/6Setting/index.jsx';
 import ViewFilmContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewFilmContent.jsx';
+import ViewSeriesContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewSeriesContent.jsx';
+import ViewSeasonContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewSeasonContent.jsx';
+import ViewEpisodeContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewEpisodeContent.jsx';
 function App() {
 let theme = useMemo(()=>createTheme(themeSettings), []);
   return (
@@ -29,7 +32,10 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
             >
               <Route path="/" element={<Dashboard />} />
               <Route path="/content" element={<ContentRepo />} />
-              <Route path="/content/view/:id" element={<ViewFilmContent />} />
+              <Route path="/content/view/film/:id" element={<ViewFilmContent />} />
+              <Route path="/content/view/series/:id" element={<ViewSeriesContent />} />
+              <Route path="/content/view/series/:id/:season" element={<ViewSeasonContent />} />
+              <Route path="/content/view/series/:id/:season/:episode" element={<ViewEpisodeContent />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/donations" element={<Donations />} />
               <Route path="/people" element={<People />} />
