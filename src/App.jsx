@@ -18,6 +18,7 @@ import ViewFilmContent from './6-Views/Studio/studio-dashboard/2ContentRepo/View
 import ViewSeriesContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewSeriesContent.jsx';
 import ViewSeasonContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewSeasonContent.jsx';
 import ViewEpisodeContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewEpisodeContent.jsx';
+import Register from './6-Views/Studio/studio-auth/Register.jsx';
 function App() {
 let theme = useMemo(()=>createTheme(themeSettings), []);
   return (
@@ -27,8 +28,8 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
           <CssBaseline />
           <Routes>
             <Route
-             // element={<ProtectedRoutes />}
-              element={<OrdinaryRoutes />}
+              element={<ProtectedRoutes />}
+             // element={<OrdinaryRoutes />}
             >
               <Route path="/" element={<Dashboard />} />
               <Route path="/content" element={<ContentRepo />} />
@@ -50,6 +51,8 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               element={<OrdinaryRoutes />}
             >
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+
             </Route>
           </Routes>
         </ThemeProvider>

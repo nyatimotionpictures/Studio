@@ -34,3 +34,10 @@ const Button = ({variant, size, className, ...props}: ButtonProps) => {
 };
 
 export default Button;
+
+//"@tanstack/react-query-devtools": "^5.60.2",
+// "lucide-react": "^0.460.0",
+//"react-phone-input-2": "^2.15.1",
+//    "tailwind-merge": "^2.3.0",
+//typescript@^4.2.0
+

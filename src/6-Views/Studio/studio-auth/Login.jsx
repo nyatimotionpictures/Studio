@@ -1,4 +1,4 @@
-import { useTheme, Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography } from "@mui/material";
 import React, { useContext } from "react";
 import Button from "../../../2-Components/Buttons/Button";
 import * as yup from "yup";
@@ -11,24 +11,41 @@ import {
 } from "../../../2-Components/Stacks/InputFormStack.jsx";
 import { styled } from "@mui/system";
 import { AuthContext } from "../../../5-Store/AuthContext.jsx";
-import apiRequest from "../../../3-Middleware/apiRequest.js";
 import { useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { postAuthLogin } from "../../../5-Store/TanstackStore/services/api.ts";
 
 const Login = () => {
-  const { palette } = useTheme();
    let routeNavigate = useNavigate();
+   const [errorMessage, setErrorMessage] = React.useState(null)
+   const {updateUser} = useContext(AuthContext)
 
-  const {updateUser} = useContext(AuthContext)
+
+   const mutation = useMutation({
+    mutationFn: postAuthLogin,
+onSuccess: (data)=>{
+  updateUser(data)
+  routeNavigate("/", { replace: true });
+},
+onError: (error)=>{
+  console.log("error", error)
+  setErrorMessage(()=> `Login Failed: ${error.message}`)
+}
+   })
+
+  
 
   const initialValues = {
-    username: "",
+    email: "",
     password: "",
+    staySignedIn: false
   };
 
   const validationSchema = yup.object().shape({
-    username: yup.string().required("required"),
+    email: yup.string().required("required"),
     password: yup.string().required("password is required"),
   });
+
   return (
     <div className="max-h-screen w-full flex flex-row gap-0 ">
       {/** form */}
@@ -40,15 +57,8 @@ const Login = () => {
           validationSchema={validationSchema}
           initialValues={initialValues}
           onSubmit={async (values, helpers) => {
-            try {
-              //console.log("values", values)
-              const res = await apiRequest.post("/admin/auth/login", values);
-
-              updateUser(res.data)
-              routeNavigate("/", { replace: true });
-            } catch (error) {
-              console.log("error", error)
-            }
+           
+            mutation.mutate(values)
            // console.log("values", values)
            // alert("login completed");
           }}
@@ -60,6 +70,7 @@ const Login = () => {
                   <img src={logo} alt={"Nyati Films"} />
                 </Box>
                 <Stack spacing="22px">
+                  {/** Login Title */}
                   <Stack>
                     <Typography
                       variant="h1"
@@ -75,21 +86,32 @@ const Login = () => {
                     </Typography>
                   </Stack>
 
+{/** Error Message */}
+{errorMessage && (
+  <Stack>
+            <Typography className="text-primary-500 text-[14px] max-w-[400px]">
+              {errorMessage}
+            </Typography>
+
+</Stack>
+)}
+
+{/** form stacks */}
                   <Stack spacing={"10px"}>
                     <SingleWrapper>
                       <FormContainer>
                         <label className="text-[#bdb8b8] text-[12.56px]">
-                          Mobile Number, Username or Email
+                          Username or Email
                         </label>
                         <input
-                          name="username"
-                          value={values.username}
+                          name="email"
+                          value={values.email}
                           className="text-[#ffffff] text-[14.35px] font-[Inter-Medium]"
                           onChange={handleChange}
                         />
-                        {errors && errors.username && (
+                        {errors && errors.email && (
                           <Typography className="text-[red] font-[Segoe-UI] text-[13px]">
-                            {errors.username}
+                            {errors.email}
                           </Typography>
                         )}
                       </FormContainer>

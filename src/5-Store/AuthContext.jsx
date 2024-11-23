@@ -6,13 +6,22 @@ export const AuthContext = createContext();
 export const AuthContextProvider = ({ children }) => {
     const [currentUser, setCurrentUser] = useState(JSON.parse(localStorage.getItem("user")) || null);
 
+
     const updateUser = (data) => {
-        setCurrentUser(data);
-        <Navigate to="/"/>
+        
+            setCurrentUser(data);
+            <Navigate to="/"/>
+        
+       
     };
 
     useEffect(() => {
-        localStorage.setItem("user", JSON.stringify(currentUser))
+        if (currentUser === null) {
+            <Navigate to="/login"/>
+        } else {
+            localStorage.setItem("user", JSON.stringify(currentUser))
+        }
+        
     },[currentUser])
 
   return <AuthContext.Provider value={{currentUser, updateUser}}>{children}</AuthContext.Provider>;
