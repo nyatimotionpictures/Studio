@@ -19,6 +19,7 @@ import ViewSeriesContent from './6-Views/Studio/studio-dashboard/2ContentRepo/Vi
 import ViewSeasonContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewSeasonContent.jsx';
 import ViewEpisodeContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewEpisodeContent.jsx';
 import Register from './6-Views/Studio/studio-auth/Register.jsx';
+
 function App() {
 let theme = useMemo(()=>createTheme(themeSettings), []);
   return (
@@ -41,6 +42,7 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               <Route path="/donations" element={<Donations />} />
               <Route path="/people" element={<People />} />
               <Route path="/setting" element={<Setting />} />
+             
 
              
             </Route>

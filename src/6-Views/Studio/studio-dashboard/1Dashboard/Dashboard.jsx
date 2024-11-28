@@ -25,17 +25,17 @@ const Dashboard = () => {
   const [statsArray, setStatsArray] = useState([
     {
       title: "Recently Uploaded",
-      stats: 2,
+      stats: 0,
       icon: true,
     },
     {
       title: "Total Donated",
-      stats: "UGX 1,200,000",
+      stats: "UGX 0",
       icon: true,
     },
     {
       title: "Total Paid Subscriptions",
-      stats: "UGX 23,200,000",
+      stats: "UGX 0",
       icon: false,
     },
   ]);
@@ -109,7 +109,7 @@ const Dashboard = () => {
   const mutation = useMutation({
     mutationFn: postFilmContent,
     onSuccess: (data) => {
-      console.log("data", data);
+     // console.log("data", data);
       setSnackbarMessage({message: data.message, severity: "success"});
       if(data.film.type === "Movie") {
        navigate(`/content/view/film/${data.film.id}`);
@@ -251,12 +251,13 @@ const Dashboard = () => {
         open={snackbarMessage !== null}
         autoHideDuration={6000}
         onClose={() => setSnackbarMessage(null)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity={snackbarMessage?.severity} variant="filled">
           {snackbarMessage?.message}
         </Alert>
       </Snackbar>
+      
       {/** popup for Movie Film Title Creation */}
       {openFilmModal && (
         <CustomStack

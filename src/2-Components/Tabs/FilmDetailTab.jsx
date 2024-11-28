@@ -28,7 +28,7 @@ const displayTabs = [
     position: "5"
 },
 ]
-const FilmDetailTab = () => {
+const FilmDetailTab = ({film}) => {
     const [currentTabValue, setCurrentTabValue] = React.useState("1");
 
     const handleTabChange = (event, newValue) => {
@@ -38,15 +38,15 @@ const FilmDetailTab = () => {
     const TabDisplay = (datakey) => {
         switch (datakey) {
             case "Content Details":
-                return <ContentTab/>;
+                return <ContentTab film={film}/>;
             case "Cast & Crew":
-                return <CastTab />;
+                return <CastTab film={film}/>;
             case "Audience, Visibility":
-                return <AudienceTab />;
+                return <AudienceTab film={film}/>;
             case "Thumbnails & Backdrops":
-                return <ThumbnailTab />;
+                return <ThumbnailTab film={film}/>;
             case "Trailer & Film":
-                return <TrailerTab />;
+                return <TrailerTab film={film}/>;
             default:
                 break;
         }

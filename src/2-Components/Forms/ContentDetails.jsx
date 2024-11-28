@@ -6,14 +6,14 @@ import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import { Autocomplete, TextField } from "@mui/material";
 import ErrorMessage from "./ErrorMessage";
-const ContentDetails = ({ innerref, handleStepNext }) => {
+const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
   const validationSchema = yup.object().shape({
     title: yup.string().required("required"),
     type: yup.string().required("required"),
     audioLanguages: yup.array().min(1, "required"),
     tags: yup.array().min(1, "required"),
    // runtime: yup.string().required("required"),
-    embeddedSubtitles: yup.string().required("required"),
+   // embeddedSubtitles: yup.string().required("required"),
     //subtitleLanguage: yup.array(yup.string().required("required")),
     yearOfProduction: yup.string().required("required"),
     genre: yup.array().min(1, "required"),
@@ -21,7 +21,7 @@ const ContentDetails = ({ innerref, handleStepNext }) => {
     plotSummary: yup.string().required("required"),
   });
 
-  const initialValues = {
+  const initialValues = editdata ? film : {
     title: "",
     type: "",
     audioLanguages: [],
@@ -82,7 +82,7 @@ const ContentDetails = ({ innerref, handleStepNext }) => {
     >
       {({ values, handleChange, handleBlur, errors, touched, setFieldValue }) => (
         <Form>
-          <CustomStack className="h-full w-full flex flex-col gap-5">
+          <CustomStack className="h-full w-full flex flex-col gap-5 text-whites-40">
             {/** title */}
             <FormContainer>
               <label
