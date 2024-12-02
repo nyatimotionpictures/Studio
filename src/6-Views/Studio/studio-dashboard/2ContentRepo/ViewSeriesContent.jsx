@@ -1,20 +1,56 @@
 import React from 'react'
 import Sidebar from '../../../../2-Components/Navigation/Sidebar'
 import CustomStack from '../../../../2-Components/Stacks/CustomStack'
-import { Typography } from '@mui/material'
+import { Alert, Snackbar, Typography } from '@mui/material'
 import posterImage from "../../../../1-Assets/Posterimage.png"
 
 import Button from '../../../../2-Components/Buttons/Button.tsx'
 import EditSeriesForm from '../../../../2-Components/Forms/EditSeriesForm.jsx'
 import NewSeasonForm from '../../../../2-Components/Forms/NewSeasonForm.jsx'
 import SeasonsListTable from '../../../../2-Components/Tables/SeasonsListTable.jsx'
+import { useGetFilm } from '../../../../5-Store/TanstackStore/services/queries.ts'
+import { useParams } from 'react-router-dom'
+import SeriesTabs from '../../../../2-Components/Tabs/SeriesTabs.jsx'
+import { useMutation } from '@tanstack/react-query'
+import { createNewSeason } from '../../../../5-Store/TanstackStore/services/api.ts'
+import { queryClient } from '../../../../lib/tanstack.ts'
 
 const ViewSeriesContent = () => {
-    const [editSeries, setEditSeries] = React.useState(false)
     const [newSeason, setNewSeason] = React.useState(false)
+    const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+    const [isImgBroken, setIsImgBroken] = React.useState(false);
+    let params = useParams();
+    const [filmId, setFilmId] = React.useState(null);
+    const filmsQuery = useGetFilm(params?.id);
 
-    const handleEditSeries = () => {
-        setEditSeries(() => !editSeries)
+
+    
+
+    React.useEffect(() => {
+        //setFilmId()
+        console.log("filmId", filmsQuery.data)
+        setFilmId(()=> params?.id)
+    }, [params?.id]);
+
+    /** use mutation: create new season */
+    const createMutation = useMutation(
+        {
+            mutationFn: createNewSeason,
+            onSuccess: async (data)=> {
+                setSnackbarMessage({message: data.message, severity: "success"});
+                await queryClient.invalidateQueries({ queryKey: ["film", filmsQuery?.data?.film?.id] });
+                handleNewSeason()
+            },
+            onError: (error) => {
+                setSnackbarMessage({message: error.message, severity: "error"});
+            }
+        }
+    )
+
+
+
+    const handleImgError = (e) => {
+        setIsImgBroken(true)
     }
 
     const handleNewSeason = () => {
@@ -31,23 +67,13 @@ const ViewSeriesContent = () => {
         }
     };
 
-    const handleNewAPISubmission = (editInfo) => {
-        alert(`form submitted ${editInfo.title}`);
+    const handleNewAPISubmission = (values) => {
+      //  alert(`form submitted ${editInfo.title}`);
+      createMutation.mutate(values)
        // handleEditing()
     }
 
-    const handleEditSubmit = () => {
-        if (formRef.current) {
-            formRef.current.handleSubmit();
-        } else {
-            alert("No form")
-        }
-    };
 
-    const handleEditAPISubmission = (editInfo) => {
-        alert(`form submitted ${editInfo.title}`);
-        // handleEditing()
-    }
   return (
       <div className="max-h-screen h-[100vh] w-full flex flex-col bg-whites-900 relative">
           <div className="grid grid-cols-[auto,1fr] flex-grow-1 relative overflow-auto">
@@ -62,20 +88,20 @@ const ViewSeriesContent = () => {
                       
                       <div className="flex flex-row items-center gap-9">
                           <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                              Tuko Pamoja
+                               {filmsQuery.data?.film?.title}
                           </Typography>
 
-                          <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">TV Series</div>
+                          <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">{filmsQuery.data?.film?.type}</div>
                       </div>
 
                       <div className="">
                           <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
-                              <li className="w-max list-none">TV Show </li>
-                              <li className="w-max">2010 </li>
+                              <li className="w-max list-none">{filmsQuery.data?.film?.type} </li>
+                              <li className="w-max">{filmsQuery.data?.film?.yearOfProduction}</li>
                           </ul>
                       </div>
 
-                      <div className="absolute right-0">
+                      {/* <div className="absolute right-0">
                           <Button
                               onClick={() => handleEditSeries()}
                               className="flex items-center gap-2 w-max bg-primary-500 bg-opacity-40 rounded-lg px-4"
@@ -83,7 +109,7 @@ const ViewSeriesContent = () => {
                               <span className="icon-[solar--pen-new-square-linear] w-4 h-4"></span>
                               <Typography className="font-[Inter-SemiBold]">Edit Series Details</Typography>
                           </Button>
-                      </div>
+                      </div> */}
                   </CustomStack>
 
                   {/** Movie Details & Tabs  */}
@@ -92,79 +118,28 @@ const ViewSeriesContent = () => {
                       <div className="flex flex-row gap-4">
                           {/** image */}
 
-                          <img src={posterImage} alt="" className="w-[210.15px] h-[272.5px]" />
+                          <img onError={handleImgError} src={ isImgBroken? NoImage : filmsQuery.data?.film?.posters[0]} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
 
                           <div className="flex flex-col max-w-[640px] gap-6">
-                              <h1 className="font-[Inter-Regular] text-sm text-[#FFFAF6] text-opacity-70">A group of young men (Itwara Anthony, Kafuruka Peter, Collin Asiimwe and Godfrey K.) in rural Ugandan town decide to be more involved in the political process after their football pitch has been allocated to a private investor with the help of their local councillor. They take advantage of the upcoming by-election to find a candidate to save their football pitch. The club captain, Kato (Peter </h1>
-                              <div className="flex flex-wrap gap-3">
-                                  {[...Array(5)].map((data, index) => {
-                                      return (
-                                          <div key={index} className="flex py-1 px-5 bg-[#D9D9D9] bg-opacity-15 rounded-full ring-1 ring-[#FFFFFE] text-whites-50">Drama</div>
-                                      )
-                                  })}
-                              </div>
+                          <h1 className="font-[Inter-Regular] text-sm text-[#FFFAF6] text-opacity-70">{filmsQuery.data?.film?.overview}</h1>
+                          <div className="flex flex-wrap gap-3">
+                                    {filmsQuery.data?.film?.genre.map((data, index) => {
+                                        return (
+                                            <div key={index} className="flex py-1 px-5 bg-[#D9D9D9] bg-opacity-15 rounded-full ring-1 ring-[#FFFFFE] text-whites-50">{data}</div>
+                                        )
+                                    })}
+                                </div>
 
                           </div>
                       </div>
 
                       <div className="mt-7">
-                          <SeasonsListTable handleNewSeason={handleNewSeason} />
-                      </div>
+                            <SeriesTabs film={filmsQuery.data?.film} handleNewSeason={handleNewSeason} />
+                        </div>
                   </div>
               </div>
           </div>
 
-          {/** Popup for Edit Series Details */}
-          {
-              editSeries && (
-                  <CustomStack
-                      className="relative z-50"
-                      aria-labelledby="modal-title"
-                      role="dialog"
-                      aria-modal="false"
-                  >
-                      <div className="fixed inset-0 border rounded-xl bg-secondary-50 bg-opacity-75 transition-opacity"></div>
-
-                      <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
-                          <div className="relative transform overflow-y-auto rounded-lg bg-secondary-400 h-screen text-left shadow-xl transition-all">
-                              <div className="bg-secondary-900 px-16 pt-0 min-h-screen h-max">
-                                 
-
-                                  {/** Edit forms  */}
-                                  <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
-                                      <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
-                                          <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                                            Edit Series Details
-                                          </Typography>
-
-                                          <div className="flex gap-5">
-                                              <Button onClick={handleEditSeries} className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700">
-                                                  CANCEL & CLOSE
-                                              </Button>
-                                          </div>
-                                      </CustomStack>
-
-                                      {/** stepper show case */}
-                                     
-                                      {/** form */}
-                                      <div className="block mb-3 h-full">
-                                          <EditSeriesForm innerref={formRef} handleStepNext={handleEditAPISubmission} />
-                                      </div>
-
-                                      {/** stepper control */}
-                                      <div className="border-t-2 border-t-secondary-500 relative">
-                                          <div className="container flex items-center justify-end mt-4 mb-8 gap-[20px]">
-                                              
-                                              <Button onClick={handleEditSubmit} className="w-max min-w-[150px] px-5 rounded-lg ">Save & Close form</Button>
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </CustomStack>
-              )
-          }
 
           {/** Popup for New Season */}
           {
@@ -175,13 +150,12 @@ const ViewSeriesContent = () => {
                       role="dialog"
                       aria-modal="false"
                   >
-                      <div className="fixed inset-0 border rounded-xl bg-secondary-50 bg-opacity-75 transition-opacity"></div>
+                      <div className="fixed inset-0 border rounded-xl bg-secondary-500 bg-opacity-75 transition-opacity"></div>
 
                       <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
-                          <div className="relative transform overflow-y-auto rounded-lg bg-secondary-400 h-screen text-left shadow-xl transition-all">
-                              <div className="bg-secondary-900 px-16 pt-0 min-h-screen h-max">
+                          <div className="relative transform overflow-y-auto rounded-lg  bg-opacity-20 flex items-center justify-center h-screen text-left shadow-xl transition-all">
 
-
+                              <div className="bg-secondary-900 px-16 pt-0 w-full max-w-[700px] rounded-lg  h-max">
                                   {/** Edit forms  */}
                                   <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
                                       <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
@@ -200,13 +174,27 @@ const ViewSeriesContent = () => {
 
                                       {/** form */}
                                       <div className="block mb-3 h-full">
-                                          <NewSeasonForm innerref={formRef} handleStepNext={handleNewAPISubmission} />
+                                          <NewSeasonForm innerref={formRef} handleStepNext={handleNewAPISubmission} film={filmsQuery?.data?.film}  />
                                       </div>
 
                                       {/** stepper control */}
                                       <div className="border-t-2 border-t-secondary-500 relative">
                                           <div className="container flex items-center justify-end mx-0  mt-4 mb-8 ">
-                                          <Button onClick={handleNewSubmit} className="w-max min-w-[150px] px-5 rounded-lg">Save & Close form</Button> </div>
+                                            {
+                                                createMutation.isPending ? (
+                                                <Button
+                                                  disabled
+                                                  className="w-max min-w-[150px] px-5 rounded-lg"
+                                                >
+                                                  Submitting...
+                                                </Button>
+                                                ) : (
+                                                    <Button onClick={handleNewSubmit} className="w-max min-w-[150px] px-5 rounded-lg">Save & Close form</Button>    
+                                                )
+                                            }
+                                        
+                                          
+                                          </div>
                                       </div>
                                   </div>
                               </div>
@@ -215,6 +203,18 @@ const ViewSeriesContent = () => {
                   </CustomStack>
               )
           }
+
+           {/** snackbar */}
+      <Snackbar
+        open={snackbarMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snackbarMessage?.severity} variant="filled">
+          {snackbarMessage?.message}
+        </Alert>
+      </Snackbar>
       </div>
   )
 }

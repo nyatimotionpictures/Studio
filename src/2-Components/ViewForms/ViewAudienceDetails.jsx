@@ -6,24 +6,25 @@ import { ratingArray } from '../../1-Assets/data/Ratings';
 import CustomRatingButton from '../RadioButtons/CustomRatingButton';
 import { visibilityData } from '../../1-Assets/data/FilmSelectData';
 
-const ViewAudienceDetails = () => {
+const ViewAudienceDetails = ({film}) => {
     const [ratingData, setRatingData] = React.useState(null)
-    let genreData = [
-        "movie", "drama"
-    ]
-
-    const ratingId = "rated_G"
+   
 
     React.useEffect(() => { 
-        if (ratingId) {
-            const filterData = ratingArray.filter((data) => data.ratedId === ratingId)
+        if (film?.audienceAgeGroup) {
+            const filterData = ratingArray.filter((data) => data.ratedId === film?.audienceAgeGroup)
 
             setRatingData(() => filterData)
         } else {
             setRatingData(() => null)
         }
 
-    }, [ratingId])
+    }, [film?.audienceAgeGroup])
+
+    
+
+   // console.log(ratingArray)
+   // console.log(film)
    
   return (
       <div className="flex flex-col h-full w-full gap-5 max-w-[1000px]">
@@ -41,20 +42,52 @@ const ViewAudienceDetails = () => {
                           </CustomStack>
 
                           {/** radio buttons */}
-                          <CustomStack className="flex-row gap-7">
-                              <div className="flex relative h-5 items-center gap-3">
-                                  <input
-                                      name="audienceType"
-                                      type="radio"
-                                      id="MadeForChildren"
-                                  />
-                                  <label htmlFor="MadeForChildren" className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                      Yes, its made for children
-                                  </label>
-                              </div>
-                              
-                          </CustomStack>
+                    {
+                        film?.audienceTarget  && film?.audienceTarget  === "MadeForChildren" ? (
+                            <CustomStack className="flex-row gap-7">
+                            <div className="flex relative h-5 items-center gap-3">
+                                <input
+                                 readOnly
+                                 checked={true}
+                                 value={film?.audienceTarget }
+                                    name="audienceType"
+                                    type="radio"
+                                    id="MadeForChildren"
+                                />
+                                <label htmlFor="MadeForChildren" className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                    Yes, its made for children
+                                </label>
+                            </div>
+                            
+                        </CustomStack>
 
+                        ) : null
+
+                    }
+
+{
+                        film?.audienceTarget  && film?.audienceTarget  === "NotMadeForChildren" ? (
+                            <CustomStack className="flex-row gap-7">
+                            <div className="flex relative h-5 items-center gap-3">
+                                <input
+                                readOnly
+                                checked={true}
+                                value="NotMadeForChildren"
+                                    name="audienceTarget "
+                                    type="radio"
+                                    id="NotMadeForChildren"
+                                />
+                                <label htmlFor="NotMadeForChildren" className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                    Yes, its made for children
+                                </label>
+                            </div>
+                            
+                        </CustomStack>
+
+                        ) : null
+
+                    }
+                         
                           {/** radio ratings */}
 
                           <CustomStack className="flex-wrap gap-3">
@@ -93,24 +126,80 @@ const ViewAudienceDetails = () => {
                               <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
                                   Visibility
                               </Typography>
-                              <Typography className="font-[Inter-Regular] text-base text-[#706E72]">
-                                  Choose when to publish and who can see your video
-                              </Typography>
+                             
                           </CustomStack>
                           {/** radio buttons */}
                           <CustomStack className="flex-col gap-2">
                           
-                                      <div
+                          {
+                            film?.visibility && (
+                                <div
                                           
-                                          className="flex relative h-5 items-center gap-3"
-                                      >
-                                          <input name="visibility" type="radio" id={"free"} />
-                                          <label htmlFor={"free"}>free</label>
-                                      </div>
+                                className="flex relative h-5 items-center gap-3"
+                            >
+                                <input name="visibility" type="radio" id={film?.visibility} checked={true} readOnly />
+                                <label htmlFor={film?.visibility} className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">{film?.visibility}</label>
+                            </div>
+                            )
+                          }
+                                     
                                 
                              
                           </CustomStack>
                       </FormContainer>
+
+                       {/** Access */}
+                       <FormContainer className="gap-2 pb-4">
+                          <CustomStack className="flex-col ">
+                              <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                                  Access
+                              </Typography>
+                             
+                          </CustomStack>
+                          {/** radio buttons */}
+                          <CustomStack className="flex-col gap-2">
+                          
+                          {
+                            film?.access && (
+                                <div
+                                          
+                                className="flex relative h-5 items-center gap-3"
+                            >
+                                <input name="access" readOnly type="radio" id={film?.access} checked={true} />
+                                <label htmlFor={film?.access} className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">{film?.access}</label>
+                            </div>
+                            )
+                          }
+                                     
+                                
+                             
+                          </CustomStack>
+                      </FormContainer>
+
+                       {/** donations */}
+                       <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+              <CustomStack className="flex-col ">
+                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                  Donations
+                </Typography>
+                
+              </CustomStack>
+              {/** radio buttons */}
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+               
+                    <div
+                      
+                      className="flex relative h-5 items-center gap-3"
+                    >
+                    <input checked={film?.enableDonation === true ? true : false} readOnly   name="enableDonation" type="checkbox" id={"enableDonation"} />
+                      <label htmlFor={"enableDonation"}>Enabled Donations</label>
+                    </div>
+                 
+              </CustomStack>
+
+            
+            </FormContainer>
+
 
                    
                    

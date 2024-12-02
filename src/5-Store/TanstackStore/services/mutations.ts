@@ -1,9 +1,9 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { deleteFilm, postFilmContent, updateFilmContent } from "./api.ts";
 import { CreateNewFilmRequest, UpdateFilmRequest } from "../../types/film.ts";
+import { queryClient } from "../../../lib/tanstack.ts";
 /** create film mutation */
 export function useCreateFilm() {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: CreateNewFilmRequest) => postFilmContent(data),
     onSettled: async (_, error) => {
@@ -18,7 +18,7 @@ export function useCreateFilm() {
 
 /** update film mutation */
 export function useUpdateFilm() {
-  const queryClient = useQueryClient();
+  
   return useMutation({
     mutationFn: (data: UpdateFilmRequest) => updateFilmContent(data),
     onSettled: async (_, error) => {
@@ -33,7 +33,7 @@ export function useUpdateFilm() {
 
 /** delete film mutation */
 export function useDeleteFilm() {
-  const queryClient = useQueryClient();
+ 
   return useMutation({
     mutationFn: (data: String) => deleteFilm(data),
     onSuccess: (data, variables, context) => {

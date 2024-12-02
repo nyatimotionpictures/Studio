@@ -28,7 +28,7 @@ const displayTabs = [
     position: "5"
 },
 ]
-const FilmDetailTab = ({film}) => {
+const FilmDetailTab = ({film, type}) => {
     const [currentTabValue, setCurrentTabValue] = React.useState("1");
 
     const handleTabChange = (event, newValue) => {
@@ -38,7 +38,7 @@ const FilmDetailTab = ({film}) => {
     const TabDisplay = (datakey) => {
         switch (datakey) {
             case "Content Details":
-                return <ContentTab film={film}/>;
+                return <ContentTab film={film} type={type ? type : null} />;
             case "Cast & Crew":
                 return <CastTab film={film}/>;
             case "Audience, Visibility":

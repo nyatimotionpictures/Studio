@@ -13,115 +13,6 @@ import posterImage from "../../../../1-Assets/Posterimage.png"
 import FilmDetailTab from "../../../../2-Components/Tabs/FilmDetailTab.jsx";
 
 const ViewEpisodeContent = () => {
-  const [openFilmModal, setOpenFilmModal] = React.useState(false);
-  let navigate = useNavigate();
-
-  const videoRef = useRef(null);
-  const [statsArray, setStatsArray] = useState([
-    {
-      title: "Total Videos",
-      stats: 200,
-      icon: true,
-    },
-    {
-      title: "Recently Uploaded",
-      stats: 2,
-      icon: true,
-    },
-    {
-      title: "Total TV Series",
-      stats: 14,
-      icon: false,
-    },
-    {
-      title: "Total Films(ie. Short films, Movies)",
-      stats: 30,
-      icon: true,
-    },
-  ]);
-
-  const stepperArray = [
-
-    { title: "Content Details" },
-
-  ];
-  const [currentStep, setCurrentStep] = useState(null);
-  const [stepsAllComplete, setStepsAllComplete] = useState(false);
-  const [videoData, setVideoData] = useState({
-    filmVideo: null
-  })
-
-  const formRef = React.useRef();
-
-  React.useEffect(() => {
-    setCurrentStep(() => stepperArray?.[0].title);
-  }, []);
-
-  const handleFormSubmit = () => {
-    if (formRef.current) {
-      formRef.current.handleSubmit();
-    }
-  };
-  /** handle Popup Modal */
-  const handleModalOpen = () => {
-    setOpenFilmModal(() => true);
-    if (typeof window != "undefined" && window.document) {
-      document.body.style.overflow = "hidden";
-    }
-  }
-  const handleModalClose = () => {
-    setOpenFilmModal(() => false);
-    document.body.style.overflow = "unset";
-  };
-
-  /** handle next step */
-  const handleStepNext = () => {
-    let getCurrentIndex =
-      currentStep !== null
-        ? stepperArray.findIndex((data) => data?.title === currentStep)
-        : null;
-    if (
-      getCurrentIndex !== null &&
-      getCurrentIndex + 1 < stepperArray?.length
-    ) {
-      let nextCurrentIndex = getCurrentIndex + 1;
-      if (nextCurrentIndex < stepperArray?.length) {
-        setCurrentStep(() => stepperArray?.[nextCurrentIndex].title);
-      }
-    } else if (getCurrentIndex + 1 === stepperArray?.length) {
-      setStepsAllComplete(() => true);
-    }
-  };
-
-  /** handle prev step */
-  const handleStepPrev = () => {
-    let getCurrentIndex =
-      currentStep !== null
-        ? stepperArray.findIndex((data) => data?.title === currentStep)
-        : null;
-
-    if (getCurrentIndex !== null && getCurrentIndex > 0) {
-      let prevCurrentIndex = getCurrentIndex - 1;
-
-      setCurrentStep(() => stepperArray?.[prevCurrentIndex].title);
-      if (stepsAllComplete) {
-        setStepsAllComplete(() => true);
-      }
-    }
-  };
-
-  /** handle form display change */
-  const FormDisplay = (step) => {
-    switch (step) {
-
-      case "Content Details":
-        return (
-          <ContentDetails innerref={formRef} handleStepNext={handleStepNext} />
-        );
-      default:
-        return null;
-    }
-  };
   return (
     <div className="max-h-screen h-[100vh] w-full flex flex-col bg-whites-900 relative">
       <div className="grid grid-cols-[auto,1fr] flex-grow-1 relative overflow-auto">
@@ -171,74 +62,14 @@ const ViewEpisodeContent = () => {
             </div>
 
             <div className="mt-7">
-              <FilmDetailTab />
+              <FilmDetailTab type="episode" />
             </div>
           </div>
 
 
         </div>
       </div>
-      {/** popup upload Movie Modal */}
-      {
-        openFilmModal && (
-          <CustomStack
-            className="relative z-50"
-            aria-labelledby="modal-title"
-            role="dialog"
-            aria-modal="false"
-          >
-            <div className="fixed inset-0 border rounded-xl bg-secondary-50 bg-opacity-75 transition-opacity"></div>
-
-            <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
-              <div className="relative transform overflow-y-auto rounded-lg bg-secondary-400 h-screen text-left shadow-xl transition-all">
-                <div className="bg-secondary-900 px-16 pt-0 min-h-screen h-max">
-                  {/** video form */}
-                  {/** <UploadVideo innerref={formRef} />  */}
-
-                  {/** forms with stepper */}
-                  <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
-                    <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
-                      <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                        Add Title
-                      </Typography>
-
-                      <div className="flex gap-5">
-                        <Button onClick={handleModalClose} className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700">
-                          CANCEL & CLOSE
-                        </Button>
-                      </div>
-                    </CustomStack>
-
-                    {/** stepper show case */}
-                    <StepperCustom
-                      stepperData={stepperArray}
-                      currentStep={currentStep}
-                      stepsAllComplete={stepsAllComplete}
-                    />
-                    {/** form */}
-                    <div className="block mb-3 h-full">
-                      <FilmFormContext.Provider value={{ videoData, setVideoData }}>
-                        {FormDisplay(stepsAllComplete ? "complete" : currentStep)}
-                      </FilmFormContext.Provider>
-                    </div>
-
-                    {/** stepper control */}
-                    <div className="border-t-2 border-t-secondary-500 relative">
-                      <StepperControls
-                        handleStepNext={handleStepNext}
-                        stepperData={stepperArray}
-                        currentStep={currentStep}
-                        handleStepPrev={handleStepPrev}
-                        handleFormSubmit={handleFormSubmit}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CustomStack>
-        )
-      }
+ 
 
     </div>
   )

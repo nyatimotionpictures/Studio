@@ -1,6 +1,31 @@
 import React from 'react'
 
-const ViewThumbnails = () => {
+const ViewThumbnails = ({
+    film
+}) => {
+    const [posterData, setPosterData] = React.useState([]);
+    const [backdropData, setBackdropData] = React.useState([]);
+
+    React.useEffect(() => {
+        let posterArray = [];
+        let backdropArray = []; 
+         film?.poster?.filter((data, index) => {
+            if (data.isCover === true) {
+                posterArray.push(data);
+            }else {
+                backdropArray.push(data);
+            }
+                return ;
+            
+        })
+
+        
+
+        setPosterData(posterArray);
+        setBackdropData(backdropArray);
+    }, [film]);
+       
+    
   return (
       <div className="flex flex-col h-full w-full gap-5 max-w-[1000px]">
           {/** Poster Image */}
@@ -13,15 +38,15 @@ const ViewThumbnails = () => {
               <div className="flex flex-wrap gap-3">
                   {/** Image Content */}
                   {
-                      [...Array(3)].map((data, index) => {
+                      posterData?.map((data, index) => {
                           return (
                               <div key={index} className="flex flex-col gap-[20px]">
-                                  <div className="bg-[#36323E] w-[200px] h-[307.69px] flex "></div>
+                                  <img src={data.url} className="bg-[#36323E] w-[200px] h-[307.69px] flex "/>
 
-                                  <div className="flex flex-col gap-1">
+                                  {/* <div className="flex flex-col gap-1">
                                       <h1 className="font-[Inter-Regular] text-base text-[#706E72]">Size</h1>
                                       <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">900x1350</p>
-                                  </div>
+                                  </div> */}
                               </div>
                           )
                       })
@@ -40,10 +65,10 @@ const ViewThumbnails = () => {
               <div className="flex flex-wrap gap-3">
                   {/** Image Content */}
                   {
-                      [...Array(3)].map((data, index) => {
+                     backdropData?.map((data, index) => {
                           return (
                               <div key={index} className="flex flex-col gap-[20px]">
-                                  <div className="bg-[#36323E] w-[320px] h-[233px] flex "></div>
+                                  <img src={data.url} className="bg-[#36323E] w-[320px] h-[233px] flex " />
 
 
                               </div> 

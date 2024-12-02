@@ -41,6 +41,8 @@ const Register = () => {
         lastname: "",
         phoneNumber: "",
         password: "",
+        role: "",
+        privileges:"admin"
     };
 
     const validationSchema = yup.object().shape({
@@ -49,6 +51,8 @@ const Register = () => {
         lastname: yup.string().required("required"),
         phoneNumber: yup.string().required("required"),
         password: yup.string().required("password is required"),
+        role: yup.string().required("role is required"),
+        privileges: yup.string().required("role is required"),
     });
 
     return (
@@ -79,13 +83,14 @@ const Register = () => {
                                             variant="h1"
                                             className="text-whites-200  text-[26px] text-center select-none font-[Inter-Bold]"
                                         >
-                                            Create your account
+                                            Create  Admin account
                                         </Typography>
                                         <Typography
                                             variant="body1"
                                             className="text-whites-40 text-[14px] text-center select-none font-[Inter-Regular]"
                                         >
-                                            Enter your account details below or <span className="text-primary-500 cursor-pointer" onClick={() => routeNavigate("/login", { replace: true })}>Log in</span>
+                                            Enter admin user details
+                                            {/* <span className="text-primary-500 cursor-pointer" onClick={() => routeNavigate("/login", { replace: true })}>Log in</span> */}
                                         </Typography>
                                     </Stack>
 
@@ -147,6 +152,7 @@ const Register = () => {
                                                 )}
                                             </FormContainer>
                                         </SingleWrapper>
+
                                         {/** phoneNumber */}
                                         <SingleWrapper>
                                             <FormContainer>
@@ -192,6 +198,36 @@ const Register = () => {
                                                 )}
                                             </FormContainer>
                                         </SingleWrapper>
+                                        {/** Role */}
+                                        <SingleWrapper>
+                                            <FormContainer>
+                                                <label className="text-[#bdb8b8] text-[12.56px]">
+                                                    Role
+                                                </label>
+                                                <select
+                                                    name="role"
+                                                    value={values.role}
+                                                    className="text-[#ffffff] text-[14.35px] font-[Inter-Medium]"
+                                                    onChange={(e) => {
+                                                        
+                                                        setFieldValue("role", e.target.value)
+                                                       
+
+                                                    }}
+                                                >
+                                                     <option value="">choose option</option>
+                                                    <option value="admin">Admin</option>
+                                                    {/* <option value="user"></option> */}
+                                                </select>
+                                                {errors && errors.role && (
+                                                    <Typography className="text-[red] font-[Segoe-UI] text-[13px]">
+                                                        {errors.role}
+                                                    </Typography>
+                                                )}
+                                            </FormContainer>
+                                        </SingleWrapper>
+
+                                        
                                         {/** password */}
                                         <SingleWrapper>
                                             <FormContainer>

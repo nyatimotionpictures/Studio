@@ -6,30 +6,59 @@ import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import { Autocomplete, TextField } from "@mui/material";
 import ErrorMessage from "./ErrorMessage";
+import moment from "moment-timezone";
+
 const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
   const validationSchema = yup.object().shape({
     title: yup.string().required("required"),
-    type: yup.string().required("required"),
     audioLanguages: yup.array().min(1, "required"),
     tags: yup.array().min(1, "required"),
-   // runtime: yup.string().required("required"),
+    runtime: yup.string().required("required"),
    // embeddedSubtitles: yup.string().required("required"),
     //subtitleLanguage: yup.array(yup.string().required("required")),
+   
     yearOfProduction: yup.string().required("required"),
+    releaseDate: yup.string().required("required"),
     genre: yup.array().min(1, "required"),
     overview: yup.string().required("required"),
     plotSummary: yup.string().required("required"),
   });
 
-  const initialValues = editdata ? film : {
+  console.log("editdata", film)
+
+  const setDateFromString = (dateString) => {
+    const parsedDate = new Date(dateString);
+    if (!isNaN(parsedDate)) {
+      return parsedDate.toISOString().split('T')[0]; // Format to YYYY-MM-DD
+      //setDate(formattedDate);
+    } 
+    return "";
+  };
+  const initialValues = editdata ? {
+    id:film?.id,
+    title: film?.title ?? "",
+    type: film?.type ?? "",
+    runtime: film?.runtime ?? "",
+    audioLanguages: film?.audioLanguages ?? [],
+    embeddedSubtitles: film?.embeddedSubtitles ?? false,
+    subtitleLanguage: film?.subtitleLanguage ?? [],
+    yearOfProduction: film?.yearOfProduction ?? "",
+    releaseDate: film?.releaseDate ? setDateFromString(film?.releaseDate)  : "",
+    genre: film?.genre ?? [],
+    tags: film?.tags ?? [],
+    overview: film?.overview ?? "",
+    plotSummary: film?.plotSummary ?? "",
+  } : {
     title: "",
     type: "",
+    runtime: "",
     audioLanguages: [],
     embeddedSubtitles: "",
     subtitleLanguage: [],
     yearOfProduction: "",
     genre: [],
     tags: [],
+    releaseDate: "",
     overview: "",
     plotSummary: "",
   };
@@ -77,6 +106,8 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values, helpers) => {
+        console.log("values", values)
+        
         handleStepNext(values);
       }}
     >
@@ -107,7 +138,8 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
               />
             </FormContainer>
             {/** type */}
-            <FormContainer>
+            {
+              editdata ? <div className="hidden"></div> :  <FormContainer>
               <label htmlFor="filmType" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
                 Type (required)
               </label>
@@ -119,8 +151,8 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
                 onBlur={handleBlur}
               >
                    <option value="">select option</option>
-                <option value="Movie">Movie</option>
-                <option value="Series">Series</option>
+                <option value="movie">Movie</option>
+                <option value="series">Series</option>
                 {/* <option value="TV Show">TV Show</option> */}
               </select>
             
@@ -130,6 +162,8 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
                 message={errors?.type && errors.type}
               />
             </FormContainer>
+            }
+           
 
             {/** three input */}
             <CustomStack className="flex-row justify-between gap-6">
@@ -173,8 +207,9 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
                 onChange={handleChange}
               >
                  <option value="">select option</option>
-                <option value="No">No</option>
-                <option value="Yes">Yes</option>
+                <option value={"false"}>No</option>
+                <option value={"true"}>Yes</option>
+             
                 {/* <option value="TV Show">TV Show</option> */}
               </select>
 
@@ -186,7 +221,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
               </FormContainer>
               {/* subtitleLanguage */}
               {
-                values.embeddedSubtitles === "Yes" &&
+                values.embeddedSubtitles === "true" &&
                 <FormContainer>
                   <label htmlFor="subtitlesLanguage" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
                     Subtitles Language
@@ -230,6 +265,20 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
                 errors={touched?.yearOfProduction && errors?.yearOfProduction ? true : false}
                 name="yearOfProduction"
                 message={errors?.yearOfProduction && errors.yearOfProduction}
+              />
+            </FormContainer>
+
+              {/** Release Date */}
+              <FormContainer>
+              <label htmlFor="releaseDate" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
+                Release Date
+              </label>
+              <input onBlur={handleBlur}  id="releaseDate" name="releaseDate" type="date" placeholder="releaseDate" value={values.releaseDate} onChange={handleChange} />
+
+             <ErrorMessage
+                errors={touched?.releaseDate && errors?.releaseDate ? true : false}
+                name="yearOfProduction"
+                message={errors?.releaseDate && errors.releaseDate}
               />
             </FormContainer>
 
@@ -307,7 +356,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
             {/** plot synopsis */}
             <FormContainer>
               <label htmlFor="overview" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75" >
-                plot synopsis
+                plot synopsis (overview)
               </label>
               <textarea onBlur={handleBlur} className="textarealg" name="overview" value={values.overview} onChange={handleChange} placeholder="plot synopsis" />
 

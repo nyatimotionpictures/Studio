@@ -9,10 +9,14 @@ import {
     createColumnHelper,
 } from "@tanstack/react-table";
 import Button from "../Buttons/Button";
-import { Typography } from "@mui/material";
+import { Alert, Snackbar, Typography } from "@mui/material";
 import * as XLSX from "xlsx";
 import SearchInput from "./SearchInput";
 import { useNavigate } from "react-router-dom";
+import moment from "moment-timezone";
+import { useMutation } from "@tanstack/react-query";
+import { deleteSeason } from "../../5-Store/TanstackStore/services/api";
+import { queryClient } from "../../lib/tanstack";
 
 
 const newData = [
@@ -32,46 +36,88 @@ const newData = [
     },
    
 ];
-const SeasonsListTable = ({ handleNewSeason }) => {
+const SeasonsListTable = ({ handleNewSeason, film }) => {
     
+    console.log("film", film)
    let navigate = useNavigate()
+   const [seasonDeleteId, setSeasonDeleteId] = React.useState(null);
+   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
 
-    const data = useMemo(() => newData, []);
+   let deleteFun = (id) => {
+    setSeasonDeleteId(()=> id)
+  }
+
+  let cancelDeleteFun = () => {
+    setSeasonDeleteId(null)
+  }
+
+  let deleteSeasonMutation = useMutation(
+    {
+        mutationFn: deleteSeason,
+        onSuccess: async(data, variables, context) => { 
+          
+          setSnackbarMessage({message: data.message, severity: "success"});
+          await queryClient.invalidateQueries({ queryKey: ["film", film?.id] });
+          cancelDeleteFun()
+         }, onError:(error)=>{
+          //console.log("erroe", error)
+          if (error?.message){
+            setSnackbarMessage(() => ({message: error.message, severity: "error"}));
+            cancelDeleteFun()
+           }
+        }
+    }
+  )
+
+  let confirmDeleteFun = () => {
+    deleteSeasonMutation.mutate(seasonDeleteId)
+//cancelDeleteFun()
+}
+   /** Array of seasons */
+    const data = useMemo(() => film?.season ?? [], [film?.season]);
+
+  
     const columnHelper = createColumnHelper();
 
     /** @type import('@tanstack/react-table).ColumnDef<any> */
     const columns = [
         {
             header: "Sn. no",
-            accessorKey: "seasonNumber",
+            accessorKey: "season",
             footer: "seasonNumber",
         },
         {
             header: "Season Title",
-            accessorKey: "seasonTitle",
+            accessorKey: "title",
             footer: "seasonTitle",
         },
-        {
-            header: "Release Date",
-            accessorKey: "ReleaseDate",
-            footer: "Content",
-        },
-        {
-            header: "Year",
-            accessorKey: "Year",
-            footer: "Content"
-        },
-        {
-            header: "Date Published",
-            accessorKey: "DatePublished",
-            footer: "Content",
-        },
+     
+        columnHelper.accessor("createdAt", { 
+            cell: (info) => (
+              <p>
+               { moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}
+               
+              </p>
+            ),
+            header: "Date Created",
+           
+         }
+        ),
        
         columnHelper.accessor("id", {
             cell: (info) => (
-                <Button onClick={() => navigate("/content/view/series/:id/:season")} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
+                <div className="flex gap-2">
+  <Button onClick={() => navigate(`/content/view/series/${film?.id}/${info.row.original.id}`)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
                     <span className="icon-[solar--maximize-square-linear] w-6 h-6"></span>
                 </Button>
+
+                <Button onClick={()=> deleteFun(info.row.original.id)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
+          <span className="icon-[solar--trash-bin-trash-bold] w-6 h-6"></span>
+     
+        </Button>
+
+                </div>
+              
             ),
             header: "",
         }),
@@ -112,11 +158,7 @@ const SeasonsListTable = ({ handleNewSeason }) => {
                   />
               </div>
               <CustomStack className="items-center gap-4">
-                  {/** btn - columns btn */}
-                  <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
-                      <Typography className="font-[Inter-SemiBold]">Columns</Typography>
-                      <span className="icon-[solar--alt-arrow-down-linear] w-4 h-4"></span>
-                  </Button>
+                
                   {/** btn - export btn */}
                   <Button
                       onClick={() => dataXLSXexport(data, "custom")}
@@ -248,6 +290,47 @@ const SeasonsListTable = ({ handleNewSeason }) => {
               </div>
           </div>
 
+         {
+ /** Modal for deleting Season */
+         }
+      {seasonDeleteId && (
+        <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-50 cursor-pointer">
+          
+          <div className="flex flex-col items-center bg-whites-500 text-white rounded-lg p-4 shadow-lg gap-5">
+            <div className="text-xl font-bold font-[Inter-Bold]">Are you sure you want to delete this?</div>
+            <div className="flex flex-col items-center bg-whites-500 text-white gap-5">
+
+{deleteSeasonMutation.isPending ?(<Button disabled className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]">Deleting...</Button>) : <>  <Button
+              className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]"
+              onClick={confirmDeleteFun}
+            >
+              Yes
+            </Button>
+            <Button
+              className="bg-secondary-500 hover:bg-secondary-700 text-whites-40 font-bold font-[Inter-SemiBold] py-2 px-4 rounded min-w-[150px]"
+              onClick={cancelDeleteFun}
+            >
+              No
+            </Button></>
+}
+          
+            </div>
+           
+          </div>
+        </div>
+      )}
+
+{/** snackbar */}
+      <Snackbar
+        open={snackbarMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snackbarMessage?.severity} variant="filled">
+          {snackbarMessage?.message}
+        </Alert>
+      </Snackbar>
         
           
       </CustomStack>

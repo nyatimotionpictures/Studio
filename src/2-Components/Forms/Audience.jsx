@@ -6,25 +6,53 @@ import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import { Typography } from "@mui/material";
 import { ratingArray } from "../../1-Assets/data/Ratings";
-import { visibilityData } from "../../1-Assets/data/FilmSelectData";
+import { visibilityData, accessData } from "../../1-Assets/data/FilmSelectData";
 
 import CustomRatingButton from "../RadioButtons/CustomRatingButton";
+import ErrorMessage from "./ErrorMessage";
 
-const Audience = ({ innerref, handleStepNext }) => {
+const Audience = ({ innerref, handleStepNext, editdata, film }) => {
+/**
+ *    audienceTarget: null,
+    audienceAgeGroup: null,
+    visibility: null,
+       access: 'free',
+ * 
+ */
+ // console.log(film)
   const validationSchema = yup.object().shape({
-    title: yup.string().required("required"),
+    audienceTarget: yup.string().required("required"),
+    audienceAgeGroup: yup.string().required("required"),
+    visibility: yup.string().required("required"),
+    enableDonation: yup.string().required("required"),
+   // access: yup.string().required("required"),
   });
 
-  const initialValues = {
-    title: "",
+  const initialValues = editdata ? {
+    ...film,
+    id: film?.id,
+    audienceTarget: film?.audienceTarget ?? "",
+    audienceAgeGroup: film?.audienceAgeGroup ?? "",
+    visibility: film?.visibility ?? "",
+    access: film?.access ?? "",
+    enableDonation: film?.enableDonation ?? false,
+  } : {
+    audienceTarget: "",
+    audienceAgeGroup: "",
+    visibility: "",
+    access: "",
+    enableDonation: false,
   };
+
+
   return (
     <Formik
       innerRef={innerref}
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values, helpers) => {
-        handleStepNext();
+        console.log(values);
+        handleStepNext(values);
       }}
     >
       {({ values, handleChange, errors, touched, setFieldValue }) => (
@@ -42,10 +70,13 @@ const Audience = ({ innerref, handleStepNext }) => {
               </CustomStack>
 
               {/** radio buttons */}
-              <CustomStack className="flex-col gap-2">
-                <div className="flex relative h-5 items-center gap-3">
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+                <div className="flex relative h-5 items-center gap-3 ">
                   <input
-                    name="audienceType"
+                  checked={values.audienceTarget === "MadeForChildren"}
+                  value={"MadeForChildren"}
+                  onChange={handleChange}
+                    name="audienceTarget"
                     type="radio"
                     id="MadeForChildren"
                   />
@@ -55,7 +86,10 @@ const Audience = ({ innerref, handleStepNext }) => {
                 </div>
                 <div className="flex relative h-5 items-center gap-3">
                   <input
-                    name="audienceType"
+                  checked={values.audienceTarget === "NotMadeForChildren"}
+                     value={"NotMadeForChildren"}
+                     onChange={handleChange}
+                    name="audienceTarget"
                     type="radio"
                     id="NotMadeForChildren"
                   />
@@ -63,6 +97,11 @@ const Audience = ({ innerref, handleStepNext }) => {
                     No, it's not made for children
                   </label>
                 </div>
+                <ErrorMessage
+                errors={touched?.audienceTarget && errors?.audienceTarget ? true : false}
+                name="audienceTarget"
+                message={errors?.audienceTarget && errors.audienceTarget}
+              />
               </CustomStack>
 
               {/** radio ratings */}
@@ -72,18 +111,26 @@ const Audience = ({ innerref, handleStepNext }) => {
                   return (
                     <CustomRatingButton
                       key={data.ratedId}
+                      checked={values.audienceAgeGroup === data.ratedId}
                       ratedId={data.ratedId}
                       btntitle={data.btntitle}
-                      radiogroupName={"filmRating"}
+                      radiogroupName={"audienceAgeGroup"}
                       btnText={data.btnText}
                       btnImg={data.btnImg}
+                      handleChange={setFieldValue}
+                      value={values.audienceAgeGroup}
                     />
                   );
                 })}
               </CustomStack>
+              <ErrorMessage
+                errors={ errors?.audienceAgeGroup ? true : false}
+                name="audienceTarget"
+                message={errors?.audienceAgeGroup && errors.audienceAgeGroup}
+              />
             </FormContainer>
             {/** visibility */}
-            <FormContainer className="gap-2 border-b-2 border-t-secondary-500 pb-4">
+            <FormContainer className="gap-2  border-t-secondary-500 pb-4">
               <CustomStack className="flex-col ">
                 <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
                   Visibility
@@ -93,86 +140,92 @@ const Audience = ({ innerref, handleStepNext }) => {
                 </Typography>
               </CustomStack>
               {/** radio buttons */}
-              <CustomStack className="flex-col gap-2">
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
                 {visibilityData.map((data, index) => {
                   return (
                     <div
                       key={data.title}
                       className="flex relative h-5 items-center gap-3"
                     >
-                      <input name="visibility" type="radio" id={data.title} />
+                      <input checked={values.visibility === data.title} onChange={()=> setFieldValue("visibility", data.title)} name="visibility" type="radio" id={data.title} />
                       <label htmlFor={data.title}>{data.title}</label>
                     </div>
                   );
                 })}
               </CustomStack>
+
+              <ErrorMessage
+                errors={ errors?.visibility ? true : false}
+                name="visibility"
+                message={errors?.visibility && errors.visibility}
+              />
             </FormContainer>
 
-            {/** trial timeframe */}
-            <FormContainer>
-              <CustomStack className="flex-col pb-2">
+              {/** Access */}
+              <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+              <CustomStack className="flex-col ">
                 <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Free Trial
+                  Access
                 </Typography>
                 <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  Free trial represents download to lease, wherein a piece of
-                  content is accessible to look for a specific timeframe for
-                  free
+                  Choose how the video should be accessed 
                 </Typography>
               </CustomStack>
+              {/** radio buttons */}
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+                {accessData.map((data, index) => {
+                  return (
+                    <div
+                      key={data.title}
+                      className="flex relative h-5 items-center gap-3"
+                    >
+                      <input checked={values.access === data.title} onChange={()=> setFieldValue("access", data.title)} name="access" type="radio" id={data.title} />
+                      <label htmlFor={data.title}>{data.title}</label>
+                    </div>
+                  );
+                })}
+              </CustomStack>
 
-              <label className="label font-[Inter-Regular] text-xs text-whites-100 text-opacity-75">
-                Trial Timeframe(in days)
-              </label>
-              <input />
+              <ErrorMessage
+                errors={ errors?.access ? true : false}
+                name="access"
+                message={errors?.access && errors.access}
+              />
             </FormContainer>
 
-            {/** Download to rent */}
-            <FormContainer>
-              <CustomStack className="flex-col pb-2">
+             {/** Donations */}
+             <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+              <CustomStack className="flex-col ">
                 <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Set Download-to-rent (DTR) Pricing in UGX
+                  Donations
                 </Typography>
                 <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  DTR represents download to lease, wherein a piece of content
-                  is accessible to look for a specific timeframe at the cost of
-                  a one-time expense.
+                Do you want to allow people to donate to this film?
                 </Typography>
               </CustomStack>
-
-              <CustomStack className="flex-row justify-between gap-6">
-                <FormContainer>
-                  <label className="label font-[Inter-Regular] text-xs text-whites-100 text-opacity-75">
-                    Price (required)
-                  </label>
-                  <input />
-                </FormContainer>
-                <FormContainer>
-                  <label className="label font-[Inter-Regular] text-xs text-whites-100 text-opacity-75">
-                    Rental Timeframe(in days)
-                  </label>
-                  <input />
-                </FormContainer>
+              {/** radio buttons */}
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+               
+                    <div
+                      
+                      className="flex relative h-5 items-center gap-3"
+                    >
+                    <input checked={values.enableDonation === true} onChange={(e)=> {
+                     
+                      setFieldValue("enableDonation", e.target.checked)}} name="enableDonation" type="checkbox" id={"enableDonation"} />
+                      <label htmlFor={"enableDonation"}>Enable Donations</label>
+                    </div>
+                 
               </CustomStack>
+
+              <ErrorMessage
+                errors={ errors?.enableDonation ? true : false}
+                name="enableDonation"
+                message={errors?.enableDonation && errors.enableDonation}
+              />
             </FormContainer>
 
-            {/** Download to own */}
-            <FormContainer>
-              <CustomStack className="flex-col pb-2">
-                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Set Download-to-own (DTO) Pricing in UGX
-                </Typography>
-                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  DTO represents download to own, whereby consumers pay a
-                  one-time fee to download the media for unlimited viewing.
-                </Typography>
-              </CustomStack>
-
-              <label className="label font-[Inter-Regular] text-xs text-whites-100 text-opacity-75">
-                Price (required)
-              </label>
-              <input />
-            </FormContainer>
+            
           </CustomStack>
         </Form>
       )}

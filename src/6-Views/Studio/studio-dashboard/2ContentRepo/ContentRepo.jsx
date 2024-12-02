@@ -11,6 +11,9 @@ import StepperControls from "../../../../2-Components/Stepper/StepperControls.js
 import { FilmFormContext } from "../../../../5-Store/FilmFormsContext.js";
 import { useGetAllFilms } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import { useCreateFilm } from "../../../../5-Store/TanstackStore/services/mutations.ts";
+import { useMutation } from "@tanstack/react-query";
+import { postFilmContent } from "../../../../5-Store/TanstackStore/services/api.ts";
+import { data } from "autoprefixer";
 
 const ContentRepo = () => {
   const [openFilmModal, setOpenFilmModal] = React.useState(false);
@@ -18,19 +21,42 @@ const ContentRepo = () => {
   const filmsQuery = useGetAllFilms();
   let navigate = useNavigate();
   //mutation for create film
-  const createNewFilmMutation = useCreateFilm();
+  const mutation = useMutation({
+    mutationFn: postFilmContent,
+    onSuccess: (data) => {
+     // console.log("data", data);
+      setSnackbarMessage({message: data.message, severity: "success"});
+      if(data.film.type === "movie") {
+       navigate(`/content/view/film/${data.film.id}`);
+      } else if(data.film.type === "series") {
+        navigate(`/content/view/series/${data.film.id}`);
+      }
+      
+    },
+    onError: (error) => {
+      console.log("error", error);
+     if (error?.message){
+      setSnackbarMessage(() => ({message: error.message, severity: "error"}));
+     }
+      
+    },
+    onSettled: async (_, error) => {
+      if (error) {
+        console.log("error", error);
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ["films"] });
+      }
+    },
+  });
   //  const videoRef = useRef(null);
   const [statsArray, setStatsArray] = useState([
     {
       title: "Total Videos",
       stats: 0,
-      icon: true,
+      icon: false,
     },
-    {
-      title: "Recently Uploaded",
-      stats: 0,
-      icon: true,
-    },
+   
+
     {
       title: "Total TV Series",
       stats: 0,
@@ -39,7 +65,7 @@ const ContentRepo = () => {
     {
       title: "Total Films",
       stats: 0,
-      icon: true,
+      icon: false,
     },
   ]);
 
@@ -54,7 +80,36 @@ const ContentRepo = () => {
 
   React.useEffect(() => {
     setCurrentStep(() => stepperArray?.[0].title);
+   
   }, []);
+  React.useEffect(() => {
+    if(filmsQuery.isSuccess) {
+      const filterMovies = filmsQuery.data?.films?.filter((data)=> data.type === "movie");
+      const filterSeries = filmsQuery.data?.films?.filter((data)=> data.type === "series");
+      setStatsArray(()=> ([
+        {
+          title: "Total Videos",
+          stats: filmsQuery.data?.films?.length ?? 0,
+          icon: false,
+        },
+       
+    
+        {
+          title: "Total TV Series",
+          stats: filterSeries?.length ?? 0,
+          icon: false,
+        },
+        {
+          title: "Total Films",
+          stats: filterMovies?.length ?? 0,
+          icon: false,
+        },
+       
+      ]
+      
+      ))
+    }
+  }, [filmsQuery.data]);
 
   const handleFormSubmit = () => {
     if (formRef.current) {
@@ -110,24 +165,7 @@ const ContentRepo = () => {
   };
 
   const handleFilmFormSubmit = (values) => {
-    createNewFilmMutation.mutate(values, {
-      onSuccess: (data) => {
-        console.log("success", data);
-        setSnackbarMessage({ message: data.message, severity: "success" });
-        if (data.film.type === "Movie") {
-          navigate(`/content/view/film/${data.film.id}`);
-        } else if (data.film.type === "Series") {
-          navigate(`/content/view/series/${data.film.id}`);
-        }
-      },
-      onError: (error) => {
-        // console.log("error", error);
-        setSnackbarMessage({
-          message: "error creating film",
-          severity: "error",
-        });
-      },
-    });
+    mutation.mutate(values);
   };
   /** handle form display change */
   const FormDisplay = (step) => {

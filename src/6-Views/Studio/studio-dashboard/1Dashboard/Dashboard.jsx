@@ -1,11 +1,9 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Sidebar from "../../../../2-Components/Navigation/Sidebar.tsx";
 import CustomStack from "../../../../2-Components/Stacks/CustomStack.jsx";
 import { Alert, Box, Snackbar, Typography } from "@mui/material";
 import Button from "../../../../2-Components/Buttons/Button.tsx";
-import VideoListTable from "../../../../2-Components/Tables/VideoListTable.jsx";
 import { useNavigate } from "react-router-dom";
-import UploadVideo from "../../../../2-Components/Forms/UploadVideo.jsx";
 import StepperCustom from "../../../../2-Components/Stepper/StepperCustom.jsx";
 import ContentDetails from "../../../../2-Components/Forms/ContentDetails.jsx";
 import StepperControls from "../../../../2-Components/Stepper/StepperControls.jsx";
@@ -15,23 +13,18 @@ import subIcon from "../../../../1-Assets/icons/sub.png";
 import WatchedListTable from "../../../../2-Components/Tables/WatchedListTable.jsx";
 import { useMutation } from "@tanstack/react-query";
 import { postFilmContent } from "../../../../5-Store/TanstackStore/services/api.ts";
+import { queryClient } from "../../../../lib/tanstack.ts";
 
 const Dashboard = () => {
   const [openFilmModal, setOpenFilmModal] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   let navigate = useNavigate();
-
-  const videoRef = useRef(null);
   const [statsArray, setStatsArray] = useState([
-    {
-      title: "Recently Uploaded",
-      stats: 0,
-      icon: true,
-    },
+    
     {
       title: "Total Donated",
       stats: "UGX 0",
-      icon: true,
+      icon: false,
     },
     {
       title: "Total Paid Subscriptions",
@@ -111,9 +104,9 @@ const Dashboard = () => {
     onSuccess: (data) => {
      // console.log("data", data);
       setSnackbarMessage({message: data.message, severity: "success"});
-      if(data.film.type === "Movie") {
+      if(data.film.type === "movie") {
        navigate(`/content/view/film/${data.film.id}`);
-      } else if(data.film.type === "Series") {
+      } else if(data.film.type === "series") {
         navigate(`/content/view/series/${data.film.id}`);
       }
       
@@ -124,6 +117,13 @@ const Dashboard = () => {
       setSnackbarMessage(() => ({message: error.message, severity: "error"}));
      }
       
+    },
+    onSettled: async (_, error) => {
+      if (error) {
+        console.log("error", error);
+      } else {
+        await queryClient.invalidateQueries({ queryKey: ["films"] });
+      }
     },
   });
 
@@ -238,7 +238,7 @@ const Dashboard = () => {
             {/** table */}
             <div className="pt-7 pb-11 flex flex-col gap-4">
               <h1 className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                Recently Watched
+                Recently Watched (i.e per users)
               </h1>
               <WatchedListTable />
             </div>
@@ -327,12 +327,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-// {<video
-//   width="400"
-//   height="400"
-//   controls
-//   autoPlay
-//   src={"http://localhost:8000/api/film/🎧Electronic Music.mp4"}
-// >
-//   Your browser does not support the video tag.
-// </video>;}
+

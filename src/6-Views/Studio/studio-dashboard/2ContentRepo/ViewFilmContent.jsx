@@ -8,6 +8,7 @@ import posterImage from "../../../../1-Assets/Posterimage.png"
 import FilmDetailTab from "../../../../2-Components/Tabs/FilmDetailTab.jsx";
 import { useGetFilm } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import NoImage from "../../../../1-Assets/no-image.svg"
+import CustomLoader from "../../../../2-Components/Loader/CustomLoader.jsx";
 
 const ViewFilmContent = () => {
     let navigate = useNavigate(); 
@@ -18,7 +19,7 @@ const ViewFilmContent = () => {
     const filmsQuery = useGetFilm(params?.id);
     React.useEffect(() => {
         //setFilmId()
-        console.log("filmId", filmsQuery.data)
+        //console.log("filmId", filmsQuery.data)
         setFilmId(()=> params?.id)
     }, [params?.id]);
     
@@ -26,10 +27,28 @@ const ViewFilmContent = () => {
         setIsImgBroken(true)
     }
     if(filmsQuery.isLoading) {
-        return <div>Loading...</div>
+        return <div className="flex flex-col justify-center items-center h-screen bg-[#24222a]">
+            <div className="flex flex-col relative gap-8">
+                <div className="w-full h-full relative flex items-center justify-center bg-secondary-800  top-0 left-0 bg-opacity-70 text-red-500">
+                 <CustomLoader />
+
+                </div>
+           
+            <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">Loading...</p>
+
+            </div>
+        
+        </div>
     }
     if(filmsQuery.isError) {
-        return <div>Error...</div>
+        return <div className="flex flex-col justify-center items-center h-screen bg-[#24222a]">
+        <div className="flex relative gap-8">
+        
+        <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">Error</p>
+
+        </div>
+    
+    </div>
     }
     return (
         <div className="max-h-screen h-[100vh] w-full flex flex-col bg-whites-900 relative">

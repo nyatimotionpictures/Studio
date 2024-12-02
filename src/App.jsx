@@ -36,13 +36,13 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               <Route path="/content" element={<ContentRepo />} />
               <Route path="/content/view/film/:id" element={<ViewFilmContent />} />
               <Route path="/content/view/series/:id" element={<ViewSeriesContent />} />
-              <Route path="/content/view/series/:id/:season" element={<ViewSeasonContent />} />
-              <Route path="/content/view/series/:id/:season/:episode" element={<ViewEpisodeContent />} />
+              <Route path="/content/view/series/:id/:seasonId" element={<ViewSeasonContent />} />
+              <Route path="/content/view/series/:id/:seasonId/:episodeId" element={<ViewEpisodeContent />} />
               <Route path="/subscriptions" element={<Subscriptions />} />
               <Route path="/donations" element={<Donations />} />
               <Route path="/people" element={<People />} />
               <Route path="/setting" element={<Setting />} />
-             
+              <Route path="/register" element={<Register />} />
 
              
             </Route>
@@ -53,8 +53,6 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               element={<OrdinaryRoutes />}
             >
               <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-
             </Route>
           </Routes>
         </ThemeProvider>

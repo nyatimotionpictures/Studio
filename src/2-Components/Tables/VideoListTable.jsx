@@ -14,146 +14,12 @@ import * as XLSX from "xlsx";
 import SearchInput from "./SearchInput";
 import { useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { deleteFilm } from "../../5-Store/TanstackStore/services/api";
 import { useDeleteFilm } from "../../5-Store/TanstackStore/services/mutations";
+import moment from "moment-timezone";
 
-const newData = [
-  {
-    content:
-      "addams Famil",
-    ReleaseDate: "31 Aug, 2020",
-    type: "TV Series",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "Joshua kimbareeba",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-  {
-    content: "addams Family VALUES",
-    ReleaseDate: "8 Sept, 2020",
-    type: "Movie",
-    Genre: "Comedy",
-    Year: "2023",
-    DatePublished: "Dec 30, 2019 07:52",
-    DTO: "1",
-    action: "1",
-  },
-];
 const VideoListTable = ({films
 }) => {
-  /**
-     * {
-     content : "addams Family VALUES",
-     ReleaseDate: "8 Sept, 2020",
-     type: "Movie",
-     Genre,
-     Year,
-     Date Published,
-     DTO/DTR,
-     Actions
-     * }
-     */
+ 
 let navigate = useNavigate()
 const [filmDeleteId, setFilmDeleteId] = React.useState(null);
 const [snackbarMessage, setSnackbarMessage] = React.useState(null);
@@ -167,7 +33,7 @@ let cancelDeleteFun = () => {
 }
 let deleteFilmMutation = useDeleteFilm();
 
-
+//console.log("all films", films)
 
 let confirmDeleteFun = () => {
       deleteFilmMutation.mutate(filmDeleteId, {onSuccess: (data, variables, context) => { 
@@ -193,11 +59,18 @@ let confirmDeleteFun = () => {
       accessorKey: "title",
       footer: "Content",
     },
-    {
+    columnHelper.accessor("releaseDate", { 
+      cell: (info) => (
+        <p>
+         { moment(info.getValue()).format("DD/MMM/YYYY")}
+         
+        </p>
+      ),
       header: "Release Date",
-      accessorKey: "releaseDate",
-      footer: "Content",
-    },
+     
+   }
+  ),
+ 
     columnHelper.accessor("type", {
       cell: (info) => (
         
@@ -211,10 +84,10 @@ let confirmDeleteFun = () => {
         cell: (info) => (
           <ul>
             {
-              info.getValue()?.length === 0 && (
+              info.getValue()?.length !== 0 && (
                 <>
                  {info.getValue().map((genre, index) => (
-              <span key={index} className="text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">{(index ? ", " : "") + genre}</span>
+              <span key={index} className="text-whites-40  rounded-lg  ">{(index ? ", " : "") + genre}</span>
             ))}
                 </>
               )
@@ -229,11 +102,17 @@ let confirmDeleteFun = () => {
       accessorKey: "yearOfProduction",
       footer: "Content"
     },
-    {
-      header: "Date Published",
-      accessorKey: "DatePublished",
-      footer: "Content",
-    },
+    columnHelper.accessor("createdAt", { 
+      cell: (info) => (
+        <p>
+         { moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}
+         
+        </p>
+      ),
+      header: "Date Created",
+     
+   }
+  ),
     {
       header: "DTR",
       accessorKey: "DTO",
@@ -242,7 +121,7 @@ let confirmDeleteFun = () => {
     columnHelper.accessor("id", {
       cell: (info, cell) => (
         <div className="flex gap-2">
- <Button onClick={()=> info.row.original.type === "Movie" ? navigate(`/content/view/film/${info.row.original.id}`) : navigate(`/content/view/series/${info.row.original.id}`)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
+ <Button onClick={()=> info.row.original.type === "movie" ? navigate(`/content/view/film/${info.row.original.id}`) : navigate(`/content/view/series/${info.row.original.id}`)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
           <span className="icon-[solar--maximize-square-linear] w-6 h-6"></span>
      
         </Button>
@@ -278,7 +157,7 @@ let confirmDeleteFun = () => {
     XLSX.writeFile(workbook, fileName ? `${fileName}.xlsx` : "data.xlsx");
   };
 
-  console.log(data)
+ // console.log(data)
   return (
     <CustomStack className="flex-col ">
       <CustomStack className="justify-between items-center">
@@ -293,10 +172,10 @@ let confirmDeleteFun = () => {
         </div>
         <CustomStack className="items-center gap-4">
           {/** btn - columns btn */}
-          <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
+          {/* <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
             <Typography className="font-[Inter-SemiBold]">Columns</Typography>
             <span className="icon-[solar--alt-arrow-down-linear] w-4 h-4"></span>
-          </Button>
+          </Button> */}
           {/** btn - export btn */}
           <Button
             onClick={() => dataXLSXexport(data, "custom")}

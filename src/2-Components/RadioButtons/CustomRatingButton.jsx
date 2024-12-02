@@ -7,6 +7,9 @@ const CustomRatingButton = ({
   radiogroupName,
   btnText,
   btnImg,
+  handleChange,
+  value,
+  checked,
 }) => {
   return (
     <label
@@ -17,7 +20,9 @@ const CustomRatingButton = ({
         <Typography className="font-[Inter-Medium] text-sm uppercase">
           {btntitle}
         </Typography>
-        <input name={radiogroupName} type="radio" id={ratedId} />
+        <input checked={checked} onChange={(e) => {
+         handleChange("audienceAgeGroup", ratedId)
+        }} name={radiogroupName} value={value} type="radio" id={ratedId} />
       </div>
 
       <div className="h-[45px] w-[133px] relative overflow-hidden">

@@ -9,120 +9,60 @@ import {
   createColumnHelper,
 } from "@tanstack/react-table";
 import Button from "../Buttons/Button";
-import { Typography } from "@mui/material";
+import { Alert, Snackbar, Typography } from "@mui/material";
 import * as XLSX from "xlsx";
 import SearchInput from "./SearchInput";
+import { useNavigate } from "react-router-dom";
+import moment from "moment-timezone";
 
-const newData = [
-  {
-    content:
-      "addams Famil",
-    watchcount: "40",
-    type: "TV Series",
-   
-    Year: "2023",
-    TotalAmount: "UGX 14,000,000",
-   
-    action: "1",
-  },
-  {
-    content:
-      "addams Famil",
-      watchcount: "40",
-    type: "TV Series",
-   
-    Year: "2023",
-    TotalAmount: "UGX 14,000,000",
-   
-    action: "1",
-  },
-  {
-    content:
-      "addams Famil",
-      watchcount: "40",
-    type: "TV Series",
-   
-    Year: "2023",
-    TotalAmount: "UGX 14,000,000",
-   
-    action: "1",
-  },
-  {
-    content:
-      "addams Famil",
-      watchcount: "40",
-    type: "TV Series",
-   
-    Year: "2023",
-    TotalAmount: "UGX 14,000,000",
-   
-    action: "1",
-  },
-  
-];
-const WatchedListTable = () => {
-  /**
-     * {
-     content : "addams Family VALUES",
-     ReleaseDate: "8 Sept, 2020",
-     type: "Movie",
-     Genre,
-     Year,
-     Date Published,
-     DTO/DTR,
-     Actions
-     * }
-     */
+const PeopleTable = ({users}) => {
+    let navigate = useNavigate()
+    const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+    const data = useMemo(() => users ?? [], [users]);
 
-  const data = useMemo(() => newData, []);
-  const columnHelper = createColumnHelper();
+    const columnHelper = createColumnHelper();
 
-  /** @type import('@tanstack/react-table).ColumnDef<any> */
+      /** @type import('@tanstack/react-table).ColumnDef<any> */
   const columns = [
-    {
-      header: "Content",
-      accessorKey: "content",
-      footer: "Content",
-    },
-   
-    columnHelper.accessor("type", {
-      cell: (info) => (
-        
-          <div className=" w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">{info.getValue()}</div>
-      
-      ),
-      header: "Type",
-    }),
-  
-    {
-      header: "Year",
-      accessorKey: "Year",
-      footer: "Content"
-    },
-    columnHelper.accessor("watchcount", {
+    columnHelper.accessor("firstname", { 
         cell: (info) => (
-          
-            <div className="  h-max flex items-center   pl-10 py-1 w-full ">{info.getValue()}</div>
-        
+          <p>
+           {
+             info.getValue() + " " + info.row.original.lastname
+           }
+           
+          </p>
         ),
-        header: "Watch Count (i.e per users)",
-      }),
+        header: "Name",
+       
+     }
+    ),
+    {
+        header: "Email",
+        accessorKey: "email",
+        footer: "Email",
+      },
     
     {
-      header: "Total Amount",
-      accessorKey: "TotalAmount",
-      footer: "Total Amount",
-    },
-   
-    columnHelper.accessor("id", {
-      cell: (info) => (
-        <Button className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
-          <span className="icon-[solar--maximize-square-linear] w-6 h-6"></span>
-        </Button>
-      ),
-      header: "",
-    }),
+        header: "Phone number",
+        accessorKey: "phoneNumber",
+        footer: "Phone number",
+      },
+      columnHelper.accessor("dateCreated", { 
+        cell: (info) => (
+          <p>
+           { moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}
+           
+          </p>
+        ),
+        header: "Date Joined",
+       
+     }
+    ),
+    
+
   ];
+
 
   const [globalFilter, setGlobalFilter] = React.useState("");
 
@@ -143,8 +83,9 @@ const WatchedListTable = () => {
     XLSX.writeFile(workbook, fileName ? `${fileName}.xlsx` : "data.xlsx");
   };
 
+
   return (
-    <CustomStack className="flex-col">
+    <CustomStack className="flex-col ">
       <CustomStack className="justify-between items-center">
         <div className="w-full flex items-center gap-1 mb-6">
           <span className="icon-[solar--minimalistic-magnifer-broken] text-whites-100 w-5 h-5"></span>
@@ -156,8 +97,8 @@ const WatchedListTable = () => {
           />
         </div>
         <CustomStack className="items-center gap-4">
-          {/* * btn - columns btn
-          <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
+          {/** btn - columns btn */}
+          {/* <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
             <Typography className="font-[Inter-SemiBold]">Columns</Typography>
             <span className="icon-[solar--alt-arrow-down-linear] w-4 h-4"></span>
           </Button> */}
@@ -194,7 +135,7 @@ const WatchedListTable = () => {
           </thead>
 
           <tbody>
-            {table.getRowModel().rows.length ? (
+            { table.getRowModel().rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
                 <tr key={row.id} className="border-y border-secondary-600 hover:bg-secondary-400">
                   {row.getVisibleCells().map((cell) => (
@@ -283,8 +224,22 @@ const WatchedListTable = () => {
           </select>
         </div>
       </div>
-    </CustomStack>
-  );
-};
 
-export default WatchedListTable;
+
+
+{/** snackbar */}
+      <Snackbar
+        open={snackbarMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snackbarMessage?.severity} variant="filled">
+          {snackbarMessage?.message}
+        </Alert>
+      </Snackbar>
+    </CustomStack>
+  )
+}
+
+export default PeopleTable

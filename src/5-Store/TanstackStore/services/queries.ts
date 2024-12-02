@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAllFilms, getFilmContent } from "./api";
+import { getAllDonations, getAllFilms, getAllUsers, getFilmContent } from "./api";
 
 export function useGetAllFilms() {
     return useQuery({
@@ -11,10 +11,26 @@ export function useGetAllFilms() {
 
 export function useGetFilm(id: String) {
     return useQuery({
-        queryKey: ["film"],
+        queryKey: ["film", id],
         queryFn: () => getFilmContent(id),
        
     });
 }
 
+export function useGetDonations() {
+    return useQuery({
+        queryKey: ["donations"],
+        queryFn: () => getAllDonations(),
+       
+    });
+}
+
+export function useGetUsers() {
+    return useQuery(
+        {
+            queryKey: ["users"],
+            queryFn: () => getAllUsers()
+        }
+    )
+}
 

@@ -31,40 +31,52 @@ const newData = [
     },
 
 ];
-const EpisodesListTable = ({ handleNewEpisode }) => {
+const EpisodesListTable = ({ handleNewEpisode, season }) => {
 
     let navigate = useNavigate()
 
-    const data = useMemo(() => newData, []);
+    const data = useMemo(() =>  season?.episodes ?? [], [season?.episodes]);
     const columnHelper = createColumnHelper();
 
     /** @type import('@tanstack/react-table).ColumnDef<any> */
     const columns = [
         {
             header: "Epi. no",
-            accessorKey: "EpisodeNumber",
+            accessorKey: "episode",
             footer: "episodeNumber",
         },
         {
             header: "episode Title",
-            accessorKey: "EpisodeTitle",
+            accessorKey: "title",
             footer: "episodeTitle",
         },
-        {
+        columnHelper.accessor("releaseDate", { 
+            cell: (info) => (
+              <p>
+               { moment(info.getValue()).format("DD/MMM/YYYY")}
+               
+              </p>
+            ),
             header: "Release Date",
-            accessorKey: "ReleaseDate",
-            footer: "Content",
-        },
+           
+         }
+        ),
         {
             header: "Year",
-            accessorKey: "Year",
+            accessorKey: "yearOfProduction",
             footer: "Content"
-        },
-        {
-            header: "Date Published",
-            accessorKey: "DatePublished",
-            footer: "Content",
-        },
+          },
+        columnHelper.accessor("createdAt", { 
+            cell: (info) => (
+              <p>
+               { moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}
+               
+              </p>
+            ),
+            header: "Date Created",
+           
+         }
+        ),
 
         columnHelper.accessor("id", {
             cell: (info) => (
@@ -110,10 +122,10 @@ const EpisodesListTable = ({ handleNewEpisode }) => {
               </div>
               <CustomStack className="items-center gap-4">
                   {/** btn - columns btn */}
-                  <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
+                  {/* <Button className="flex items-center gap-2 bg-secondary-900 rounded-lg px-4">
                       <Typography className="font-[Inter-SemiBold]">Columns</Typography>
                       <span className="icon-[solar--alt-arrow-down-linear] w-4 h-4"></span>
-                  </Button>
+                  </Button> */}
                   {/** btn - export btn */}
                   <Button
                       onClick={() => dataXLSXexport(data, "custom")}
