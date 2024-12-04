@@ -1,15 +1,26 @@
 import React, { useState } from "react";
 import CustomStack from "../Stacks/CustomStack";
-import { Typography } from "@mui/material";
+import { Alert, Snackbar, Typography } from "@mui/material";
 import Button from "../Buttons/Button";
 import * as yup from "yup";
 import { Form, Formik } from "formik";
 import { FormContainer } from "../Stacks/InputFormStack";
 import ErrorMessage from "../Forms/ErrorMessage";
+import axios from "axios";
+import { BaseUrl } from "../../3-Middleware/apiRequest";
+//import UploadProgress from "../TrackProgress/UploadProgress";
+import { queryClient } from "../../lib/tanstack";
+import { useParams } from "react-router-dom";
 
-const VideoUpload = ({ videoType, handleModalClose }) => {
+const VideoUpload = ({ videoType, handleModalClose, film, type }) => {
+//  console.log("type", type)
   // console.log("videoType", videoType)
+  let params = useParams();
   const [preview, setPreview] = useState(null);
+  const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+  const [uploadProgress, setUploadProgress] = React.useState(0);
+  const [uploaddata, setUploadData] = React.useState(0);
+  //const [eventStreamMessages, setEventStreamMessages] = useState([]);
 
   const validationSchema =
     videoType === "Trailer"
@@ -19,13 +30,15 @@ const VideoUpload = ({ videoType, handleModalClose }) => {
             .required("Video is required")
             .test("fileType", "Unsupported file format", (value) => {
               if (value) {
+                console.log("value", value)
                 return ["video/mp4", "video/webm", "video/ogg"].includes(
                   value.type
                 );
               }
-              return true;
+              //return true;
             }),
-          isTrailer: yup.number().required("Price is required"),
+      
+         type: yup.string().required("type is required"),
         })
       : yup.object().shape({
           film: yup
@@ -37,28 +50,37 @@ const VideoUpload = ({ videoType, handleModalClose }) => {
                   value.type
                 );
               }
-              return true;
+             // return true;
             }),
           price: yup.number().required("Price is required"),
           currency: yup.string().required("Currency is required"),
         });
 
-  const initialValues =
+  let initialValues =
     videoType === "Trailer"
       ? {
           film: null,
-          isTrailer: "true",
+          
+         
+         type: type === "episode" ? "episode" : "film",
         }
       : {
           film: null,
-          price: null,
+          price: 1,
           currency: "UGX",
+         
+          resolution: videoType,
+          
         };
 
   const handleVideoPreview = (file) => {
     const videoURL = URL.createObjectURL(file);
     setPreview(videoURL);
   };
+
+  React.useEffect(()=>{
+    setUploadData(()=> uploadProgress)
+  },[uploadProgress])
 
   return (
     <CustomStack
@@ -86,17 +108,117 @@ const VideoUpload = ({ videoType, handleModalClose }) => {
                   </Button>
                 </div>
               </CustomStack>
+              {uploaddata > 0 && (
+              <div className="flex flex-col gap-2">
+                <h4>Upload Progress: {uploaddata}%</h4>
+                <div className="w-full bg-secondary-500 rounded-lg h-2 relative">
+                  <div
+                    className="h-2 bg-primary-500 rounded-lg absolute"
+                    style={{ width: `${uploaddata}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
 
               {/** form */}
               <div className="flex w-full items-center justify-center h-full ">
                 {/* <PosterForm handleModalClose={handleModalClose} /> */}
+              
 
                 <Formik
                   initialValues={initialValues}
                   validationSchema={validationSchema}
-                  onSubmit={(values, helpers) => {
-                    // handleStepNext();
-                    console.log("values", values);
+                  onSubmit={async(values, helpers) => {
+                    try {
+                      // handleStepNext();
+                     //console.log("vdfdfdfdfdfes", values);
+                     //  '/filmupload/:filmId'
+
+                    //  const eventSource = new EventSource(`${BaseUrl}/v1/studio/filmupload/${film?.id}`);
+                    //   eventSource.onmessage = (event) => {
+                    //     const data = JSON.parse(event.data);
+                    //     console.log("data", data)
+                    //     setEventStreamMessages((prevMessages) => [...prevMessages, data ]);
+                    //     // if(data.progress === 100){
+                    //     //   eventSource.close();
+                    //     // } 
+                    //     setUploadProgress(data.progress);
+                    //   };
+ 
+                     const user = JSON.parse(localStorage.getItem("user"));
+                     helpers.setSubmitting(true);
+                        
+                         const token = user !== null && user.token ? user.token : null;
+                          let formData = new FormData();
+                        
+                          
+                          formData.append( videoType === "Trailer" ? "trailer" : "film", values.film);
+                          //formData.append("trailer", values.film);
+                         formData.append("type", values.type);
+                        // formData.append("isTrailer", values.isTrailer);
+                          formData.append("price", values?.price?.toString());
+                          formData.append("currency", values.currency);
+                          formData.append("resolution", values.resolution);
+
+                          // let url 
+
+                          // if(type === "episode") {
+                          //   url = `${BaseUrl}/v1/studio/episodeupload/${film?.id}`;
+                          // } else {
+                          //   url = `${BaseUrl}/v1/studio/filmupload/${film?.id}`;
+                          // }
+
+                         
+                          let id = type === "episode" ? params?.episodeId : film?.id;
+                            let axiosurl;
+                        if (videoType === "Trailer") {
+                          axiosurl = `${BaseUrl}/v1/studio/uploadtrailer/${id}`;
+                        } else {
+                          axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/episodeupload/${film?.id}` : `${BaseUrl}/v1/studio/filmupload/${params?.id}`;
+                        }
+                       
+                            
+                          
+                          
+                          console.log("axiosurl", axiosurl)
+
+                          const response = await axios.post(axiosurl, formData, {  
+                            headers: {
+                              "Authorization": `Bearer ${token}`,
+                              "Content-Type": "multipart/form-data",
+                               },
+                               onUploadProgress: (progressEvent) => {
+                              //  console.log(progressEvent.total)
+                              const percentCompleted = Math.floor(
+                                (progressEvent.loaded / progressEvent.total) * 100
+                              );
+                              setUploadProgress(percentCompleted);
+                              },
+                           });
+
+                           //console.log("response", response.data);
+               
+                           if (response.data) {
+                            setSnackbarMessage({ message: "Successfully Uploaded Video", severity: "success" });
+                            type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film",params?.id ] }) : await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
+                            helpers.setSubmitting(false);
+                            handleModalClose();
+
+                           }
+                           
+                         
+ 
+                    } catch (error) {
+                      console.log("error", error);
+                      setSnackbarMessage({
+                        message: "error uploading poster",
+                        severity: "error",
+                      });
+                      //throw error;
+                    }
+                    
+
+
                   }}
                 >
                   {({
@@ -106,6 +228,7 @@ const VideoUpload = ({ videoType, handleModalClose }) => {
                     touched,
                     setFieldValue,
                     handleBlur,
+                    isSubmitting,
                   }) => (
                     <Form>
                       <div className="flex flex-col gap-8 h-full w-full">
@@ -202,12 +325,17 @@ const VideoUpload = ({ videoType, handleModalClose }) => {
 
                         {/** stepper control */}
                         <div className="relative flex flex-col  gap-5 mb-8 ">
-                          <Button
-                            type="submit"
-                            className="font-[Inter-Medium]  bg-primary-500 rounded-lg"
-                          >
-                            Submit
-                          </Button>
+                          {
+isSubmitting ? (
+                            <Button className="font-[Inter-Medium]  bg-primary-500 rounded-lg"> Submitting.... </Button>  ) : (
+                              <Button
+                              type="submit"
+                              className="font-[Inter-Medium]  bg-primary-500 rounded-lg"
+                            >
+                              Submit
+                            </Button>)
+                          }
+                          
                           <Button
                             onClick={() => {
                               setPreview(null);
@@ -227,6 +355,19 @@ const VideoUpload = ({ videoType, handleModalClose }) => {
           </div>
         </div>
       </div>
+
+  {/** snackbar */}
+  <Snackbar
+        open={snackbarMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snackbarMessage?.severity} variant="filled">
+          {snackbarMessage?.message}
+        </Alert>
+      </Snackbar>
+
     </CustomStack>
   );
 };

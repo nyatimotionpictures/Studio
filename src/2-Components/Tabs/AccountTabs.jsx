@@ -3,6 +3,8 @@ import { Tab, Tabs } from '@mui/material';
 import { TabContext, TabPanel } from '@mui/lab';
 import UserTab from './UserTab';
 import UserPasswordTab from './UserPasswordTab';
+import { useGetAdminUser } from '../../5-Store/TanstackStore/services/queries';
+import { useParams } from 'react-router-dom';
 
 const displayTabs = [
     {
@@ -18,7 +20,10 @@ const displayTabs = [
 
 const AccountTabs = () => {
     const [currentTabValue, setCurrentTabValue] = React.useState("1");
+    let params = useParams();
+    let userDetails = JSON.parse(localStorage.getItem("user"));
 
+   // console.log("userDetails", userDetails)
     const handleTabChange = (event, newValue) => {
         setCurrentTabValue(() => newValue);
     };
@@ -26,14 +31,18 @@ const AccountTabs = () => {
     const TabDisplay = (datakey) => {
         switch (datakey) {
             case "User Profile":
-                return <UserTab  />;
+                return <UserTab user={userDetails.user}  />;
             case  "Password Settings":
-                return <UserPasswordTab />;
+                return <UserPasswordTab user={userDetails.user}  />;
             
             default:
                 break;
         }
     }
+
+    // let getAdminUserQuery = useGetAdminUser(userDetails?.user?.id);
+
+
   return (
     <div className="min-h-[60vh]">
     {displayTabs?.length > 0 && (

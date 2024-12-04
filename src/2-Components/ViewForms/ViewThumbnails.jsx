@@ -6,10 +6,12 @@ const ViewThumbnails = ({
     const [posterData, setPosterData] = React.useState([]);
     const [backdropData, setBackdropData] = React.useState([]);
 
+    //console.log(film?.posters)
+
     React.useEffect(() => {
         let posterArray = [];
         let backdropArray = []; 
-         film?.poster?.filter((data, index) => {
+         film?.posters?.filter((data, index) => {
             if (data.isCover === true) {
                 posterArray.push(data);
             }else {
@@ -23,7 +25,7 @@ const ViewThumbnails = ({
 
         setPosterData(posterArray);
         setBackdropData(backdropArray);
-    }, [film]);
+    }, [film?.posters]);
        
     
   return (
@@ -41,7 +43,7 @@ const ViewThumbnails = ({
                       posterData?.map((data, index) => {
                           return (
                               <div key={index} className="flex flex-col gap-[20px]">
-                                  <img src={data.url} className="bg-[#36323E] w-[200px] h-[307.69px] flex "/>
+                                  <img src={data.url} className="bg-[#36323E] w-[300px] h-[307.69px] object-cover flex "/>
 
                                   {/* <div className="flex flex-col gap-1">
                                       <h1 className="font-[Inter-Regular] text-base text-[#706E72]">Size</h1>
@@ -68,7 +70,7 @@ const ViewThumbnails = ({
                      backdropData?.map((data, index) => {
                           return (
                               <div key={index} className="flex flex-col gap-[20px]">
-                                  <img src={data.url} className="bg-[#36323E] w-[320px] h-[233px] flex " />
+                                  <img src={data.url} className="bg-[#36323E] w-[320px] h-[233px] object-cover flex " />
 
 
                               </div> 

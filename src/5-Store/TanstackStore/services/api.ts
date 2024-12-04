@@ -23,44 +23,7 @@ import {
 {
   /** /studio */
 }
-// // GET Routes
-// router.get('/films', getFilms);
-// router.get('/films/:filmId', getFilm);
-// router.get('/users', getUsers);
-// router.get('/donations', verifyToken, getDonations);
-// // POST Routes
-// router.post('/newfilm', verifyToken, validateData(filmSchema), createFilm);
-// router.post(
-//     '/newseason/:filmId',
-//     verifyToken,
-//     validateData(seasonSchema),
-//     createSeason
-// );
-// router.post(
-//     '/newepisode/:seasonId',
-//     verifyToken,
-//     validateData(episodeSchema),
-//     createEpisode
-// );
-// // PUT Routes
-// router.put('/films/:filmId', verifyToken, validateData(filmSchema), updateFilm);
-// router.put(
-//     '/season/:seasonId',
-//     verifyToken,
-//     validateData(seasonSchema),
-//     updateSeason
-// );
-// router.put(
-//     '/episode/:episodeId',
-//     verifyToken,
-//     validateData(episodeSchema),
-//     updateEpisode
-// );
 
-// // DELETE Routes
-// router.delete('/films/:filmId', verifyToken, deleteFilm);
-// router.delete('/season/:seasonId', verifyToken, deleteSeason);
-// router.delete('/episode/:episodeId', verifyToken, deleteEpisode);
 /** Authorization */
 /** mutation: Admin Registration : working as expected */
 export const postAdminRegister = async (
@@ -181,25 +144,40 @@ export const updateFilmContent = async (
   }
 };
 
-/** mutation: upload film poster : not yet used */
-export const uploadPosterContent = async (filmContent: {
-  id: string;
-  poster: File;
-  isCover: string;
-}): Promise<{
-  message: string;
-  poster: any;
-}> => {
+/** mutation: update film content : working as expected */
+export const updateEpisodeContent = async (
+  filmContent: UpdateFilmRequest
+): Promise<CreateNewFilmResponse> => {
   try {
     let { id, ...rest } = filmContent;
+    //console.log("rest", rest)
+    const response = await apiRequest.put<CreateNewFilmResponse>(
+      `/v1/studio/episode/${id}`,
+      rest
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+/** mutation: upload film poster : not yet used */
+export const uploadPosterContent = async (filmContent: any) => {
+  try {
+  
     /** convert to formdata */
-    let formData = new FormData();
-    formData.append("poster", rest.poster);
-    formData.append("isCover", rest.isCover);
-    const response = await apiRequest.post<{
-      message: string;
-      poster: any;
-    }>(`/v1/film/poster/${id}`, formData);
+   
+    const user = JSON.parse(localStorage.getItem("user"));
+    
+     const token = user !== null && user?.token ? user.token : null;
+  
+    const response = await apiRequest.post(`/v1/studio/posterupload/${filmContent.filmId}`, filmContent, {
+     headers: {
+          "Content-Type": "multipart/form-data",
+        },
+    });
 
     return response.data;
   } catch (error) {
@@ -216,18 +194,7 @@ interface FilmPoster {
   isBackdrop: boolean;
 }
 
-/** get posters by film id : not yet used */
-export const getPostersByFilmId = async (id: string): Promise<FilmPoster[]> => {
-  try {
-    const response = await apiRequest.get<FilmPoster[]>(
-      `/v1/film/poster/${id}`
-    );
-    return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
-  }
-};
+
 
 interface CreateNewSeasonRequest {
      id  :      String;
@@ -236,7 +203,7 @@ interface CreateNewSeasonRequest {
      filmId  :  String;
 
 }
-/** create new season : not yet used */
+/** create new season : used as expected */
 export const createNewSeason = async (
   seasonContent: CreateNewSeasonRequest
 ): Promise<{ message: string, season: any }> => {
@@ -254,7 +221,7 @@ export const createNewSeason = async (
   }
 };
 
-/** mutation: delete season */
+/** mutation: delete season : working as expected */
 export const deleteSeason = async (
      seasonId: String
    ): Promise<filmDeleteResponse> => {
@@ -270,7 +237,23 @@ export const deleteSeason = async (
      }
    };
 
-   /** mutation: update season */
+   /** mutation: delete episode :  */
+export const deleteEpisode = async (
+  episodeId: String
+): Promise<filmDeleteResponse> => {
+  try {
+    const response = await apiRequest.delete<filmDeleteResponse>(
+      `/v1/studio/episode/${episodeId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+   /** mutation: update season : works as expected */
    export const updateSeason = async (
      seasonContent: CreateNewSeasonRequest
    ): Promise<{ message: string, season: any }> => {
@@ -288,9 +271,9 @@ export const deleteSeason = async (
      }
    };
 
-   /** muation: create new episode */
+   /** muation: create new episode: works as expected */
    export const createNewEpisode = async (
-     episodeContent: CreateNewFilmRequest
+     episodeContent: any
    ): Promise<{ message: string, episode: any }> => {
      try {
           let {seasonId,...rest} = episodeContent;
@@ -306,7 +289,7 @@ export const deleteSeason = async (
      }
    };
 
-   /** mutation: get all donations */
+   /** mutation: get all donations: works as expected */
    export const getAllDonations = async () => {
      try {
        const response = await apiRequest.get(
@@ -320,8 +303,24 @@ export const deleteSeason = async (
      }
    };
 
+      /** mutation: get all subscriptions: works as expected */
+      export const getAllPurchases = async () => {
+        try {
+          const response = await apiRequest.get(
+            "/v1/studio/purchasehistory"
+          );
+      
+          return response.data;
+        } catch (error) {
+          const axiosError = error as AxiosError<ErrorResponse>;
+          throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+        }
+      };
 
-      /** mutation: get all users */
+   
+
+
+      /** mutation: get all users: works as expected */
       export const getAllUsers = async () => {
           try {
             const response = await apiRequest.get(
@@ -335,13 +334,53 @@ export const deleteSeason = async (
           }
         };
 
-        /** get User */
+        /** get User: Not yet used */
         export const getAdminUser = async (id: String) => {
           try {
             const response = await apiRequest.get(
-              `/v1/studio/users/${id}`
+              `/v1/admin/auth/me/"${id}`
             );
         
+            return response.data;
+          } catch (error) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+          }
+        };
+
+        /** change password: not yet used */
+        export const changePassword = async (
+          passworddetails : any
+        ) => {
+          try {
+             let   {
+            adminId,
+           ...rest
+          } = passworddetails 
+            const response = await apiRequest.put(
+              `/v1/admin/auth/password/${adminId}`, rest
+            );
+
+            return response.data;
+          } catch (error) {
+            const axiosError = error as AxiosError<ErrorResponse>;
+            throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+          }
+        };
+
+        /** Update Video Price */
+        export const updateVideoPrice = async ( 
+          priceDetails : any
+        ) => {
+          try {
+             let   {
+            videoId,
+           ...rest
+          } = priceDetails
+            const response = await apiRequest.put(
+              `/v1/studio/updateVideoPrice/${videoId}`, rest
+            );
+
             return response.data;
           } catch (error) {
             const axiosError = error as AxiosError<ErrorResponse>;
@@ -372,7 +411,39 @@ export const deleteFilm = async (
 ): Promise<filmDeleteResponse> => {
   try {
     const response = await apiRequest.delete<filmDeleteResponse>(
-      `/v1/film/delete/${filmId}`
+      `/v1/studio/films/${filmId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+/** delete poster by film id :  used */
+export const deletePoster = async (
+  posterId: String
+) => {
+  try {
+    const response = await apiRequest.delete(
+      `/v1/studio/poster/${posterId}`
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+/** delete video by film id : used */
+export const deleteVideo = async (
+  videoId: String
+) => {
+  try {
+    const response = await apiRequest.delete(
+      `/v1/studio/video/${videoId}`
     );
 
     return response.data;

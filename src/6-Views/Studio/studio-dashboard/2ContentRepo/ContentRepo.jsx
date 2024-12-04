@@ -14,6 +14,7 @@ import { useCreateFilm } from "../../../../5-Store/TanstackStore/services/mutati
 import { useMutation } from "@tanstack/react-query";
 import { postFilmContent } from "../../../../5-Store/TanstackStore/services/api.ts";
 import { data } from "autoprefixer";
+import { queryClient } from "../../../../lib/tanstack.ts";
 
 const ContentRepo = () => {
   const [openFilmModal, setOpenFilmModal] = React.useState(false);

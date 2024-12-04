@@ -10,6 +10,7 @@ import hdIcon from '../../../../1-Assets/icons/hd-resolution.svg'
 import fullhdIcon from '../../../../1-Assets/icons/fullhd-resolution.svg'
 import ultrahdIcon from '../../../../1-Assets/icons/ultrahd-resolution.svg'
 import SubscriptionTable from "../../../../2-Components/Tables/SubscriptionTable.jsx";
+import { useGetPurchases } from "../../../../5-Store/TanstackStore/services/queries.ts";
 
 
 
@@ -21,61 +22,48 @@ const Subscriptions = () => {
   const [statsArray, setStatsArray] = useState([
     {
       title: "Total Paid Subscriptions",
-      stats: "UGX 1,2000,000",
+      stats: "UGX 0",
       icon: false,
     },
   ]);
 
-  // const [subCategories, setsubCategories] = useState([
-  //   {
-  //     title: "SD",
-  //     price: "UGX 7,000",
-  //     ref:"sd",
-  //     icon: sdIcon,
+  let getallpurchases = useGetPurchases();
+
+
+  useEffect(() => {
+    if(getallpurchases.data) {
+      let successPurchases = [];
      
-  //   },
-  //   {
-  //     title: "HD",
-  //     price: "UGX 7,000",
-  //     ref: "hd",
-  //     icon: hdIcon,
-      
-  //   },
-  //   {
-  //     title: "Full HD",
-  //     price: "UGX 7,000",
-  //     ref: "fullhd",
-  //     icon: fullhdIcon,
-      
-  //   },
-  //   {
-  //     title: "Ultra HD",
-  //     price: "UGX 7,000",
-  //     ref: "ultrahd",
-  //     icon: ultrahdIcon,
-    
-  //   },
-    
-  // ])
+      const filterPurchases =   getallpurchases.data?.appDonations?.filter((data) =>{
+
+        if (data.status.includes("success")){
+          successPurchases.push(parseFloat(data.amount))
+        }
+      }  ) ?? [];
 
 
+  
+      const ReducerPurchases = successPurchases?.length > 0 ?  successPurchases?.reduce((sum, price) => sum + price, 0  ) : 0;
+   
+   
+      setStatsArray(()=> [
+        {
+          title: "Total Paid Subscriptions",
+          stats: `UGX ${ReducerPurchases}`,
+          
+          icon: false,
+        }
+        
+      ])
+    }
+  }, [getallpurchases.data])
 
-  const stepperArray = [
-    { title: "Video" },
-    { title: "Content Details" },
-    { title: "Cast & Crew" },
-    { title: "Audience, Visibility..." },
-    { title: "Trailer & Thumbnails" },
-    { title: "Preview" },
-  ];
-  const [currentStep, setCurrentStep] = useState(null);
+  
   
 
   const formRef = React.useRef();
 
-  React.useEffect(() => {
-    setCurrentStep(() => stepperArray?.[0].title);
-  }, []);
+
 
 
  
@@ -149,7 +137,7 @@ const Subscriptions = () => {
           <div className="pt-7 pb-11 ">
             {/* <VideoListTable /> */}
 
-            <SubscriptionTable />
+            <SubscriptionTable transactions={getallpurchases?.data} />
           </div>
         </div>
       </div>

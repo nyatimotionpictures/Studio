@@ -37,7 +37,7 @@ const Donations = () => {
 
  let getalldonations = useGetDonations();
 
-  console.log("all data", getalldonations.data)
+  //console.log("all data", getalldonations.data)
 
 /** useEffect to get total amount of app donations and web donations */
   useEffect(() => {

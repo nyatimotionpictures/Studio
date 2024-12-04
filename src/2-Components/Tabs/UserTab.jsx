@@ -2,46 +2,49 @@ import { ErrorMessage, Form, Formik } from 'formik';
 import React from 'react'
 import CustomStack from '../Stacks/CustomStack';
 import { FormContainer } from '../Stacks/InputFormStack';
+import moment from 'moment-timezone';
 
-const UserTab = () => {
+const UserTab = ({user}) => {
 
+   // console.log("user", user)
   return (
    
          <CustomStack className="h-full w-full flex flex-col gap-5 text-whites-40">
             <div className='flex  items-center gap-10'>
-                        {/** Account ID */}
+            {/** Account ID */}
                <FormContainer>
              <label
-               htmlFor="season"
+               htmlFor="accountId"
                className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
              >
               Account ID
              </label>
              <input
-               id="season"
-               type="number"
-               
-               name="season"
-            
-               placeholder="Season Number"
+               id="accoundId"
+               type="text"
+               readOnly
+               name="accountId"
+            value={user?.id}
+               placeholder="Account ID"
               
              />
            </FormContainer>
 
-           {/** title */}
+           {/** Created */}
            <FormContainer>
              <label
-               htmlFor="title"
+               htmlFor="date"
                className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
              >
             Created
              </label>
              <input
-               id="title"
+               id="date"
              
-               name="title"
-             
-               placeholder="Title "
+               name="date"
+             readOnly
+             value={user?.createdAt ? moment(user?.createdAt).format("DD/MMM/YYYY - hh:mm:ss a") : ""}
+               placeholder="Date"
               
              />
 
@@ -51,21 +54,21 @@ const UserTab = () => {
             </div>
        
             <div className='flex  items-center gap-10'>
-                        {/** Season Number */}
+                        {/** Email Address */}
                <FormContainer>
              <label
-               htmlFor="season"
+               htmlFor="email"
                className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
              >
               E-mail address
              </label>
              <input
-               id="season"
-               type="number"
+               id="email"
                
-               name="season"
-            
-               placeholder="Season Number"
+               value={user.email}
+               name="email"
+            readOnly
+               placeholder="Email"
               
              />
            </FormContainer>
@@ -73,17 +76,17 @@ const UserTab = () => {
            {/** title */}
            <FormContainer>
              <label
-               htmlFor="title"
+               htmlFor="name"
                className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
              >
             Name
              </label>
              <input
-               id="title"
-             
-               name="title"
-             
-               placeholder="Title "
+               id="name"
+                readOnly
+               name="name"
+             value={`${user.firstname} ${user.lastname}`}
+               placeholder="name"
               
              />
 

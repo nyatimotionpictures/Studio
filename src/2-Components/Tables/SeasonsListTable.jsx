@@ -19,23 +19,7 @@ import { deleteSeason } from "../../5-Store/TanstackStore/services/api";
 import { queryClient } from "../../lib/tanstack";
 
 
-const newData = [
-    {
-        seasonNumber:
-            "01",
-        seasonTitle:
-            "addams Famil",
-        
-        ReleaseDate: "31 Aug, 2020",
-       
-        Genre: "Comedy",
-        Year: "2023",
-        DatePublished: "Dec 30, 2019 07:52",
-       
-        action: "1",
-    },
-   
-];
+
 const SeasonsListTable = ({ handleNewSeason, film }) => {
     
     console.log("film", film)

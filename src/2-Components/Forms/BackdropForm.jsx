@@ -1,4 +1,4 @@
-import { Form, Formik } from "formik";
+import { Form, Formik, useFormik } from "formik";
 import React from "react";
 import { useContext } from "react";
 import * as yup from "yup";
@@ -8,8 +8,18 @@ import { Typography } from "@mui/material";
 import Button from "../Buttons/Button";
 import ErrorMessage from "./ErrorMessage";
 
-const BackdropForm = ({ handleModalClose }) => {
+import {useDropzone} from 'react-dropzone';
+import axios from "axios";
+import { BaseUrl } from "../../3-Middleware/apiRequest";
+import { queryClient } from "../../lib/tanstack";
+import { useParams } from "react-router-dom";
+
+const BackdropForm = ({ handleModalClose, film, type }) => {
+  //console.log("film", film, type)
+  let params = useParams();
     const [preview, setPreview] = React.useState(null);
+    const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+    const [uploadProgress, setUploadProgress] = React.useState(0);
   const posterValidationSchema = yup.object().shape({
     poster: yup
       .mixed()
@@ -21,7 +31,7 @@ const BackdropForm = ({ handleModalClose }) => {
           );
         }
       }),
-    isCover: yup.string().required("required"),
+      isBackdrop: yup.string().required("required"),
   });
 
   const handleImagePreview = (file) => {
@@ -29,23 +39,101 @@ const BackdropForm = ({ handleModalClose }) => {
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
   };
-  return (
-    <Formik
-    initialValues={{
-      poster: null,
+
+  const formik = useFormik({
+    initialValues: {
+      files: [],
       isBackdrop: "true",
-    }}
-    validationSchema={posterValidationSchema}
-    onSubmit={(values, helpers) => {
-      // handleStepNext();
-      console.log("values", values);
-    }}
-  >
-    {({ values, handleChange, errors, touched, setFieldValue }) => (
-      <Form>
+      poster: null,
+      filmId: film?.id,
+    },
+    validationSchema: posterValidationSchema,
+    onSubmit: async (values, helpers) => {
+      try {
+        console.log("values", values);
+        const user = JSON.parse(localStorage.getItem("user"));
+        helpers.setSubmitting(true);
+           
+            const token = user !== null && user.token ? user.token : null;
+             let formData = new FormData();
+             formData.append("files", values.files);
+             //formData.append("filmId", values.filmId);
+             formData.append("poster", values.files[0]);
+               formData.append("isCover", values.isCover);
+       
+           //  updateFilmMutation.mutate(formData);
+           let axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+
+            const response = await axios.post(axiosurl, formData, {  
+             headers: {
+               "Authorization": `Bearer ${token}`,
+               "Content-Type": "multipart/form-data",
+                },
+                onUploadProgress: (progressEvent) => {
+                  setUploadProgress(
+                    Math.round((progressEvent.loaded * 100) / progressEvent.total)
+                  );
+                },
+            });
+           // console.log("response", response.data);
+            helpers.setSubmitting(false);
+            handleModalClose();
+            setSnackbarMessage({ message: response.data.message, severity: "success" });
+            type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film", params?.id] }) : await queryClient.invalidateQueries({ queryKey: ["film", params?.id] })
+        
+            
+            helpers.setSubmitting(false);
+             //console.log("response", response.data);
+      } catch (error) {
+        setSnackbarMessage({
+          message: "error uploading poster",
+          severity: "error",
+        });
+      }
+    
+    },
+  });
+
+  const onDrop = (acceptedFiles) => {
+    formik.setFieldValue("files", acceptedFiles);
+    formik.setFieldValue("poster", acceptedFiles[0]);
+    handleImagePreview(acceptedFiles[0]);
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    multiple: false,
+    accept: "image/*",
+  });
+
+
+  return (
+    <>
+    {/* {
+     formik.isSubmitting && <div className="h-full w-full absolute bg-seconday-500 bg-opacity-20 top-0 left-0 flex justify-center items-center">
+
+        <UploadProgress url={`http://localhost:4500/api/v1/studio/posterupload/${film?.id}`} />
+        <CustomLoader />
+      </div>
+    } */}
+    
+     
+      
+      <form onSubmit={formik.handleSubmit} >
         <div className="flex flex-col gap-8 h-full ">
-          <div className="flex flex-row gap-5 flex-wrap items-center ">
-            {preview && (
+          <div className="flex flex-col gap-5 flex-wrap items-center ">
+          {uploadProgress > 0 && (
+              <div className="flex flex-col gap-2">
+                <h4>Upload Progress: {uploadProgress}%</h4>
+                <div className="w-full bg-secondary-500 rounded-lg h-2 relative">
+                  <div
+                    className="h-2 bg-primary-500 rounded-lg absolute"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+              </div>
+            )}
+            {preview ? (
               <div className="flex flex-col gap-2">
                 <h4>Image Preview:</h4>
                 <img
@@ -54,10 +142,9 @@ const BackdropForm = ({ handleModalClose }) => {
                   className="w-[320px] object-cover h-[286.37px]"
                 />
               </div>
-            )}
-
-            <FormContainer className="w-max">
-              <label htmlFor="poster">
+            ): (
+              <FormContainer className="w-max">
+              <div    {...getRootProps()} htmlFor="poster">
                 <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[286.37px] w-[250.4px] border-2 rounded-xl border-dashed border-secondary-300 gap-6 text-center">
                   <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
                   <CustomStack className="flex-col gap-2 items-center">
@@ -69,40 +156,42 @@ const BackdropForm = ({ handleModalClose }) => {
                     </Typography>
                   </CustomStack>
                 </CustomStack>
-              </label>
+              </div>
 
               <input
-                hidden
-                id="poster"
-                type="file"
-                accept="image/*"
-                onChange={(event) => {
-                  if (
-                    event.target.files ||
-                    event.target.files.length > 0
-                  ) {
-                    const file = event.target.files[0];
-                    setFieldValue("poster", file);
-                    handleImagePreview(file);
-                  }
-                }}
+                {...getInputProps()}
               />
 
             <ErrorMessage
-              errors={errors?.poster ? true : false}
+              errors={formik.errors?.poster ? true : false}
               name="directors"
-              message={errors?.poster && errors.poster}
+              message={formik.errors?.poster && formik.errors.poster}
             />
             </FormContainer>
 
+            )}
+
+         
 
           </div>
 
           {/** stepper control */}
           <div className="relative flex flex-col gap-5">
-            <Button type="submit" className="font-[Inter-Medium] bg-primary-500 rounded-lg">
+            {
+              formik.isSubmitting ? (
+                <Button
+                  disabled
+                  className="font-[Inter-Medium] bg-primary-500 rounded-lg"
+                >
+                  Submitting...
+                </Button>
+              ) : (
+                <Button type="submit" className="font-[Inter-Medium] bg-primary-500 rounded-lg">
               Submit
             </Button>
+              )
+            }
+            
             <Button onClick={
               () => {
                   setPreview(null);
@@ -113,9 +202,8 @@ const BackdropForm = ({ handleModalClose }) => {
             </Button>
           </div>
         </div>
-      </Form>
-    )}
-  </Formik>
+      </form>
+    </>
   )
 }
 

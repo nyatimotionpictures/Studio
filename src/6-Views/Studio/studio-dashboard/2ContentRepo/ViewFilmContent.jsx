@@ -22,6 +22,8 @@ const ViewFilmContent = () => {
         //console.log("filmId", filmsQuery.data)
         setFilmId(()=> params?.id)
     }, [params?.id]);
+
+   // console.log("filmsQuery", filmsQuery.data)
     
     const handleImgError = (e) => {
         setIsImgBroken(true)
@@ -83,7 +85,7 @@ const ViewFilmContent = () => {
                         <div className="flex flex-row gap-4">
                             {/** image */}
 
-                            <img onError={handleImgError} src={ isImgBroken? NoImage : filmsQuery.data?.film?.posters[0]} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
+                            <img onError={handleImgError} src={ isImgBroken ? NoImage : filmsQuery.data?.film?.posters[0]?.url} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
 
                             <div className="flex flex-col max-w-[640px] gap-6">
                                 <h1 className="font-[Inter-Regular] text-sm text-[#FFFAF6] text-opacity-70">{filmsQuery.data?.film?.overview}</h1>

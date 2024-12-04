@@ -3,12 +3,10 @@ import Button from "../Buttons/Button";
 import ContentDetails from "../Forms/ContentDetails";
 import ViewContentDetails from "../ViewForms/ViewContentDetails";
 import { useParams } from "react-router-dom";
-import { useGetFilm } from "../../5-Store/TanstackStore/services/queries";
-import { useUpdateFilm } from "../../5-Store/TanstackStore/services/mutations";
 import { Alert, Snackbar } from "@mui/material";
 import NewEpisodeForm from "../Forms/NewEpisodeForm";
 import ViewEpisodeData from "../ViewForms/ViewEpisodeData";
-import { updateFilmContent } from "../../5-Store/TanstackStore/services/api";
+import { updateEpisodeContent, updateFilmContent } from "../../5-Store/TanstackStore/services/api";
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "../../lib/tanstack";
 
@@ -21,11 +19,12 @@ const ContentTab = ({ film, type }) => {
   //updateFilmContent
   const updateFilmMutation = useMutation(
     {
-      mutationFn: updateFilmContent,
+      mutationFn: type === "episode" ? updateEpisodeContent : updateFilmContent,
       onSuccess: async (data) => {
-        console.log("success", data);
+        //console.log("success", data);
         setSnackbarMessage({ message: data.message, severity: "success" });
-        await queryClient.invalidateQueries({ queryKey: ["film", data?.film?.id] });
+        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film"] }) : await queryClient.invalidateQueries({ queryKey: ["film", data?.film?.id] })
+        ;
         handleEditing();
       },
       onError: (error) => {

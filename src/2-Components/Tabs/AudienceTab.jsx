@@ -5,10 +5,10 @@ import ViewAudienceDetails from '../ViewForms/ViewAudienceDetails';
 import { useUpdateFilm } from '../../5-Store/TanstackStore/services/mutations';
 import { Alert, Snackbar } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
-import { updateFilmContent } from '../../5-Store/TanstackStore/services/api';
+import { updateEpisodeContent, updateFilmContent } from '../../5-Store/TanstackStore/services/api';
 import { queryClient } from '../../lib/tanstack';
 
-const AudienceTab = ({film}) => {
+const AudienceTab = ({film, type}) => {
   const [editing, setEditing] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   const formRef = React.useRef();
@@ -17,11 +17,12 @@ const AudienceTab = ({film}) => {
   //updateFilmContent
   const updateFilmMutation = useMutation(
     {
-      mutationFn: updateFilmContent,
+      mutationFn: type === "episode" ? updateEpisodeContent : updateFilmContent,
       onSuccess: async (data) => {
-        console.log("success", data);
+       // console.log("success", data);
         setSnackbarMessage({ message: data.message, severity: "success" });
-        await queryClient.invalidateQueries({ queryKey: ["film", data?.film?.id] });
+        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film"] }) : await queryClient.invalidateQueries({ queryKey: ["film", data?.film?.id] })
+        ;
         handleEditing();
       },
       onError: (error) => {

@@ -1,9 +1,10 @@
 import { QueryClient } from "@tanstack/react-query";
 import axios from "axios";
-
+//http://localhost:4500/api
+export const BaseUrl = "https://api.nyatimotionpictures.com/api";
 const queryClient = new QueryClient();
 const apiRequest = axios.create({
-    baseURL: "http://localhost:4500/api",
+    baseURL: "https://api.nyatimotionpictures.com/api",
     withCredentials: true,
 });
 
@@ -14,7 +15,7 @@ apiRequest.interceptors.request.use((config)=> {
 
     if (token){
         config.headers.authorization = `Bearer ${token}`;
-        config.headers["Content-Type"] = "application/json";
+       config.headers["Content-Type"] = "application/json";
     }
     config.headers["Content-Type"] = "application/json";
     return config;

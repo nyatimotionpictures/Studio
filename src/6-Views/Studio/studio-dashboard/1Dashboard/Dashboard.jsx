@@ -14,11 +14,14 @@ import WatchedListTable from "../../../../2-Components/Tables/WatchedListTable.j
 import { useMutation } from "@tanstack/react-query";
 import { postFilmContent } from "../../../../5-Store/TanstackStore/services/api.ts";
 import { queryClient } from "../../../../lib/tanstack.ts";
+import { useGetAllFilms, useGetDonations, useGetPurchases } from "../../../../5-Store/TanstackStore/services/queries.ts";
+import VideoListTable from "../../../../2-Components/Tables/VideoListTable.jsx";
 
 const Dashboard = () => {
   const [openFilmModal, setOpenFilmModal] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   let navigate = useNavigate();
+  const filmsQuery = useGetAllFilms();
   const [statsArray, setStatsArray] = useState([
     
     {
@@ -32,6 +35,66 @@ const Dashboard = () => {
       icon: false,
     },
   ]);
+
+  let getalldonations = useGetDonations();
+  let getallpurchases = useGetPurchases();
+
+  useEffect(() => {
+    
+      let AppDonations = [];
+      let WebDonations = [];
+      const filterAppDonations =   getalldonations?.data?.appDonations?.filter((data) =>{
+
+        if (data.status.includes("success")){
+          AppDonations.push(parseFloat(data.amount))
+        }
+      }  ) ?? [];
+      const filterWebDonations = getalldonations?.data?.webDonations?.filter((data) =>{
+
+        if (data.payment_status_description.includes("success")){
+          WebDonations.push(parseFloat(data.amount))
+        }
+      }  ) ?? [];
+
+      let AllDonations = [...AppDonations, ...WebDonations];
+      const ReducerAllDonations = AllDonations?.length > 0 ?  AllDonations.reduce((sum, price) => sum + price, 0  ) : 0;
+     
+      // purchases
+    
+        let successPurchases = [];
+       
+        const filterPurchases =   getallpurchases?.data?.appDonations?.filter((data) =>{
+  
+          if (data.status.includes("success")){
+            successPurchases.push(parseFloat(data.amount))
+          }
+        }  ) ?? [];
+  
+  
+    
+        const ReducerPurchases = successPurchases?.length > 0 ?  successPurchases?.reduce((sum, price) => sum + price, 0  ) : 0;
+     
+     
+      
+      
+      setStatsArray(()=> [
+        {
+          title: "Total Donated",
+          stats: `UGX ${ReducerAllDonations}`,
+          icon: false,
+        },
+        {
+          title: "Total Paid Subscriptions",
+          stats: `UGX ${ReducerPurchases}`,
+          
+          icon: false,
+        }
+       
+      ])
+    
+  }, [getalldonations.data,getallpurchases.data])
+
+
 
   const stepperArray = [{ title: "Content Details" }];
   const [currentStep, setCurrentStep] = useState(null);
@@ -157,7 +220,7 @@ const Dashboard = () => {
       title: "Manage Subscriptions",
       desc: `Click shortcut to update Rent - to - Stream price plans for SD,HD, FHD & UHD Subscriptions`,
       icon: subIcon,
-      path: "/subcriptions",
+      path: "/subscriptions",
     },
   ];
 
@@ -238,9 +301,13 @@ const Dashboard = () => {
             {/** table */}
             <div className="pt-7 pb-11 flex flex-col gap-4">
               <h1 className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                Recently Watched (i.e per users)
+                Recent Films
               </h1>
-              <WatchedListTable />
+              {/* <WatchedListTable /> */}
+
+              <VideoListTable
+              films={filmsQuery.isPending ? [] : filmsQuery.data.films}
+            />
             </div>
           </div>
         </div>

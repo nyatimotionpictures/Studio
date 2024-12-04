@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAllDonations, getAllFilms, getAllUsers, getFilmContent } from "./api";
+import { getAdminUser, getAllDonations, getAllFilms, getAllPurchases, getAllUsers, getFilmContent } from "./api";
 
 export function useGetAllFilms() {
     return useQuery({
@@ -25,11 +25,28 @@ export function useGetDonations() {
     });
 }
 
+export function useGetPurchases() {
+    return useQuery({
+        queryKey: ["purchases"],
+        queryFn: () => getAllPurchases(),
+       
+    });
+}
+
 export function useGetUsers() {
     return useQuery(
         {
             queryKey: ["users"],
             queryFn: () => getAllUsers()
+        }
+    )
+}
+
+export function useGetAdminUser(id: String) {
+    return useQuery(
+        {
+            queryKey: ["admin", id],
+            queryFn: () => getAdminUser(id)
         }
     )
 }

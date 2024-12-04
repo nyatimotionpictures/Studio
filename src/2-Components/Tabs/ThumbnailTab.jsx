@@ -4,7 +4,7 @@ import Button from '../Buttons/Button'
 import Thumbnails from '../Forms/Thumbnails';
 import ViewThumbnails from '../ViewForms/ViewThumbnails';
 
-const ThumbnailTab = ({film}) => {
+const ThumbnailTab = ({film, type}) => {
   const [editing, setEditing] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   const formRef = React.useRef();
@@ -16,27 +16,21 @@ const ThumbnailTab = ({film}) => {
     setEditing(() => !editing)
   }
 
-  const handleFormSubmit = () => {
-    if (formRef.current) {
-      formRef.current.handleSubmit();
-    } else {
-      alert("No form")
-    }
-  };
+
 
   const handleAPISubmission = (editInfo) => {
-    alert(`form submitted ${editInfo.title}`);
-    handleEditing()
+    //alert(`form submitted ${editInfo.title}`);
+   // handleEditing()
   }
   return (
     <div className="flex relative flex-col gap-6 pt-4">
       {
         editing ? (
           <div >
-            <Thumbnails innerref={formRef} handleStepNext={handleAPISubmission}   editdata={true} film={film} />  
+            <Thumbnails innerref={formRef} handleStepNext={handleAPISubmission}   editdata={true} film={film} type={type} />  
           </div>
         ) : (<div>
-          <ViewThumbnails film={film} />
+          <ViewThumbnails film={film} type={type} />
         </div>)
       }
     

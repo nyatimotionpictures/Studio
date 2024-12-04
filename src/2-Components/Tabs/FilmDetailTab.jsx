@@ -35,18 +35,19 @@ const FilmDetailTab = ({film, type}) => {
         setCurrentTabValue(() => newValue);
     };
 
+
     const TabDisplay = (datakey) => {
         switch (datakey) {
             case "Content Details":
-                return <ContentTab film={film} type={type ? type : null} />;
+                return <ContentTab film={film} type={type ? type : "film"} />;
             case "Cast & Crew":
-                return <CastTab film={film}/>;
+                return <CastTab film={film} type={type ? type : "film"}/>;
             case "Audience, Visibility":
-                return <AudienceTab film={film}/>;
+                return <AudienceTab film={film} type={type ? type : "film"} />;
             case "Thumbnails & Backdrops":
-                return <ThumbnailTab film={film}/>;
+                return <ThumbnailTab film={film} type={type ? type : "film"}/>;
             case "Trailer & Film":
-                return <TrailerTab film={film}/>;
+                return <TrailerTab film={film} type={type ? type : "film"} />;
             default:
                 break;
         }

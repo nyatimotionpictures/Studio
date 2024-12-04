@@ -60,7 +60,7 @@ const SubscriptionTable = ({ transactions }) => {
         <p>
           {
             <div
-              className={`w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg ${
+              className={`w-max h-max  px-2 py-1 border  rounded-lg ${
                 info.row.original.status.includes("success") &&
                 "border-[#18AC55] text-[#18AC55]"
               } ${

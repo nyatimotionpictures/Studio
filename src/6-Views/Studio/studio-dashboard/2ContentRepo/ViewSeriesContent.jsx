@@ -14,6 +14,7 @@ import SeriesTabs from '../../../../2-Components/Tabs/SeriesTabs.jsx'
 import { useMutation } from '@tanstack/react-query'
 import { createNewSeason } from '../../../../5-Store/TanstackStore/services/api.ts'
 import { queryClient } from '../../../../lib/tanstack.ts'
+import NoImage from "../../../../1-Assets/no-image.svg"
 
 const ViewSeriesContent = () => {
     const [newSeason, setNewSeason] = React.useState(false)
@@ -118,7 +119,7 @@ const ViewSeriesContent = () => {
                       <div className="flex flex-row gap-4">
                           {/** image */}
 
-                          <img onError={handleImgError} src={ isImgBroken? NoImage : filmsQuery.data?.film?.posters[0]} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
+                          <img onError={handleImgError} src={ isImgBroken? NoImage : filmsQuery.data?.film?.posters[0]?.url} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
 
                           <div className="flex flex-col max-w-[640px] gap-6">
                           <h1 className="font-[Inter-Regular] text-sm text-[#FFFAF6] text-opacity-70">{filmsQuery.data?.film?.overview}</h1>
