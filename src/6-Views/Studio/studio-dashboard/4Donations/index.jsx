@@ -33,9 +33,12 @@ const Donations = () => {
 
 
 
+
   // function useGet
 
  let getalldonations = useGetDonations();
+
+ console.log("all data", getalldonations.data)
 
   //console.log("all data", getalldonations.data)
 
@@ -52,7 +55,7 @@ const Donations = () => {
       }  ) ?? [];
       const filterWebDonations = getalldonations.data?.webDonations?.filter((data) =>{
 
-        if (data.payment_status_description.includes("success")){
+        if (data.payment_status_description.includes("Transaction Successful")){
           WebDonations.push(parseFloat(data.amount))
         }
       }  ) ?? [];
