@@ -42,7 +42,7 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               <Route path="/donations" element={<Donations />} />
               <Route path="/people" element={<People />} />
               <Route path="/setting" element={<Setting />} />
-              <Route path="/register" element={<Register />} />
+             
 
              
             </Route>
@@ -53,6 +53,7 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               element={<OrdinaryRoutes />}
             >
               <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
             </Route>
           </Routes>
         </ThemeProvider>
