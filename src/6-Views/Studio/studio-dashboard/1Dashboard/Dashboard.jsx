@@ -51,7 +51,7 @@ const Dashboard = () => {
       }  ) ?? [];
       const filterWebDonations = getalldonations?.data?.webDonations?.filter((data) =>{
 
-        if (data.payment_status_description.includes("success")){
+        if (data.payment_status_description.includes("Transaction Successful")){
           WebDonations.push(parseFloat(data.amount))
         }
       }  ) ?? [];
