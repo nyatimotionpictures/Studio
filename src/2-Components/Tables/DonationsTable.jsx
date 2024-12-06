@@ -71,9 +71,9 @@ const [snackbarMessage, setSnackbarMessage] = React.useState(null);
           <p>
             {
                 type === "Web Donations" ? (
-                    <div className={`w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg ${info.row.original.payment_status_description.includes("success") && "border-[#18AC55] text-[#18AC55]"} ${info.row.original.payment_status_description.includes("failed") && "border-[#DB3B22] text-[#DB3B22]"} ${info.row.original.payment_status_description.includes("pending") && "border-[#FC9405] text-[#FC9405]"}`} >{info.row.original.payment_status_description}</div>
+                    <div className={`w-max h-max  px-2 py-1 border bg-secondary-800  rounded-lg ${info.row.original.payment_status_description.includes("Success") && "border-[#18AC55] text-[#18AC55]"} ${info.row.original.payment_status_description.includes("failed") && "border-[#DB3B22] text-[#DB3B22]"} ${info.row.original.payment_status_description.includes("pending") && "border-[#FC9405] text-[#FC9405]"}`} >{info.row.original.payment_status_description}</div>
                 ) : (
-                    <div className={`w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg ${info.row.original.status.includes("success") && "border-[#18AC55] text-[#18AC55]"} ${info.row.original.status.includes("failed") && "border-[#DB3B22] text-[#DB3B22]"} ${info.row.original.status.includes("pending") && "border-[#FC9405] text-[#FC9405]"}`} >{info.row.original.status}</div>
+                    <div className={`w-max h-max  px-2 py-1 border bg-secondary-800  rounded-lg ${info.row.original.status.includes("success") && "border-[#18AC55] text-[#18AC55]"} ${info.row.original.status.includes("failed") && "border-[#DB3B22] text-[#DB3B22]"} ${info.row.original.status.includes("pending") && "border-[#FC9405] text-[#FC9405]"}`} >{info.row.original.status}</div>
                 )
             }
           

@@ -103,12 +103,12 @@ const Donations = () => {
           <div className="flex gap-9 mt-1">
             {
               donateTotals.map((data, index) => (
-                <div onClick={() => data.table === "AppDonations" ? setDonateState("App Donations"): setDonateState("Web Donations")} key={index} className="flex flex-row gap-3 h-[126px] py-[21px] px-[28px] bg-[#36323E] rounded-md ring-1 ring-[#EEF1F4] ring-opacity-30 cursor-pointer select-none hover:bg-opacity-20">
-                  <div className="h-[83px] bg-whites-50 rounded-md w-[83px] flex justify-center items-center">
+                <div onClick={() => data.table === "AppDonations" ? setDonateState("App Donations"): setDonateState("Web Donations")} key={index} className={`flex flex-row gap-3 h-[126px]  py-[21px] px-[28px]  rounded-md ring-1 ring-[#EEF1F4] ring-opacity-30 cursor-pointer select-none hover:bg-opacity-20 ${data.table === donateState.split(" ").join("") ? "!bg-secondary-800": "!bg-[#36323E]  !bg-opacity-20"}`}>
+                  <div className={`h-[83px] bg-whites-50 rounded-md w-[83px] flex justify-center items-center ${data.table === donateState.split(" ").join("") ? "": "!bg-opacity-40 !text-opacity-20"}`}>
                     <img src={data.icon} alt="" className="w-[70.73px] h-[54,53px]" />
                   </div>
-                  <div className="flex flex-col gap-2 max-w-[214px] justify-between">
-                    <h1 className="text-whites-40  text-xl font-bold">{data.amount}</h1>
+                  <div className={`flex flex-col gap-2 max-w-[214px] justify-between ${data.table === donateState.split(" ").join("") ? "": "!bg-opacity-40 !text-opacity-20"}`}>
+                    <h1 className={`text-whites-40  text-xl font-bold ${data.table === donateState.split(" ").join("") ? "": "!bg-opacity-40 !text-opacity-20"}`}>{data.amount}</h1>
                     <p className="text-[#9E9D9D]">{data.desc}</p>
                   </div>
                 </div>

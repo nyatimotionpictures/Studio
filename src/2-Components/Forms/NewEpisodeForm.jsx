@@ -316,7 +316,7 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
                  {/** tagline */}
                  <FormContainer>
                    <label className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
-                     tagline
+                     Tagline
                    </label>
                    <Autocomplete onBlur={handleBlur} limitTags={4} style={{border: "none"}} className="mulipleselect" multiple id="tags" freeSolo options={tagOptions.map((option)=>option.label)}  onChange={(event, newValue)=> {
                        setFieldValue("tags", newValue);
@@ -344,7 +344,7 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
                  {/** plot summary - 80-160 words */}
                  <FormContainer>
                    <label htmlFor="plotSummary" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
-                     plot summary - 80-160 words (required)
+                     Plot Summary - 80-160 words (required)
                    </label>
                    <textarea onBlur={handleBlur}  id="plotSummary" name="plotSummary" value={values.plotSummary} onChange={handleChange} placeholder="plot summary - 80-160 words" />
      
@@ -358,7 +358,7 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
                  {/** plot synopsis */}
                  <FormContainer>
                    <label htmlFor="overview" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75" >
-                     plot synopsis
+                     Plot Synopsis
                    </label>
                    <textarea onBlur={handleBlur} className="textarealg" name="overview" value={values.overview} onChange={handleChange} placeholder="plot synopsis" />
      

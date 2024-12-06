@@ -43,7 +43,7 @@ const SeasonTabs = ({ handleNewEpisode, film, season }) => {
                 <Tabs value={currentTabValue !== null && currentTabValue} onChange={handleTabChange} indicatorColor=''  sx={{ margin: "0px",    }} >
                     {displayTabs.map((data) => {
                         return (
-                            <Tab className={`  font-[Inter-Regular] ${currentTabValue !== null && currentTabValue === data.position ? "!scale-100 text-whites-50 !border-b-2 !border-b-transparent z-40" : "scale-75 text-primary-500 text-opacity-50"}  translate-y-2 text-sm mx-2`} key={data.position} value={data.position} label={data.title} sx={currentTabValue !== null && currentTabValue === data.position ? { border: "2px solid #ee5070 !important", backgroundColor:"#24222a", borderBottom: "0px !important", borderTopLeftRadius: "10px", borderTopRightRadius: "10px" } : { border: "1px solid #424148 !important", borderBottom: "0px", borderTopLeftRadius: "10px", borderTopRightRadius: "10px"}} />
+                            <Tab className={`  font-[Inter-Regular] ${currentTabValue !== null && currentTabValue === data.position ? "!scale-100 text-whites-50 !border-b-2 !border-b-transparent z-40" : "scale-75 text-primary-500 text-opacity-75"}  translate-y-2 text-sm mx-2`} key={data.position} value={data.position} label={data.title} sx={currentTabValue !== null && currentTabValue === data.position ? { border: "2px solid #ee5070 !important", backgroundColor:"#24222a", borderBottom: "0px !important", borderTopLeftRadius: "10px", borderTopRightRadius: "10px" } : { border: "1px solid #424148 !important", borderBottom: "0px", borderTopLeftRadius: "10px", borderTopRightRadius: "10px"}} />
                     )
                 })}
                 </Tabs>
