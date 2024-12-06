@@ -7,6 +7,9 @@ import { useDeleteVideo, useUpdateVideoPrice } from "../../5-Store/TanstackStore
 import { Alert, Snackbar, Typography } from "@mui/material";
 import UpdatePriceForm from "../Forms/UpdatePriceForm";
 import { useParams } from "react-router-dom";
+import { Player } from "video-react";
+import 'video-react/dist/video-react.css'; 
+
 
 const ViewTrailerFilm = ({ film, type }) => {
  //console.log("films", film);
@@ -177,7 +180,7 @@ const ViewTrailerFilm = ({ film, type }) => {
           <div className="flex flex-wrap gap-3">
             <div className="flex flex-col gap-[20px]">
               <div className="bg-[#36323E] w-[470px] h-[266px] flex ">
-                <video
+                <Player
                   src={videoTrailer?.url}
                   controls
                   className="w-full object-cover "
@@ -306,7 +309,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <video
+                  <Player
                     src={videoSD?.url}
                     controls
                     className="w-full object-cover "
@@ -428,7 +431,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <video
+                  <Player
                     src={videoHD?.url}
                     controls
                     className="w-full object-cover "
@@ -551,7 +554,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <video
+                  <Player
                     src={videoFHD?.url}
                     controls
                     className="w-full object-cover "
@@ -673,7 +676,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <video
+                  <Player
                     src={videoUHD?.url}
                     controls
                     className="w-full object-cover "
