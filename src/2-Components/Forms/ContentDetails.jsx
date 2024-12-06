@@ -13,7 +13,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
     title: yup.string().required("required"),
     audioLanguages: yup.array().min(1, "required"),
     tags: yup.array().min(1, "required"),
-    runtime: yup.string().required("required"),
+  //  runtime: yup.string().required("required"),
    // embeddedSubtitles: yup.string().required("required"),
     //subtitleLanguage: yup.array(yup.string().required("required")),
    
@@ -249,7 +249,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
             {/** runtime */}
             <FormContainer>
               <label htmlFor="runtime" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
-                Runtime in Minutes
+                Runtime in Minutes (optional)
               </label>
               <input name="runtime" type="text" placeholder="Runtime in Minutes" value={values.runtime} onChange={handleChange} />
             </FormContainer>
@@ -314,7 +314,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
             {/** tagline */}
             <FormContainer>
               <label className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
-                tagline
+                Tagline
               </label>
               <Autocomplete onBlur={handleBlur} limitTags={4} style={{border: "none"}} className="mulipleselect" multiple id="tags" freeSolo options={tagOptions.map((option)=>option.label)}  onChange={(event, newValue)=> {
                   setFieldValue("tags", newValue);
@@ -342,7 +342,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
             {/** plot summary - 80-160 words */}
             <FormContainer>
               <label htmlFor="plotSummary" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75">
-                plot summary - 80-160 words (required)
+                Plot Summary - 80-160 words (required)
               </label>
               <textarea onBlur={handleBlur}  id="plotSummary" name="plotSummary" value={values.plotSummary} onChange={handleChange} placeholder="plot summary - 80-160 words" />
 
@@ -356,7 +356,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
             {/** plot synopsis */}
             <FormContainer>
               <label htmlFor="overview" className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75" >
-                plot synopsis (overview)
+                Plot Synopsis (overview)
               </label>
               <textarea onBlur={handleBlur} className="textarealg" name="overview" value={values.overview} onChange={handleChange} placeholder="plot synopsis" />
 

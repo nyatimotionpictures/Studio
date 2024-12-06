@@ -120,13 +120,13 @@ let confirmDeleteFun = () => {
     },
     columnHelper.accessor("id", {
       cell: (info, cell) => (
-        <div className="flex gap-2">
+        <div className="flex gap-4">
  <Button onClick={()=> info.row.original.type === "movie" ? navigate(`/content/view/film/${info.row.original.id}`) : navigate(`/content/view/series/${info.row.original.id}`)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
           <span className="icon-[solar--maximize-square-linear] w-6 h-6"></span>
      
         </Button>
 
-        <Button onClick={()=> deleteFun(info.row.original.id)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500">
+        <Button onClick={()=> deleteFun(info.row.original.id)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500 text-opacity-60">
           <span className="icon-[solar--trash-bin-trash-bold] w-6 h-6"></span>
      
         </Button>
