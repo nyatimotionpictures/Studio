@@ -18,6 +18,7 @@ import { postAuthLogin } from "../../../5-Store/TanstackStore/services/api.ts";
 const Login = () => {
    let routeNavigate = useNavigate();
    const [errorMessage, setErrorMessage] = React.useState(null)
+   const [viewPassword, setViewPassword] = React.useState(false);
    const {updateUser} = useContext(AuthContext)
 
 
@@ -45,6 +46,11 @@ onError: (error)=>{
     email: yup.string().required("required"),
     password: yup.string().required("password is required"),
   });
+
+
+  const handlePasswordView = (e) => {
+    setViewPassword(() => !viewPassword);
+  };
 
   return (
     <div className="max-h-screen w-full flex flex-row gap-0 ">
@@ -121,13 +127,30 @@ onError: (error)=>{
                         <label className="text-[#bdb8b8] text-[12.56px]">
                           Password
                         </label>
+                        <div className="flex flex-col gap-2 h-full relative justify-center">
                         <input
-                          type={"password"}
+                           type={viewPassword ? "text" : "password"}
                           name="password"
                           className="text-[#ffffff] font-[Inter-Medium] text-[14.35px]"
                           value={values.password}
                           onChange={handleChange}
                         />
+
+<div className=" w-max flex items-center justify-center px-0 py-0  absolute text-whites-40 right-3  m-auto hover:text-primary-500  z-50">
+                        {!viewPassword ? (
+                          <span
+                            onClick={handlePasswordView}
+                            className="icon-[solar--eye-closed-outline] w-6 h-6"
+                          ></span>
+                        ) : (
+                          <span
+                            onClick={handlePasswordView}
+                            className="icon-[solar--eye-line-duotone] w-6 h-6"
+                          ></span>
+                        )}
+                      </div>
+                        </div>
+                        
                         {errors && errors.password && (
                           <Typography className="text-[red] font-[Segoe-UI] text-[13px]">
                             {errors.password}
@@ -138,14 +161,22 @@ onError: (error)=>{
                   </Stack>
 
                   <Stack spacing="18px">
-                    <Button
-                      onClick={handleSubmit}
-                      type="button"
-                      className="rounded-full py-2 px-4 text-[14.35px] "
-                      variant="default"
-                    >
-                      Sign In
-                    </Button>
+                    {
+                      mutation.isPending ? (<Button
+                        disabled
+                        className="rounded-full py-2 px-4 text-[14.35px] "
+                      >
+                        Submitting...
+                      </Button>) : ( <Button
+                        onClick={handleSubmit}
+                        type="button"
+                        className="rounded-full py-2 px-4 text-[14.35px] "
+                        variant="default"
+                      >
+                        Sign In
+                      </Button>)
+                    }
+                   
 
                     <Button
                       type="button"
