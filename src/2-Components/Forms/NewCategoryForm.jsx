@@ -218,6 +218,23 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                   id="movies"
                   options={moviesOptions}
                   getOptionLabel={(option) => option.title}
+                  renderOption={(props, option) => (
+                    <Box
+                      component="li"
+                      {...props}
+                      sx={{
+                        "& > img": {
+                          mr: 2,
+                          flexShrink: 0,
+                        },
+                        "& > span": { flex: 1 },
+                      }}
+                    >
+                      <span>
+                        {option?.title} ({option.yearOfProduction}) 
+                      </span>
+                    </Box>
+                  )}
                   onChange={(event, newValue) => {
                     setFieldValue("films", newValue);
                   }}
@@ -272,6 +289,23 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                   id="mixed"
                   options={mixedOptions}
                   getOptionLabel={(option) => option.title}
+                  renderOption={(props, option) => (
+                    <Box
+                      component="li"
+                      {...props}
+                      sx={{
+                        "& > img": {
+                          mr: 2,
+                          flexShrink: 0,
+                        },
+                        "& > span": { flex: 1 },
+                      }}
+                    >
+                      <span>
+                        {option?.title} ({option.yearOfProduction}) 
+                      </span>
+                    </Box>
+                  )}
                   onChange={(event, newValue) => {
                     setFieldValue("mixed", newValue);
                   }}
@@ -327,6 +361,23 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                     id="series"
                     options={serieOptions}
                     getOptionLabel={(option) => option?.title}
+                    renderOption={(props, option) => (
+                      <Box
+                        component="li"
+                        {...props}
+                        sx={{
+                          "& > img": {
+                            mr: 2,
+                            flexShrink: 0,
+                          },
+                          "& > span": { flex: 1 },
+                        }}
+                      >
+                        <span>
+                          {option?.title} ({option.yearOfProduction}) 
+                        </span>
+                      </Box>
+                    )}
                     onChange={(event, newValue) => {
                       setFieldValue("series", newValue);
                       setSerieArray(newValue);
@@ -392,7 +443,7 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                         }}
                       >
                         <span>
-                          {option?.title} (S{option.season}) (
+                          {option?.title} (S{option?.season}) (
                           {option?.filmtitle})
                         </span>
                       </Box>
