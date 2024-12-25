@@ -40,7 +40,6 @@ const StreamSetting = () => {
         return  filmsQuery.data?.films?.filter((data)=> data ).flat();
     }, [filmsQuery?.data]);
 
-    console.log("genreOptions", serieOptions)
 
         /** use mutation: create new season */
         const createMutation = useMutation(

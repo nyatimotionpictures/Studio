@@ -5,7 +5,8 @@ import * as yup from "yup";
 import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import ErrorMessage from "./ErrorMessage";
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, Box, TextField } from "@mui/material";
+import { useGetSingleFilms } from "../../5-Store/TanstackStore/services/queries";
 
 const categoryTypes =[
     { label: "mixed (series&films)",   },
@@ -15,24 +16,9 @@ const categoryTypes =[
 ]
 
 const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions, moviesOptions, mixedOptions }) => {
-    // const genreOptions = [
-    //     { label: "Action",   },
-    //     { label: "Adventure"  },
-    //     { label: "Comedy" },
-    //     { label: "Drama" },
-    //     { label: "Family" },
-    //     { label: "Fantasy" },
-    //     { label: "History" },
-    //     { label: "Horror" },
-    //     { label: "Music" },
-    //     { label: "Mystery" },
-    //     { label: "Romance" },
-    //     { label: "Sci-Fi" },
-    //     { label: "Sport" },
-    //     { label: "Thriller" },
-    //     { label: "War" },
-       
-    //   ];
+
+    const [serieArray, setSerieArray] = React.useState([]);
+
        const validationSchema = yup.object().shape({
             name: yup.string().required("required"),
            // postion: yup.number().required("required"),
@@ -52,6 +38,29 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
            
             
         };
+
+          const serieGetData = React.useMemo(() => {
+            return  serieArray.map((option) => {
+              return option.id
+            });   
+          }, [serieArray]);  
+
+         
+          let queriedData = useGetSingleFilms(serieGetData);
+          
+
+      let seasonsOptions = React.useMemo(()=>{
+        if (!queriedData || queriedData?.length === 0) return [];
+        return queriedData?.map((data)=>data?.data?.film?.season?.map((season)=> ({
+          id: season.id,
+          title: season.title,
+          season: season.season,
+          filmId: season.filmId,
+          filmtitle: data?.data?.film?.title,
+
+        }))).flat();
+      },[queriedData])
+ 
   return (
     <Formik
       innerRef={innerref}
@@ -68,7 +77,7 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
         handleBlur,
         touched,
         setFieldValue,
-        resetForm
+        resetForm,
       }) => (
         <Form>
           <CustomStack className="h-full w-full flex flex-col gap-5 text-whites-40">
@@ -86,7 +95,7 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                 value={values.name}
                 name="name"
                 onChange={handleChange}
-                placeholder="Category Name"
+                placeholder="Category Title i.e Most Rated Movies"
                 onBlur={handleBlur}
               />
 
@@ -111,16 +120,13 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                 value={values.type}
                 name="type"
                 onChange={(e) => {
-                   
-                    //resetForm({genre: [], series: [], seasons: []});
-                    setFieldValue("type", e.target.value);
-                    setFieldValue("genre", []);
-                    setFieldValue("series", []);
-                    setFieldValue("seasons", []);
-                    setFieldValue("films", []);
-                    setFieldValue("mixed", []);
-
-                  
+                  //resetForm({genre: [], series: [], seasons: []});
+                  setFieldValue("type", e.target.value);
+                  setFieldValue("genre", []);
+                  setFieldValue("series", []);
+                  setFieldValue("seasons", []);
+                  setFieldValue("films", []);
+                  setFieldValue("mixed", []);
                 }}
                 onBlur={handleBlur}
               >
@@ -157,7 +163,6 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                   className="mulipleselect"
                   multiple
                   id="genre"
-                  freeSolo
                   options={genreOptions.map((option) => option)}
                   onChange={(event, newValue) => {
                     setFieldValue("genre", newValue);
@@ -169,7 +174,7 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                       variant="outlined"
                       className="border-0 outline-none focus:border-0 !focus:outline-none"
                       label=""
-                      placeholder="Genres"
+                      placeholder="Select Genres from dropdown"
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           "& fieldset": {
@@ -195,14 +200,14 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
               </FormContainer>
             )}
 
-              {/** selection === movies */}
-              {values.type === "movies" && (
+            {/** selection === movies */}
+            {values.type === "movies" && (
               <FormContainer>
                 <label
                   htmlFor="movies"
                   className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                 >
-                    Movies (required)
+                  Movies (required)
                 </label>
                 <Autocomplete
                   onBlur={handleBlur}
@@ -249,14 +254,14 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
               </FormContainer>
             )}
 
-                     {/** selection === mixed */}
-                     {values.type === "mixed (series&films)" && (
+            {/** selection === mixed */}
+            {values.type === "mixed (series&films)" && (
               <FormContainer>
                 <label
                   htmlFor="mixed"
                   className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                 >
-                    Mixed Content (required)
+                  Mixed Content (required)
                 </label>
                 <Autocomplete
                   onBlur={handleBlur}
@@ -320,11 +325,11 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                     className="mulipleselect"
                     multiple
                     id="series"
-                   options={serieOptions}
-                    getOptionLabel={(option) => option.title}
+                    options={serieOptions}
+                    getOptionLabel={(option) => option?.title}
                     onChange={(event, newValue) => {
-                        console.log("newValue", event.target, newValue)
                       setFieldValue("series", newValue);
+                      setSerieArray(newValue);
                     }}
                     value={values.series}
                     renderInput={(params) => (
@@ -372,8 +377,26 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                     className="mulipleselect"
                     multiple
                     id="seasons"
-                  
-                    options={serieOptions?.map((option) => option.title)}
+                    options={seasonsOptions}
+                    getOptionLabel={(option) => option?.title}
+                    renderOption={(props, option) => (
+                      <Box
+                        component="li"
+                        {...props}
+                        sx={{
+                          "& > img": {
+                            mr: 2,
+                            flexShrink: 0,
+                          },
+                          "& > span": { flex: 1 },
+                        }}
+                      >
+                        <span>
+                          {option?.title} (S{option.season}) (
+                          {option?.filmtitle})
+                        </span>
+                      </Box>
+                    )}
                     onChange={(event, newValue) => {
                       setFieldValue("seasons", newValue);
                     }}
@@ -384,7 +407,7 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                         variant="outlined"
                         className="border-0 outline-none focus:border-0 !focus:outline-none"
                         label=""
-                        placeholder="Seasons"
+                        placeholder="Choose Seasons from dropdown"
                         sx={{
                           "& .MuiOutlinedInput-root": {
                             "& fieldset": {
@@ -408,12 +431,8 @@ const NewCategoryForm = ({ innerref, handleStepNext, genreOptions, serieOptions,
                     message={errors?.type && errors.type}
                   />
                 </FormContainer>
-
-               
               </>
-            ) }
-
-            {/** selection === films&series */}
+            )}
           </CustomStack>
         </Form>
       )}

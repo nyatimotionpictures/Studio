@@ -98,7 +98,7 @@ export const postFilmContent = async (
 
 /** query: Get Single Film : working as expected */
 export const getFilmContent = async (
-  filmId: String
+  filmId: any
 ): Promise<GetSingleFilmResponse> => {
   try {
     const response = await apiRequest.get<GetSingleFilmResponse>(

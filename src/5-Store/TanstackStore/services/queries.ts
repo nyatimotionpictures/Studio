@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQueries, useQuery } from "@tanstack/react-query";
 import { getAdminUser, getAllDonations, getAllFilms, getAllPurchases, getAllUsers, getFilmContent } from "./api";
 
 export function useGetAllFilms() {
@@ -15,6 +15,17 @@ export function useGetFilm(id: String) {
         queryFn: () => getFilmContent(id),
        
     });
+}
+
+export function useGetSingleFilms(ids: (any | undefined)[] | undefined) {
+    return useQueries(
+        {
+            queries: (ids ?? [])?.map(( id ) => ({
+                queryKey: ["singlefilms", { id }],
+                queryFn: () => getFilmContent(id!),
+            })),
+        }
+    )
 }
 
 export function useGetDonations() {
