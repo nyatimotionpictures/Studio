@@ -202,7 +202,29 @@ const ViewAudienceDetails = ({film}) => {
 
 
                    
-                   
+                             {/** featured */}
+                             <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+              <CustomStack className="flex-col ">
+                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                  Featured
+                </Typography>
+                
+              </CustomStack>
+              {/** radio buttons */}
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+               
+                    <div
+                      
+                      className="flex relative h-5 items-center gap-3"
+                    >
+                    <input checked={film?.featured === true ? true : false} readOnly   name="featured" type="checkbox" id={"featured"} />
+                      <label htmlFor={"featured"}>Featured</label>
+                    </div>
+                 
+              </CustomStack>
+
+            
+            </FormContainer>
 
                     
                   </CustomStack>

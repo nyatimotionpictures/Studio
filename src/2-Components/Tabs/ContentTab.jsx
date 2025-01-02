@@ -23,7 +23,7 @@ const ContentTab = ({ film, type }) => {
       onSuccess: async (data) => {
         //console.log("success", data);
         setSnackbarMessage({ message: data.message, severity: "success" });
-        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film"] }) : await queryClient.invalidateQueries({ queryKey: ["film", data?.film?.id] })
+        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film", params?.id] }) : await queryClient.invalidateQueries({ queryKey: ["film", params?.id] })
         ;
         handleEditing();
       },

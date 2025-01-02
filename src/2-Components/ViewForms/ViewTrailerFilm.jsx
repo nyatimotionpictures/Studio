@@ -9,6 +9,7 @@ import UpdatePriceForm from "../Forms/UpdatePriceForm";
 import { useParams } from "react-router-dom";
 import { Player } from "video-react";
 import 'video-react/dist/video-react.css'; 
+import { current } from "@reduxjs/toolkit";
 
 
 const ViewTrailerFilm = ({ film, type }) => {
@@ -17,6 +18,8 @@ const ViewTrailerFilm = ({ film, type }) => {
   let params = useParams();
 
   const [videoType, setVideoType] = React.useState(null);
+  const [videoPrice, setVideoPrice] = React.useState(null);
+
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   const [openVideoModal, setOpenVideoModal] = React.useState(false);
   const [videoDeleteId, setVideoDeleteId] = React.useState(null);
@@ -121,8 +124,8 @@ const ViewTrailerFilm = ({ film, type }) => {
     //cancelDeleteFun()
   };
 
-  const handleUpdatePrice = (id, types) => {
-    setUpdatePriceId(() => ({id:id, filmTypes:types}))
+  const handleUpdatePrice = (id, types, currentPrice) => {
+    setUpdatePriceId(() => ({id:id, filmTypes:types, currentPrice:currentPrice}))
   }
 
   const handleUpdatePriceClose = () => {
@@ -147,10 +150,10 @@ const ViewTrailerFilm = ({ film, type }) => {
         setVideoUHD(() => null);
         setVideoFHD(() => null);
         handleUpdatePriceClose()
-        await queryClient.invalidateQueries({ queryKey: ["film", film?.id] });
+        await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
       },
       onError: (error) => {
-        console.log("error", error);
+      //  console.log("error", error);
         if (error?.message) {
           setSnackbarMessage(() => ({
             message: error.message,
@@ -289,7 +292,7 @@ const ViewTrailerFilm = ({ film, type }) => {
 
                 <div className="">
                   <Button
-                    onClick={() => handleUpdatePrice(videoSD?.id, "SD") }
+                    onClick={() => handleUpdatePrice(videoSD?.id, "SD", videoSD?.videoPrice?.price) }
                     className="w-max min-w-[150px]"
                   >
                     Update Price
@@ -343,6 +346,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 <div className="">
                   <Button
                     onClick={() => {
+                      setVideoPrice(7000);
                       setVideoType("SD");
                       handleVideoModalOpen();
                     }}
@@ -411,7 +415,7 @@ const ViewTrailerFilm = ({ film, type }) => {
 
                 <div className="">
                   <Button
-                      onClick={() => handleUpdatePrice(videoHD?.id, "HD") }
+                      onClick={() => handleUpdatePrice(videoHD?.id, "HD", videoHD?.videoPrice?.price) }
                     className="w-max min-w-[150px]"
                   >
                     Update Price
@@ -466,6 +470,8 @@ const ViewTrailerFilm = ({ film, type }) => {
                 <div className="">
                   <Button
                     onClick={() => {
+                      setVideoPrice(10000);
+
                       setVideoType("HD");
                       handleVideoModalOpen();
                     }}
@@ -534,7 +540,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
                 <div className="">
                   <Button
-                     onClick={() => handleUpdatePrice(videoFHD?.id, "FHD") }
+                     onClick={() => handleUpdatePrice(videoFHD?.id, "FHD", videoFHD?.videoPrice?.price) }
                     className="w-max min-w-[150px]"
                   >
                     Update Price
@@ -588,6 +594,8 @@ const ViewTrailerFilm = ({ film, type }) => {
                 <div className="">
                   <Button
                     onClick={() => {
+                      setVideoPrice(15000);
+
                       setVideoType("FHD");
                       handleVideoModalOpen();
                     }}
@@ -656,7 +664,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
                 <div className="">
                   <Button
-                      onClick={() => handleUpdatePrice(videoUHD?.id, "UHD") }
+                      onClick={() => handleUpdatePrice(videoUHD?.id, "UHD", videoUHD?.videoPrice?.price) }
                     className="w-max min-w-[150px]"
                   >
                     Update Price
@@ -710,6 +718,8 @@ const ViewTrailerFilm = ({ film, type }) => {
                 <div className="">
                   <Button
                     onClick={() => {
+                      setVideoPrice(20000);
+
                       setVideoType("UHD");
                       handleVideoModalOpen();
                     }}
@@ -770,6 +780,7 @@ const ViewTrailerFilm = ({ film, type }) => {
           handleModalClose={handleVideoModalClose}
           film={film}
           type={type}
+          videoPrice={videoPrice}
         />
       )}
 

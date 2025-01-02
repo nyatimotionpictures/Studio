@@ -42,6 +42,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
     visibility: "",
     access: "",
     enableDonation: false,
+    featured: false,
   };
 
 
@@ -51,7 +52,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values, helpers) => {
-        console.log(values);
+       // console.log(values);
         handleStepNext(values);
       }}
     >
@@ -225,6 +226,38 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
               />
             </FormContainer>
 
+
+    {/** Featured */}
+    <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+              <CustomStack className="flex-col ">
+                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                  Featured
+                </Typography>
+                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                Do you want to appear on the featured film slider?
+                </Typography>
+              </CustomStack>
+              {/** radio buttons */}
+              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+               
+                    <div
+                      
+                      className="flex relative h-5 items-center gap-3"
+                    >
+                    <input checked={values.featured === true} onChange={(e)=> {
+                     
+                      setFieldValue("featured", e.target.checked)}} name="featured" type="checkbox" id={"featured"} />
+                      <label htmlFor={"featured"}>Featured </label>
+                    </div>
+                 
+              </CustomStack>
+
+              <ErrorMessage
+                errors={ errors?.featured ? true : false}
+                name="enableDonation"
+                message={errors?.featured && errors.featured}
+              />
+            </FormContainer>
             
           </CustomStack>
         </Form>

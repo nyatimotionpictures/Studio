@@ -4,7 +4,7 @@ import { useContext } from "react";
 import * as yup from "yup";
 import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
-import { Typography } from "@mui/material";
+import { Alert, Snackbar, Typography } from "@mui/material";
 import Button from "../Buttons/Button";
 import ErrorMessage from "./ErrorMessage";
 
@@ -176,22 +176,22 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
           </div>
 
           {/** stepper control */}
-          <div className="relative flex flex-col gap-5">
+         
             {
               formik.isSubmitting ? (
+                <div className="relative flex flex-col gap-5">
                 <Button
                   disabled
                   className="font-[Inter-Medium] bg-primary-500 rounded-lg"
                 >
                   Submitting...
                 </Button>
+                </div>
               ) : (
+                <div className="relative flex flex-col gap-5">
                 <Button type="submit" className="font-[Inter-Medium] bg-primary-500 rounded-lg">
               Submit
             </Button>
-              )
-            }
-            
             <Button onClick={
               () => {
                   setPreview(null);
@@ -200,9 +200,26 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
             } className="font-[Inter-Medium] bg-secondary-500 rounded-lg">
               Cancel
             </Button>
-          </div>
+            </div>
+              )
+            }
+            
+            
+         
         </div>
       </form>
+
+       {/** snackbar */}
+       <Snackbar
+        open={snackbarMessage !== null}
+        autoHideDuration={6000}
+        onClose={() => setSnackbarMessage(null)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert severity={snackbarMessage?.severity} variant="filled">
+          {snackbarMessage?.message}
+        </Alert>
+      </Snackbar>
     </>
   )
 }

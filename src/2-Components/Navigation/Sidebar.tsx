@@ -183,6 +183,11 @@ const Sidebar = () => {
           title="People"
           url="/people"
         />
+         <SmallSidebarItem
+            Icon={"icon-[carbon--cloud-service-management]"}
+            title="Stream Settings"
+            url="/streamsettings"
+          />
         <SmallSidebarItem
           Icon={"icon-[carbon--settings]"}
           title="Account Settings"
@@ -231,6 +236,11 @@ const Sidebar = () => {
             Icon={"icon-[carbon--user-multiple]"}
             title="People"
             url="/people"
+          />
+           <LargeSidebarItem
+            Icon={"icon-[carbon--cloud-service-management]"}
+            title="Stream Settings"
+            url="/streamsettings"
           />
           <LargeSidebarItem
             Icon={"icon-[carbon--settings]"}

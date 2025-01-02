@@ -7,11 +7,13 @@ import { Alert, Snackbar } from "@mui/material";
 import { useMutation } from "@tanstack/react-query";
 import { updateEpisodeContent, updateFilmContent } from "../../5-Store/TanstackStore/services/api";
 import { queryClient } from "../../lib/tanstack";
+import { useParams } from "react-router-dom";
 
 const CastTab = ({ film, type }) => {
   const [editing, setEditing] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   const formRef = React.useRef();
+  let params = useParams();
 
   //mutation for update film
   const updateFilmMutation = useMutation(
@@ -20,7 +22,7 @@ const CastTab = ({ film, type }) => {
       onSuccess: async (data) => {
        // console.log("success", data);
         setSnackbarMessage({ message: data.message, severity: "success" });
-        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film"] }) : await queryClient.invalidateQueries({ queryKey: ["film", data?.film?.id] })
+        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film", params?.id] }) : await queryClient.invalidateQueries({ queryKey: ["film", params?.id] })
         ;
         handleEditing();
       },

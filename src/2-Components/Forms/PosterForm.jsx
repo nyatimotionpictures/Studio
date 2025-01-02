@@ -56,7 +56,7 @@ const PosterForm = ({ handleModalClose, film, type }) => {
     validationSchema: posterValidationSchema,
     onSubmit: async (values, helpers) => {
       try {
-       // console.log("values", values);
+        // console.log("values", values);
         const user = JSON.parse(localStorage.getItem("user"));
         helpers.setSubmitting(true);
 
@@ -68,22 +68,21 @@ const PosterForm = ({ handleModalClose, film, type }) => {
         formData.append("isCover", values.isCover);
 
         //  updateFilmMutation.mutate(formData);
-        let url = type === "episode" ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
-        const response = await axios.post(
-         url,
-          formData,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "multipart/form-data",
-            },
-            onUploadProgress: (progressEvent) => {
-              setUploadProgress(
-                Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              );
-            },
-          }
-        );
+        let url =
+          type === "episode"
+            ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}`
+            : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+        const response = await axios.post(url, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+          onUploadProgress: (progressEvent) => {
+            setUploadProgress(
+              Math.round((progressEvent.loaded * 100) / progressEvent.total)
+            );
+          },
+        });
 
         helpers.setSubmitting(false);
         setSnackbarMessage({
@@ -91,9 +90,13 @@ const PosterForm = ({ handleModalClose, film, type }) => {
           severity: "success",
         });
         handleModalClose();
-        type === "episode" ? await queryClient.invalidateQueries({ queryKey: ["film", params?.id] }) : await queryClient.invalidateQueries({ queryKey: ["film", params?.id] })
-        ;
-        
+        type === "episode"
+          ? await queryClient.invalidateQueries({
+              queryKey: ["film", params?.id],
+            })
+          : await queryClient.invalidateQueries({
+              queryKey: ["film", params?.id],
+            });
 
         //  console.log("response", response.data);
       } catch (error) {
@@ -180,30 +183,33 @@ const PosterForm = ({ handleModalClose, film, type }) => {
           </div>
 
           {/** stepper control */}
-          <div className="relative flex flex-col gap-5">
-            {formik.isSubmitting ? (
-              <Button className="font-[Inter-Medium] bg-primary-500 rounded-lg">
+
+          {formik.isSubmitting ? (
+            <div className="relative flex flex-col gap-5">
+              <Button className="font-[Inter-Medium] bg-primary-500 bg-opacity-50 rounded-lg">
                 Submitting....
               </Button>
-            ) : (
+            </div>
+          ) : (
+            <div className="relative flex flex-col gap-5">
               <Button
                 type="submit"
                 className="font-[Inter-Medium] bg-primary-500 rounded-lg"
               >
                 Submit
               </Button>
-            )}
 
-            <Button
-              onClick={() => {
-                setPreview(null);
-                handleModalClose();
-              }}
-              className="font-[Inter-Medium] bg-secondary-500 rounded-lg"
-            >
-              Cancel
-            </Button>
-          </div>
+              <Button
+                onClick={() => {
+                  setPreview(null);
+                  handleModalClose();
+                }}
+                className="font-[Inter-Medium] bg-secondary-500 rounded-lg"
+              >
+                Cancel
+              </Button>
+            </div>
+          )}
         </div>
       </form>
 

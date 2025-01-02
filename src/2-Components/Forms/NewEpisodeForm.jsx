@@ -38,6 +38,7 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
   });
 
   const initialValues = editdata ? {
+    ...film,
     id:film?.id,
     episode: film?.episode ?? null,
     seasonId: film?.seasonId ?? null,

@@ -24,7 +24,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
     plotSummary: yup.string().required("required"),
   });
 
-  console.log("editdata", film)
+  //console.log("editdata", film)
 
   const setDateFromString = (dateString) => {
     const parsedDate = new Date(dateString);
@@ -35,6 +35,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
     return "";
   };
   const initialValues = editdata ? {
+    ...film,
     id:film?.id,
     title: film?.title ?? "",
     type: film?.type ?? "",

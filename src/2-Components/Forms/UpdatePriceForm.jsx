@@ -13,8 +13,10 @@ const UpdatePriceForm = ({ innerref, handleStepNext, film, filmTypes }) => {
         videoId: yup.string().required("required"),
       });
 
+      console.log("filmTypes", filmTypes)
+
     const initialValues = {
-        price: null,
+        price: filmTypes?.currentPrice ?? 0,
         currency: "UGX",
         videoId: filmTypes?.id,
     };

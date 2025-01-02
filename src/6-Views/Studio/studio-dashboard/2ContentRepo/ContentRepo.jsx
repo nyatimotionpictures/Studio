@@ -245,7 +245,7 @@ const ContentRepo = () => {
           {/** table */}
           <div className="pt-7 pb-11 ">
             <VideoListTable
-              films={filmsQuery.isPending ? [] : filmsQuery.data.films}
+              films={filmsQuery.isPending ? [] : filmsQuery?.data?.films}
             />
           </div>
         </div>
