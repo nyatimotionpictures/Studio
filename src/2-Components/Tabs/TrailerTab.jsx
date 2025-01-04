@@ -5,7 +5,7 @@ import TrailersForm from '../Forms/TrailersForm';
 
 const TrailerTab = ({film, type}) => {
  
-
+  // console.log("film", film)
   return (
     <div className="flex relative flex-col gap-6 pt-4">
       {

@@ -284,15 +284,15 @@ const Sidebar = () => {
             </CustomStack>
 
             <div className="flex w-full overflow-hidden">
-              <Button disabled={mutation.isLoading ? true : false}  onClick={() => mutation.mutate(
+              <Button disabled={mutation.isPending ? true : false}  onClick={() => mutation.mutate(
                 currentUserData && currentUserData.id ? currentUserData.id : null
               )} className="w-full p-2 flex flex-row items-center justify-center  gap-4 text-base bg-secondary-500 m-0 rounded-lg">
                 
                 {
-                  mutation.isLoading ?  <p>Loader..</p> :  <span className="icon-[solar--logout-outline] w-6 h-6"></span>
+                  mutation.isPending ?  <p>Loader..</p> :  <span className="icon-[solar--logout-outline] w-6 h-6"></span>
                 }
                 {
-                  mutation.isLoading ?  <p>Logging out</p> :  <p>Logout</p>
+                  mutation.isPending ?  <p>Logging out</p> :  <p>Logout</p>
                 }
                
               </Button>
