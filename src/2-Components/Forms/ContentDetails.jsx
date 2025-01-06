@@ -18,7 +18,7 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
     //subtitleLanguage: yup.array(yup.string().required("required")),
    
     yearOfProduction: yup.string().required("required"),
-    releaseDate: yup.string().required("required"),
+  //  releaseDate: yup.string().required("required"),
     genre: yup.array().min(1, "required"),
     overview: yup.string().required("required"),
     plotSummary: yup.string().required("required"),

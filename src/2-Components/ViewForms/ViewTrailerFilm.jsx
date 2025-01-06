@@ -182,16 +182,17 @@ const ViewTrailerFilm = ({ film, type }) => {
 
           <div className="flex flex-wrap gap-3">
             <div className="flex flex-col gap-[20px]">
-              <div className="bg-[#36323E] w-[470px] h-[266px] flex ">
+              <div className="bg-[#36323E] w-[470px] h-[266px]  flex ">
                 <Player
                   src={videoTrailer?.url}
                   controls
                   className="w-full object-cover "
                   style={{ width: "100%", height: "100%" }}
+
                 />
               </div>
 
-              <div className="flex flex-row gap-10">
+              <div className="flex flex-row gap-10 mt-4">
                 <div className="flex flex-col gap-1">
                   <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
                     Duration
@@ -320,7 +321,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                   />
                 </div>
                 {/** delete video */}
-                <div className="flex flex-row gap-10">
+                <div className="flex flex-row gap-10 mt-10">
                   <Button
                     onClick={() => deleteFun(videoSD?.id)}
                     className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
@@ -444,7 +445,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
 
                    {/** delete video */}
-                   <div className="flex flex-row gap-10">
+                   <div className="flex flex-row gap-10 mt-10">
                   <Button
                     onClick={() => deleteFun(videoHD?.id)}
                     className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
@@ -569,7 +570,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
 
                  {/** delete video */}
-                 <div className="flex flex-row gap-10">
+                 <div className="flex flex-row gap-10 mt-10">
                   <Button
                     onClick={() => deleteFun(videoFHD?.id)}
                     className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
@@ -693,7 +694,7 @@ const ViewTrailerFilm = ({ film, type }) => {
                 </div>
 
                 {/** delete video */}
-                <div className="flex flex-row gap-10">
+                <div className="flex flex-row gap-10 mt-10">
                   <Button
                     onClick={() => deleteFun(videoUHD?.id)}
                     className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"

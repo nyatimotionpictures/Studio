@@ -452,3 +452,89 @@ export const deleteVideo = async (
     throw axiosError.response?.data ?? { message: "An unknown error occurred" };
   }
 };
+
+/** Categories */
+/** mutation: create new category */
+export const createNewCategory = async (
+  categoryContent: any
+) => {
+  try {
+    const response = await apiRequest.post(
+      "/v1/studio/newcategory",
+      categoryContent
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+/** mutation: update category */
+export const updateCategory = async (
+  categoryContent: any
+) => {
+  try {
+    let { id, ...rest } = categoryContent;
+    const response = await apiRequest.put(
+      `/v1/studio/category/${id}`,
+      rest
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+
+/** mutation: connect film to category */
+export const connectFilmToCategory = async (
+  categoryContent: any
+) => {
+  try {
+    let { id, ...rest } = categoryContent;
+    const response = await apiRequest.post(
+      `/v1/studio/connectfilmtocategory/${id}`,
+      rest
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
+
+/** mutation: delete category */
+// export const deleteCategory = async (
+//   categoryId: String
+// ): Promise<categoryDeleteResponse> => {
+//   try {
+//     const response = await apiRequest.delete<categoryDeleteResponse>(
+//       `/v1/studio/category/${categoryId}`
+//     );
+
+//     return response.data;
+//   } catch (error) {
+//     const axiosError = error as AxiosError<ErrorResponse>;
+//     throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+//   }
+// };
+
+// /** mutation: get all categories */
+// export const getAllCategories = async () => {
+//   try {
+//     const response = await apiRequest.get<GetAllCategories[]>(
+//       `/v1/studio/categories`
+//     );
+
+//     return response.data;
+//   } catch (error) {
+//     const axiosError = error as AxiosError<ErrorResponse>;
+//     throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+//   }
+// };

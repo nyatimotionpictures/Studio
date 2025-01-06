@@ -97,7 +97,10 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                   Add Upload - {videoType} Video
                 </Typography>
 
-                <div className="flex gap-5">
+{
+   /** 
+    * 
+    *  <div className="flex gap-5">
                   <Button
                     onClick={handleModalClose}
                     className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700"
@@ -105,6 +108,11 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                     CANCEL & CLOSE
                   </Button>
                 </div>
+    * 
+    * 
+    */
+}
+               
               </CustomStack>
               {uploaddata > 0 && (
                 <div className="flex flex-col gap-2">
