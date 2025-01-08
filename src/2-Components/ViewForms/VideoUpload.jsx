@@ -12,7 +12,17 @@ import { BaseUrl } from "../../3-Middleware/apiRequest";
 import { queryClient } from "../../lib/tanstack";
 import { useParams } from "react-router-dom";
 
-const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) => {
+const VideoUpload = ({
+  videoType,
+  handleModalClose,
+  film,
+  type,
+  videoPrice,
+  setErrorUpload,
+  setSucessUpload,
+  errorUpload,
+  sucessUpload
+}) => {
   //  console.log("type", type)
   // console.log("videoType", videoType)
   let params = useParams();
@@ -97,10 +107,7 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                   Add Upload - {videoType} Video
                 </Typography>
 
-{
-   /** 
-    * 
-    *  <div className="flex gap-5">
+                <div className="flex gap-5">
                   <Button
                     onClick={handleModalClose}
                     className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700"
@@ -108,11 +115,6 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                     CANCEL & CLOSE
                   </Button>
                 </div>
-    * 
-    * 
-    */
-}
-               
               </CustomStack>
               {uploaddata > 0 && (
                 <div className="flex flex-col gap-2">
@@ -139,16 +141,7 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                       //console.log("vdfdfdfdfdfes", values);
                       //  '/filmupload/:filmId'
 
-                      //  const eventSource = new EventSource(`${BaseUrl}/v1/studio/filmupload/${film?.id}`);
-                      //   eventSource.onmessage = (event) => {
-                      //     const data = JSON.parse(event.data);
-                      //     console.log("data", data)
-                      //     setEventStreamMessages((prevMessages) => [...prevMessages, data ]);
-                      //     // if(data.progress === 100){
-                      //     //   eventSource.close();
-                      //     // }
-                      //     setUploadProgress(data.progress);
-                      //   };
+                     
 
                       const user = JSON.parse(localStorage.getItem("user"));
                       helpers.setSubmitting(true);
@@ -168,14 +161,6 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                       formData.append("currency", values.currency);
                       formData.append("resolution", values.resolution);
 
-                      // let url
-
-                      // if(type === "episode") {
-                      //   url = `${BaseUrl}/v1/studio/episodeupload/${film?.id}`;
-                      // } else {
-                      //   url = `${BaseUrl}/v1/studio/filmupload/${film?.id}`;
-                      // }
-
                       let id =
                         type === "episode" ? params?.episodeId : film?.id;
                       let axiosurl;
@@ -190,27 +175,40 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
 
                       //   console.log("axiosurl", axiosurl);
 
+                      //event listener
+                      const eventSource = new EventSource(axiosurl);
+                      eventSource.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        console.log("data", data)
+                        setEventStreamMessages((prevMessages) => [...prevMessages, data ]);
+                        if(data.progress === 100){
+                          eventSource.close();
+                        }
+                        setUploadProgress(data.progress);
+                      };
+
                       const response = await axios.post(axiosurl, formData, {
                         headers: {
                           Authorization: `Bearer ${token}`,
                           "Content-Type": "multipart/form-data",
                         },
-                        onUploadProgress: (progressEvent) => {
-                          //  console.log(progressEvent.total)
-                          const percentCompleted = Math.floor(
-                            (progressEvent.loaded / progressEvent.total) * 100
-                          );
-                          setUploadProgress(percentCompleted);
-                        },
+                        // onUploadProgress: (progressEvent) => {
+                        //   //  console.log(progressEvent.total)
+                        //   const percentCompleted = Math.floor(
+                        //     (progressEvent.loaded / progressEvent.total) * 100
+                        //   );
+                        //   setUploadProgress(percentCompleted);
+                        // },
                       });
 
                       //console.log("response", response.data);
 
                       if (response.data) {
-                        setSnackbarMessage({
-                          message: "Successfully Uploaded Video",
-                          severity: "success",
-                        });
+                        setSucessUpload("Successfully Uploaded Video");
+                        // setSnackbarMessage({
+                        //   message: "Successfully Uploaded Video",
+                        //   severity: "success",
+                        // });
                         type === "episode"
                           ? await queryClient.invalidateQueries({
                               queryKey: ["film", params?.id],
@@ -219,13 +217,28 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
                               queryKey: ["film", params?.id],
                             });
                         helpers.setSubmitting(false);
-                        handleModalClose();
+                        // handleModalClose();
                       }
                     } catch (error) {
-                      setSnackbarMessage({
-                        message: error?.message,
-                        severity: "error",
-                      });
+                      if (error?.response) {
+                        setErrorUpload(
+                          `Error ${error.response.status}: ${error.response.statusText}`
+                        );
+                      } else if (error.request) {
+                        
+
+                        setErrorUpload(
+                          "No response from server. Please check your network connection."
+                        );
+                      } else {
+                       
+                        setErrorUpload(`Request failed: ${error.message}`);
+                      }
+
+                      // setSnackbarMessage({
+                      //   message: error?.message,
+                      //   severity: "error",
+                      // });
                       //throw error;
                     }
                   }}
@@ -364,19 +377,89 @@ const VideoUpload = ({ videoType, handleModalClose, film, type, videoPrice }) =>
             </div>
           </div>
         </div>
+
+        {/** error popup or sucess */}
+        {errorUpload !== null || sucessUpload !== null ? (
+          <div className="absolute top-0 left-0 w-full h-full flex justify-center items-center z-50 bg-secondary-900 bg-opacity-30   backdrop-blur-sm ">
+            <div className="w-full h-full flex flex-col justify-center items-center ">
+              <div className="fixed inset-0 border rounded-xl bg-secondary-500 bg-opacity-75 transition-opacity"></div>
+              {/** error snackbar */}
+              {errorUpload !== null && (
+                <div className="relative transform overflow-y-auto rounded-lg z-50   flex items-center justify-center h-max  text-left shadow-xl transition-all">
+                  <div className="bg-secondary-900 min-w-[290px] flex flex-col items-center justify-center gap-5 py-5 px-5 md:px-16 pt-2 w-full max-w-[700px] rounded-lg  h-max">
+                    <div className="flex flex-col gap-5 items-center justify-center">
+                      <Typography className="text-center text-lg font-[Inter-Medium] text-[red] text-opacity-100">
+                        Video Error
+                      </Typography>
+
+                      <div className="flex flex-col gap-2 items-center justify-center">
+                        <p className="mt-4 text-sm text-whites-40">
+                          {errorUpload}
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-2 items-center justify-center">
+                        <Button
+                          onClick={() => {
+                            // setSnackbarMessage(null)
+                            handleModalClose();
+                          }}
+                          className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
+                        >
+                          Close{" "}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/** success snackbar */}
+              {sucessUpload !== null && (
+                <div className="relative transform overflow-y-auto rounded-lg z-50 bg-opacity-20 flex items-center justify-center h-max  text-left shadow-xl transition-all">
+                  <div className="bg-secondary-900 min-w-[290px] flex flex-col items-center justify-center gap-5 py-5 px-5 md:px-16 pt-2 w-full max-w-[700px] rounded-lg  h-max">
+                    <div className="flex flex-col gap-5 items-center justify-center">
+                      <Typography className="text-center text-lg font-[Inter-Medium] text-[green] text-opacity-100">
+                        Video Upload Success
+                      </Typography>
+
+                      <div className="flex flex-col gap-2 items-center justify-center">
+                        <p className="mt-4 text-sm text-whites-40">
+                          Video has been uploaded successfully.
+                        </p>
+                      </div>
+
+                      <div className="flex flex-col gap-2 items-center justify-center">
+                        <Button
+                          onClick={() => {
+                            // setSnackbarMessage(null)
+                            handleModalClose();
+                          }}
+                          className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
+                        >
+                          Close{" "}
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/** snackbar */}
-      <Snackbar
+      {/* <Snackbar
         open={snackbarMessage !== null}
         autoHideDuration={6000}
-        onClose={() => setSnackbarMessage(null)}
+        // onClose={() => setSnackbarMessage(null)}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert severity={snackbarMessage?.severity} variant="filled">
           {snackbarMessage?.message}
         </Alert>
-      </Snackbar>
+      </Snackbar> */}
     </CustomStack>
   );
 };

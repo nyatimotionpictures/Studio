@@ -29,6 +29,8 @@ const ViewTrailerFilm = ({ film, type }) => {
   const [videoHD, setVideoHD] = React.useState(null);
   const [videoFHD, setVideoFHD] = React.useState(null);
   const [videoUHD, setVideoUHD] = React.useState(null);
+  const [errorUpload, setErrorUpload] = React.useState(null);
+  const [sucessUpload, setSucessUpload] = React.useState(null);
 
   const formRef = React.useRef();
 
@@ -49,6 +51,8 @@ const ViewTrailerFilm = ({ film, type }) => {
   const handleVideoModalClose = () => {
     setVideoType(null);
     setOpenVideoModal(() => false);
+    setErrorUpload(null)
+    setSucessUpload(null)
     document.body.style.overflow = "unset";
   };
 
@@ -168,7 +172,7 @@ const ViewTrailerFilm = ({ film, type }) => {
   
 
   return (
-    <div className="flex flex-col h-full w-full gap-14 max-w-[1000px]">
+    <div className="flex flex-col h-full w-full gap-14 max-w-[1000px] relative">
       {/** Trailer */}
       {videoTrailer ? (
         <div className="flex flex-col  gap-6">
@@ -776,14 +780,24 @@ const ViewTrailerFilm = ({ film, type }) => {
 
       {/** video modal */}
       {openVideoModal && (
-        <VideoUpload
+        <div className="flex flex-col gap-8 absolute top-0 left-0 w-full h-full  cursor-pointer">
+            <VideoUpload
           videoType={videoType}
           handleModalClose={handleVideoModalClose}
           film={film}
           type={type}
           videoPrice={videoPrice}
+          setErrorUpload={setErrorUpload}
+          setSucessUpload={setSucessUpload}
+          errorUpload={errorUpload}
+          sucessUpload={sucessUpload}
         />
+          </div>
+      
       )}
+
+      {/** error & sucess message */}
+    
 
       {/** Modal for deleting Film */}
       {videoDeleteId && (
