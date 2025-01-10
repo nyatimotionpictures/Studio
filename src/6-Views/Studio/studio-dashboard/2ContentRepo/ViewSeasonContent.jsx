@@ -90,7 +90,7 @@ const newEpisodeMutation = useMutation(
 
             <div className="flex flex-row items-center gap-9">
               <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-               Season: {seasonData?.title}
+               Season/Segment: {seasonData?.title}
               </Typography>
 
             

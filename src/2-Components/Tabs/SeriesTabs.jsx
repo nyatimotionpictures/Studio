@@ -9,7 +9,7 @@ import { TabContext, TabPanel } from '@mui/lab';
 
 const displayTabs = [
     {
-    title: "Seasons",
+    title: "Seasons/Segments",
     position: "1"
 },
     {
@@ -39,7 +39,7 @@ const SeriesTabs = ({film, handleNewSeason}) => {
 
     const TabDisplay = (datakey) => {
         switch (datakey) {
-            case "Seasons":
+            case "Seasons/Segments":
                 return <SeasonsListTable film={film} handleNewSeason={handleNewSeason}/>;
             case "Content Details":
                 return <ContentTab film={film}/>;

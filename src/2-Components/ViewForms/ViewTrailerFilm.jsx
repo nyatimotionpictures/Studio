@@ -284,7 +284,7 @@ const ViewTrailerFilm = ({ film, type }) => {
 
       {/** SD */}
 
-      {film?.type !== "series" && (
+      {film?.type !== "series" && type !== "series" && (
         <>
           {videoSD ? (
             <div className="flex flex-col  gap-6">
@@ -406,7 +406,7 @@ const ViewTrailerFilm = ({ film, type }) => {
       )}
 
       {/** hd */}
-      {film?.type !== "series" && (
+      {film?.type !== "series" && type !== "series" && (
         <>
           {videoHD ? (
             <div className="flex flex-col  gap-6">
@@ -532,7 +532,7 @@ const ViewTrailerFilm = ({ film, type }) => {
 
       {/** fullhd */}
 
-      {film?.type !== "series" && (
+      {film?.type !== "series" && type !== "series" && (
         <>
           {videoFHD ? (
             <div className="flex flex-col  gap-6">
@@ -656,7 +656,7 @@ const ViewTrailerFilm = ({ film, type }) => {
 
       {/** ultrahd */}
 
-      {film?.type !== "series" && (
+      {film?.type !== "series" && type !== "series" && (
         <>
           {videoUHD ? (
             <div className="flex flex-col  gap-6">
