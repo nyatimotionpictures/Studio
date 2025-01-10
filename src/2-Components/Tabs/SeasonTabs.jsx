@@ -5,6 +5,7 @@ import EpisodesListTable from "../Tables/EpisodesListTable";
 import SeasonDetails from "../Forms/SeasonDetails";
 import ThumbnailTab from "./ThumbnailTab";
 import TrailerTab from "./TrailerTab";
+import AudienceTab from "./AudienceTab";
 
 const displayTabs = [
   {
@@ -16,12 +17,20 @@ const displayTabs = [
     position: "2",
   },
   {
-    title: "Season/Segment Posters",
+    title: "Audience, Visibility",
     position: "3",
   },
   {
-    title: "Season/Segment Trailer",
+    title: "Posters",
     position: "4",
+  },
+  {
+    title: "Trailer",
+    position: "5",
+  },
+  {
+    title: "Pricing",
+    position: "6",
   },
 ];
 
@@ -32,7 +41,7 @@ const SeasonTabs = ({ handleNewEpisode, film, season }) => {
     setCurrentTabValue(() => newValue);
   };
 
-  console.log("film", film);
+  //console.log("film", film);
   /** get season details */
 
   const TabDisplay = (datakey) => {
@@ -46,10 +55,14 @@ const SeasonTabs = ({ handleNewEpisode, film, season }) => {
         );
       case "Season/Segment Details":
         return <SeasonDetails film={film} season={season} />;
-      case "Season/Segment Posters":
+        case "Audience, Visibility":
+          return <AudienceTab film={season} type={film?.type} />;
+      case "Posters":
         return <ThumbnailTab film={season} />;
-      case "Season/Segment Trailer":
+      case "Trailer":
         return <TrailerTab film={season} type={film?.type} />;
+        case "Pricing":
+          return <h1>Pricing</h1>;
       default:
         break;
     }
