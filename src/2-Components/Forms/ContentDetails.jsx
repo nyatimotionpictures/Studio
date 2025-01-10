@@ -152,7 +152,8 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
                 onBlur={handleBlur}
               >
                    <option value="">select option</option>
-                <option value="movie">Movie</option>
+                <option value="film (shorts)">Film (shorts)</option>
+                <options value="film (feature)">Film (feature)</options>
                 <option value="series">Series</option>
                 {/* <option value="TV Show">TV Show</option> */}
               </select>

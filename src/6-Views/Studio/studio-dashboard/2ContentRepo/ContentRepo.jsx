@@ -27,7 +27,7 @@ const ContentRepo = () => {
     onSuccess: (data) => {
      // console.log("data", data);
       setSnackbarMessage({message: data.message, severity: "success"});
-      if(data.film.type === "movie") {
+      if(data.film.type === "movie" || data.film.type?.includes("film")) {
        navigate(`/content/view/film/${data.film.id}`);
       } else if(data.film.type === "series") {
         navigate(`/content/view/series/${data.film.id}`);
@@ -85,7 +85,7 @@ const ContentRepo = () => {
   }, []);
   React.useEffect(() => {
     if(filmsQuery.isSuccess) {
-      const filterMovies = filmsQuery.data?.films?.filter((data)=> data.type === "movie");
+      const filterMovies = filmsQuery.data?.films?.filter((data)=> data.type === "movie" || data?.type?.includes("film"));
       const filterSeries = filmsQuery.data?.films?.filter((data)=> data.type === "series");
       setStatsArray(()=> ([
         {
