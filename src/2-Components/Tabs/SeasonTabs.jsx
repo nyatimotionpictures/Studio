@@ -6,6 +6,7 @@ import SeasonDetails from "../Forms/SeasonDetails";
 import ThumbnailTab from "./ThumbnailTab";
 import TrailerTab from "./TrailerTab";
 import AudienceTab from "./AudienceTab";
+import PricingTab from "./PricingTab";
 
 const displayTabs = [
   {
@@ -62,7 +63,7 @@ const SeasonTabs = ({ handleNewEpisode, film, season }) => {
       case "Trailer":
         return <TrailerTab film={season} type={film?.type} />;
         case "Pricing":
-          return <h1>Pricing</h1>;
+          return <PricingTab film={season} type={film?.type} />;
       default:
         break;
     }

@@ -103,16 +103,6 @@ const newEpisodeMutation = useMutation(
                 
               </ul>
             </div>
-
-            {/* <div className="absolute right-0">
-              <Button
-                onClick={() => handleEditSeason()}
-                className="flex items-center gap-2 w-max bg-primary-500 bg-opacity-40 rounded-lg px-4"
-              >
-                <span className="icon-[solar--pen-new-square-linear] w-4 h-4"></span>
-                <Typography className="font-[Inter-SemiBold]">Edit Season Details</Typography>
-              </Button>
-            </div> */}
           </CustomStack>
 
           {/** Movie Details & Tabs  */}
