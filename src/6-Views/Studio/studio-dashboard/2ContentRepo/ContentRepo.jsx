@@ -15,6 +15,8 @@ import { useMutation } from "@tanstack/react-query";
 import { postFilmContent } from "../../../../5-Store/TanstackStore/services/api.ts";
 import { data } from "autoprefixer";
 import { queryClient } from "../../../../lib/tanstack.ts";
+import SuccessErrorModal from "../../../../2-Components/Modals/SuccessErrorModal.jsx";
+import CustomLoader from "../../../../2-Components/Loader/CustomLoader.jsx";
 
 const ContentRepo = () => {
   const [openFilmModal, setOpenFilmModal] = React.useState(false);
@@ -35,9 +37,11 @@ const ContentRepo = () => {
       
     },
     onError: (error) => {
-      console.log("error", error);
+       console.log("error", error);
      if (error?.message){
       setSnackbarMessage(() => ({message: error.message, severity: "error"}));
+     }else {
+      setSnackbarMessage(() => ({message: error.error, severity: "error"}));
      }
       
     },
@@ -249,10 +253,19 @@ const ContentRepo = () => {
             />
           </div>
         </div>
+
+        
+
       </div>
 
+      {
+        mutation?.isPending && (
+          <CustomLoader text="Uploading..." />
+        )
+      }
+
       {/** snackbar */}
-      <Snackbar
+      {/* <Snackbar
         open={snackbarMessage !== null}
         autoHideDuration={6000}
         onClose={() => setSnackbarMessage(null)}
@@ -261,11 +274,14 @@ const ContentRepo = () => {
         <Alert severity={snackbarMessage?.severity} variant="filled">
           {snackbarMessage?.message}
         </Alert>
-      </Snackbar>
+      </Snackbar> */}
+
+<SuccessErrorModal open={snackbarMessage !== null} severity={snackbarMessage?.severity} modalTitle={snackbarMessage?.severity} message={snackbarMessage?.message} handleModalClose={() => setSnackbarMessage(null)} />
+
       {/** popup upload Movie Modal */}
       {openFilmModal && (
         <CustomStack
-          className="relative z-50"
+          className="relative z-40"
           aria-labelledby="modal-title"
           role="dialog"
           aria-modal="false"
@@ -318,6 +334,7 @@ const ContentRepo = () => {
                       currentStep={currentStep}
                       handleStepPrev={handleStepPrev}
                       handleFormSubmit={handleFormSubmit}
+                      isSubmitting={mutation?.isPending}
                     />
                   </div>
                 </div>
