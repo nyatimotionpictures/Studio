@@ -3,18 +3,20 @@ import Button from "../Buttons/Button";
 import VideoUpload from "./VideoUpload";
 import { queryClient } from "../../lib/tanstack";
 import CustomStack from "../Stacks/CustomStack";
-import { useDeleteVideo, useUpdateVideoPrice } from "../../5-Store/TanstackStore/services/mutations";
+import {
+  useDeleteVideo,
+  useUpdateVideoPrice,
+} from "../../5-Store/TanstackStore/services/mutations";
 import { Alert, Snackbar, Typography } from "@mui/material";
 import UpdatePriceForm from "../Forms/UpdatePriceForm";
 import { useParams } from "react-router-dom";
 import { Player } from "video-react";
-import 'video-react/dist/video-react.css'; 
+import "video-react/dist/video-react.css";
 import { current } from "@reduxjs/toolkit";
 
-
 const ViewTrailerFilm = ({ film, type }) => {
- //console.log("films", film);
-  const [updatePriceId, setUpdatePriceId] = React.useState(null)
+  //console.log("films", film);
+  const [updatePriceId, setUpdatePriceId] = React.useState(null);
   let params = useParams();
 
   const [videoType, setVideoType] = React.useState(null);
@@ -51,8 +53,8 @@ const ViewTrailerFilm = ({ film, type }) => {
   const handleVideoModalClose = () => {
     setVideoType(null);
     setOpenVideoModal(() => false);
-    setErrorUpload(null)
-    setSucessUpload(null)
+    setErrorUpload(null);
+    setSucessUpload(null);
     document.body.style.overflow = "unset";
   };
 
@@ -110,12 +112,11 @@ const ViewTrailerFilm = ({ film, type }) => {
         setVideoSD(() => null);
         setVideoHD(() => null);
         setVideoUHD(() => null);
-       setVideoFHD(() => null);
+        setVideoFHD(() => null);
         cancelDeleteFun();
         await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
       },
       onError: (error) => {
-       
         if (error?.message) {
           setSnackbarMessage(() => ({
             message: error.message,
@@ -129,22 +130,24 @@ const ViewTrailerFilm = ({ film, type }) => {
   };
 
   const handleUpdatePrice = (id, types, currentPrice) => {
-    setUpdatePriceId(() => ({id:id, filmTypes:types, currentPrice:currentPrice}))
-  }
+    setUpdatePriceId(() => ({
+      id: id,
+      filmTypes: types,
+      currentPrice: currentPrice,
+    }));
+  };
 
   const handleUpdatePriceClose = () => {
-    setUpdatePriceId(() => null)
-  }
+    setUpdatePriceId(() => null);
+  };
 
   const handleUpdatePriceSubmit = (data) => {
     //updatePrice(data)
-   
-    
-  }
+  };
 
   const handleAPISubmission = (editInfo) => {
     //updateSeasonMutation.mutate(editInfo);
-    updateVideoPriceMutation.mutate(editInfo,  {
+    updateVideoPriceMutation.mutate(editInfo, {
       onSuccess: async (data, variables, context) => {
         // console.log("run second");
         setSnackbarMessage({ message: data.message, severity: "success" });
@@ -153,23 +156,21 @@ const ViewTrailerFilm = ({ film, type }) => {
         setVideoHD(() => null);
         setVideoUHD(() => null);
         setVideoFHD(() => null);
-        handleUpdatePriceClose()
+        handleUpdatePriceClose();
         await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
       },
       onError: (error) => {
-      //  console.log("error", error);
+        //  console.log("error", error);
         if (error?.message) {
           setSnackbarMessage(() => ({
             message: error.message,
             severity: "error",
           }));
-          handleUpdatePriceClose()
+          handleUpdatePriceClose();
         }
       },
-    })
+    });
   };
-
-  
 
   return (
     <div className="flex flex-col h-full w-full gap-14 max-w-[1000px] relative">
@@ -192,7 +193,6 @@ const ViewTrailerFilm = ({ film, type }) => {
                   controls
                   className="w-full object-cover "
                   style={{ width: "100%", height: "100%" }}
-
                 />
               </div>
 
@@ -229,57 +229,61 @@ const ViewTrailerFilm = ({ film, type }) => {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col  gap-6">
-          <div className="flex flex-row  gap-8 items-center max-w-[80%]">
-            <div className="flex flex-col gap-[7px] min-w-[150px] ">
-              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                Trailer
-              </h1>
-              <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                You can upload a file that contains full-motion (digital video)
-                that is at least 1-3 minute video
-              </p>
-            </div>
-
-            <div className="">
-              <Button
-                onClick={() => {
-                  setVideoType("Trailer");
-                  handleVideoModalOpen();
-                }}
-                className="w-max min-w-[150px]"
-              >
-                Upload File
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap gap-3">
-            <div className="flex flex-col gap-[20px]">
-              <div className="bg-[#36323E] w-[470px] h-[266px] flex "></div>
-
-              <div className="flex flex-row gap-10">
-                <div className="flex flex-col gap-1">
-                  <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Duration
+        <>
+          {type !== "episode" && (
+            <div className="flex flex-col  gap-6">
+              <div className="flex flex-row  gap-8 items-center max-w-[80%]">
+                <div className="flex flex-col gap-[7px] min-w-[150px] ">
+                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                    Trailer
                   </h1>
-                  <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    ??
+                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                    You can upload a file that contains full-motion (digital
+                    video) that is at least 1-3 minute video
                   </p>
                 </div>
 
-                <div className="flex flex-col gap-1">
-                  <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Size
-                  </h1>
-                  <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    ??
-                  </p>
+                <div className="">
+                  <Button
+                    onClick={() => {
+                      setVideoType("Trailer");
+                      handleVideoModalOpen();
+                    }}
+                    className="w-max min-w-[150px]"
+                  >
+                    Upload File
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
+                <div className="flex flex-col gap-[20px]">
+                  <div className="bg-[#36323E] w-[470px] h-[266px] flex "></div>
+
+                  <div className="flex flex-row gap-10">
+                    <div className="flex flex-col gap-1">
+                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                        Duration
+                      </h1>
+                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                        ??
+                      </p>
+                    </div>
+
+                    <div className="flex flex-col gap-1">
+                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                        Size
+                      </h1>
+                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                        ??
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
+          )}
+        </>
       )}
 
       {/** SD */}
@@ -295,26 +299,37 @@ const ViewTrailerFilm = ({ film, type }) => {
                   </h1>
                 </div>
 
-                <div className="">
-                  <Button
-                    onClick={() => handleUpdatePrice(videoSD?.id, "SD", videoSD?.videoPrice?.price) }
-                    className="w-max min-w-[150px]"
-                  >
-                    Update Price
-                  </Button>
-                </div>
+                {type !== "episode" && (
+                  <div className="">
+                    <Button
+                      onClick={() =>
+                        handleUpdatePrice(
+                          videoSD?.id,
+                          "SD",
+                          videoSD?.videoPrice?.price
+                        )
+                      }
+                      className="w-max min-w-[150px]"
+                    >
+                      Update Price
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                    UGX {videoSD?.videoPrice?.price}
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX {videoSD?.videoPrice?.price}
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
                   <Player
@@ -364,14 +379,17 @@ const ViewTrailerFilm = ({ film, type }) => {
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                    UGX ??
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX ??
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="flex flex-col gap-[20px]">
                   <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
@@ -415,29 +433,39 @@ const ViewTrailerFilm = ({ film, type }) => {
                   <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
                     HD (720P)
                   </h1>
-                 
                 </div>
 
-                <div className="">
-                  <Button
-                      onClick={() => handleUpdatePrice(videoHD?.id, "HD", videoHD?.videoPrice?.price) }
-                    className="w-max min-w-[150px]"
-                  >
-                    Update Price
-                  </Button>
-                </div>
+                {type !== "episode" && (
+                  <div className="">
+                    <Button
+                      onClick={() =>
+                        handleUpdatePrice(
+                          videoHD?.id,
+                          "HD",
+                          videoHD?.videoPrice?.price
+                        )
+                      }
+                      className="w-max min-w-[150px]"
+                    >
+                      Update Price
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                  UGX {videoHD?.videoPrice?.price}
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX {videoHD?.videoPrice?.price}
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
                   <Player
@@ -448,8 +476,8 @@ const ViewTrailerFilm = ({ film, type }) => {
                   />
                 </div>
 
-                   {/** delete video */}
-                   <div className="flex flex-row gap-10 mt-10">
+                {/** delete video */}
+                <div className="flex flex-row gap-10 mt-10">
                   <Button
                     onClick={() => deleteFun(videoHD?.id)}
                     className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
@@ -489,14 +517,17 @@ const ViewTrailerFilm = ({ film, type }) => {
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                    UGX ??
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX ??
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="flex flex-col gap-[20px]">
                   <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
@@ -541,28 +572,39 @@ const ViewTrailerFilm = ({ film, type }) => {
                   <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
                     Full HD (1080P)
                   </h1>
-                  
                 </div>
-                <div className="">
-                  <Button
-                     onClick={() => handleUpdatePrice(videoFHD?.id, "FHD", videoFHD?.videoPrice?.price) }
-                    className="w-max min-w-[150px]"
-                  >
-                    Update Price
-                  </Button>
-                </div>
+
+                {type !== "episode" && (
+                  <div className="">
+                    <Button
+                      onClick={() =>
+                        handleUpdatePrice(
+                          videoFHD?.id,
+                          "FHD",
+                          videoFHD?.videoPrice?.price
+                        )
+                      }
+                      className="w-max min-w-[150px]"
+                    >
+                      Update Price
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                  UGX {videoFHD?.videoPrice?.price}
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX {videoFHD?.videoPrice?.price}
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
                   <Player
@@ -573,8 +615,8 @@ const ViewTrailerFilm = ({ film, type }) => {
                   />
                 </div>
 
-                 {/** delete video */}
-                 <div className="flex flex-row gap-10 mt-10">
+                {/** delete video */}
+                <div className="flex flex-row gap-10 mt-10">
                   <Button
                     onClick={() => deleteFun(videoFHD?.id)}
                     className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
@@ -613,14 +655,17 @@ const ViewTrailerFilm = ({ film, type }) => {
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                    UGX ??
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX ??
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="flex flex-col gap-[20px]">
                   <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
@@ -665,28 +710,38 @@ const ViewTrailerFilm = ({ film, type }) => {
                   <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
                     Ultra HD (2160p)
                   </h1>
-                
                 </div>
-                <div className="">
-                  <Button
-                      onClick={() => handleUpdatePrice(videoUHD?.id, "UHD", videoUHD?.videoPrice?.price) }
-                    className="w-max min-w-[150px]"
-                  >
-                    Update Price
-                  </Button>
-                </div>
+                {type !== "episode" && (
+                  <div className="">
+                    <Button
+                      onClick={() =>
+                        handleUpdatePrice(
+                          videoUHD?.id,
+                          "UHD",
+                          videoUHD?.videoPrice?.price
+                        )
+                      }
+                      className="w-max min-w-[150px]"
+                    >
+                      Update Price
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                  UGX {videoUHD?.videoPrice?.price}
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX {videoUHD?.videoPrice?.price}
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
                   <Player
@@ -737,14 +792,17 @@ const ViewTrailerFilm = ({ film, type }) => {
 
               <div className="flex flex-col gap-5">
                 {/** price */}
-                <div className="flex flex-col gap-[10px]">
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Price (required).
-                  </p>
-                  <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                    UGX
+                {type !== "episode" && (
+                  <div className="flex flex-col gap-[10px]">
+                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                      Price (required).
+                    </p>
+                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
+                      UGX
+                    </div>
                   </div>
-                </div>
+                )}
+
                 {/** FILM */}
                 <div className="flex flex-col gap-[20px]">
                   <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
@@ -781,23 +839,21 @@ const ViewTrailerFilm = ({ film, type }) => {
       {/** video modal */}
       {openVideoModal && (
         <div className="flex flex-col gap-8 absolute top-0 left-0 w-full h-full  cursor-pointer">
-            <VideoUpload
-          videoType={videoType}
-          handleModalClose={handleVideoModalClose}
-          film={film}
-          type={type}
-          videoPrice={videoPrice}
-          setErrorUpload={setErrorUpload}
-          setSucessUpload={setSucessUpload}
-          errorUpload={errorUpload}
-          sucessUpload={sucessUpload}
-        />
-          </div>
-      
+          <VideoUpload
+            videoType={videoType}
+            handleModalClose={handleVideoModalClose}
+            film={film}
+            type={type}
+            videoPrice={videoPrice}
+            setErrorUpload={setErrorUpload}
+            setSucessUpload={setSucessUpload}
+            errorUpload={errorUpload}
+            sucessUpload={sucessUpload}
+          />
+        </div>
       )}
 
       {/** error & sucess message */}
-    
 
       {/** Modal for deleting Film */}
       {videoDeleteId && (
@@ -842,68 +898,75 @@ const ViewTrailerFilm = ({ film, type }) => {
         </CustomStack>
       )}
 
-          {/** Popup for New Season */}
-          {
-              updatePriceId && (
-                  <CustomStack
-                      className="relative z-50"
-                      aria-labelledby="modal-title"
-                      role="dialog"
-                      aria-modal="false"
-                  >
-                      <div className="fixed inset-0 border rounded-xl bg-secondary-500 bg-opacity-75 transition-opacity"></div>
+      {/** Popup for Updating Price */}
+      {updatePriceId && type !== "episode" && (
+        <CustomStack
+          className="relative z-50"
+          aria-labelledby="modal-title"
+          role="dialog"
+          aria-modal="false"
+        >
+          <div className="fixed inset-0 border rounded-xl bg-secondary-500 bg-opacity-75 transition-opacity"></div>
 
-                      <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
-                          <div className="relative transform overflow-y-auto rounded-lg  bg-opacity-20 flex items-center justify-center h-screen text-left shadow-xl transition-all">
+          <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
+            <div className="relative transform overflow-y-auto rounded-lg  bg-opacity-20 flex items-center justify-center h-screen text-left shadow-xl transition-all">
+              <div className="bg-secondary-900 px-16 pt-0 w-full max-w-[700px] rounded-lg  h-max">
+                {/** Edit forms  */}
+                <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
+                  <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
+                    <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
+                      Update Price for{" "}
+                      {updatePriceId?.filmTypes ? updatePriceId?.filmTypes : ""}
+                    </Typography>
 
-                              <div className="bg-secondary-900 px-16 pt-0 w-full max-w-[700px] rounded-lg  h-max">
-                                  {/** Edit forms  */}
-                                  <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
-                                      <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
-                                          <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                                             Update Price ${updatePriceId?.filmTypes ? updatePriceId?.filmTypes : ""}
-                                          </Typography>
-
-                                          <div className="flex gap-5">
-                                              <Button onClick={handleUpdatePriceClose} className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700">
-                                                  CANCEL & CLOSE
-                                              </Button>
-                                          </div>
-                                      </CustomStack>
-
-                                      {/** stepper show case */}
-
-                                      {/** form */}
-                                      <div className="block mb-3 h-full">
-                                          <UpdatePriceForm innerref={formRef} handleStepNext={handleAPISubmission} film={film} filmTypes={updatePriceId}   />
-                                      </div>
-
-                                      {/** stepper control */}
-                                      <div className="border-t-2 border-t-secondary-500 relative">
-                                          <div className="container flex items-center justify-end mx-0  mt-4 mb-8 ">
-                                            {
-                                                updateVideoPriceMutation.isPending ? (
-                                                <Button
-                                                  disabled
-                                                  className="w-max min-w-[150px] px-5 rounded-lg"
-                                                >
-                                                  Submitting...
-                                                </Button>
-                                                ) : (
-                                                    <Button onClick={handleFormSubmit} className="w-max min-w-[150px] px-5 rounded-lg">Save & Close form</Button>    
-                                                )
-                                            }
-                                        
-                                          
-                                          </div>
-                                      </div>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
+                    <div className="flex gap-5">
+                      <Button
+                        onClick={handleUpdatePriceClose}
+                        className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700"
+                      >
+                        CANCEL & CLOSE
+                      </Button>
+                    </div>
                   </CustomStack>
-              )
-          }
+
+                  {/** stepper show case */}
+
+                  {/** form */}
+                  <div className="block mb-3 h-full">
+                    <UpdatePriceForm
+                      innerref={formRef}
+                      handleStepNext={handleAPISubmission}
+                      film={film}
+                      filmTypes={updatePriceId}
+                    />
+                  </div>
+
+                  {/** stepper control */}
+                  <div className="border-t-2 border-t-secondary-500 relative">
+                    <div className="container flex items-center justify-end mx-0  mt-4 mb-8 ">
+                      {updateVideoPriceMutation.isPending ? (
+                        <Button
+                          disabled
+                          className="w-max min-w-[150px] px-5 rounded-lg"
+                        >
+                          Submitting...
+                        </Button>
+                      ) : (
+                        <Button
+                          onClick={handleFormSubmit}
+                          className="w-max min-w-[150px] px-5 rounded-lg"
+                        >
+                          Save & Close form
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CustomStack>
+      )}
 
       {/** snackbar */}
       <Snackbar

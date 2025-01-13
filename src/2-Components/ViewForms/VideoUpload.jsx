@@ -50,7 +50,7 @@ const VideoUpload = ({
 
           type: yup.string().required("type is required"),
         })
-      : yup.object().shape({
+      : type !== "episode" ? yup.object().shape({
           film: yup
             .mixed()
             .required("Video is required")
@@ -64,6 +64,19 @@ const VideoUpload = ({
             }),
           price: yup.number().required("Price is required"),
           currency: yup.string().required("Currency is required"),
+        }) : yup.object().shape({
+          film: yup
+            .mixed()
+            .required("Video is required")
+            .test("fileType", "Unsupported file format", (value) => {
+              if (value) {
+                return ["video/mp4", "video/webm", "video/ogg"].includes(
+                  value.type
+                );
+              }
+              // return true;
+            }),
+         
         });
 
   let initialValues =
@@ -73,10 +86,14 @@ const VideoUpload = ({
 
           type: type === "episode" ? "episode" : "film",
         }
-      : {
+      : type !== "episode" ? {
           film: null,
           price: videoPrice ? videoPrice : 0,
           currency: "UGX",
+
+          resolution: videoType,
+        } : {
+          film: null,
 
           resolution: videoType,
         };
@@ -157,8 +174,9 @@ const VideoUpload = ({
                       //formData.append("trailer", values.film);
                       formData.append("type", values.type);
                       // formData.append("isTrailer", values.isTrailer);
-                      formData.append("price", values?.price?.toString());
-                      formData.append("currency", values.currency);
+                     
+                     type !== "episode" && formData.append("price", values?.price?.toString());
+                     type !== "episode" && formData.append("currency", values.currency);
                       formData.append("resolution", values.resolution);
 
                       let id =
@@ -255,7 +273,7 @@ const VideoUpload = ({
                     <Form>
                       <div className="flex flex-col gap-8 h-full w-full">
                         {/** video price */}
-                        {videoType !== "Trailer" && (
+                        {videoType !== "Trailer" && type !== "episode" && (
                           <FormContainer>
                             <label
                               htmlFor="yearOfProduction"
