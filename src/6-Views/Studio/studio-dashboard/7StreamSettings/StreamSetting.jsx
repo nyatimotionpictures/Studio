@@ -32,7 +32,7 @@ const StreamSetting = () => {
 
     const moviesOptions = React.useMemo(() => {
    
-        return  filmsQuery.data?.films?.filter((data)=>data.type === "movie" && data ).flat();
+        return  filmsQuery.data?.films?.filter((data)=>data.type === "movie" || data?.type?.includes("film") && data ).flat();
     }, [filmsQuery?.data]);
 
     const mixedOptions = React.useMemo(() => {
