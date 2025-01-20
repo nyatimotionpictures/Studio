@@ -212,6 +212,41 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
               />
             </FormContainer>
 
+
+            {/** Duration */}
+            {
+              values.access === "Rent" && (
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Duration (in hours)
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                      How long will you rent this film?
+                    </Typography>
+                  
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                  <input 
+                    id="duration"
+                    type="text"
+                    placeholder="Duration e.g 24"
+                    value={values.duration}
+                    onChange={handleChange}
+                  />
+
+                  </CustomStack>
+                 
+                    <ErrorMessage
+                      errors={errors?.duration ? true : false}
+                      name="duration"
+                      message={errors?.duration && errors.duration}
+                    />
+                  </CustomStack>
+                </FormContainer>
+              ) 
+            }
+
+
             {/** Donations */}
             <FormContainer className="gap-2  border-t-secondary-500 pb-4">
               <CustomStack className="flex-col ">

@@ -101,7 +101,7 @@ const ViewFilmContent = () => {
                         </div>
 
                         <div className="mt-7">
-                            <FilmDetailTab film={filmsQuery.data.film} type={filmsQuery?.data?.film?.type} />
+                            <FilmDetailTab film={filmsQuery.data.film} type={filmsQuery?.data?.film?.type} isLoading={filmsQuery.isLoading} refetch={filmsQuery.refetch} />
                         </div>
                     </div>
 

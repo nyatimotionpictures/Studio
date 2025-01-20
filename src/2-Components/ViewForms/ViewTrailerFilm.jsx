@@ -12,9 +12,12 @@ import UpdatePriceForm from "../Forms/UpdatePriceForm";
 import { useParams } from "react-router-dom";
 import { Player } from "video-react";
 import "video-react/dist/video-react.css";
-import { current } from "@reduxjs/toolkit";
+import VideoUploadMultiple from "./VideoUploadMultiple";
+import CustomLoader from "../Loader/CustomLoader";
+import TrailerUploadVideo from "../UploadsVideo/TrailerUploadVideo";
+import MultipleUploadVideo from "../UploadsVideo/MultipleUploadVideo";
 
-const ViewTrailerFilm = ({ film, type }) => {
+const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   //console.log("films", film);
   const [updatePriceId, setUpdatePriceId] = React.useState(null);
   let params = useParams();
@@ -23,7 +26,7 @@ const ViewTrailerFilm = ({ film, type }) => {
   const [videoPrice, setVideoPrice] = React.useState(null);
 
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
-  const [openVideoModal, setOpenVideoModal] = React.useState(false);
+
   const [videoDeleteId, setVideoDeleteId] = React.useState(null);
   const [videoTrailer, setVideoTrailer] = React.useState(null);
 
@@ -44,19 +47,8 @@ const ViewTrailerFilm = ({ film, type }) => {
     }
   };
 
-  const handleVideoModalOpen = () => {
-    setOpenVideoModal(() => true);
-    if (typeof window != "undefined" && window.document) {
-      document.body.style.overflow = "hidden";
-    }
-  };
-  const handleVideoModalClose = () => {
-    setVideoType(null);
-    setOpenVideoModal(() => false);
-    setErrorUpload(null);
-    setSucessUpload(null);
-    document.body.style.overflow = "unset";
-  };
+
+
 
   //console.log("video", film?.video)
   useEffect(() => {
@@ -87,7 +79,7 @@ const ViewTrailerFilm = ({ film, type }) => {
       setVideoFHD(null);
       setVideoUHD(null);
     }
-  }, [film?.video]);
+  }, [film?.video, isLoading]);
 
   let deleteFun = (id) => {
     console.log(id);
@@ -107,7 +99,10 @@ const ViewTrailerFilm = ({ film, type }) => {
     deleteVideoMutation.mutate(posterId, {
       onSuccess: async (data, variables, context) => {
         // console.log("run second");
+        // refetch();
         setSnackbarMessage({ message: data.message, severity: "success" });
+         //await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
+        //  await queryClient.prefetchQuery({ queryKey: ["film", params?.id] });
         setVideoTrailer(() => null);
         setVideoSD(() => null);
         setVideoHD(() => null);
@@ -129,48 +124,58 @@ const ViewTrailerFilm = ({ film, type }) => {
     //cancelDeleteFun()
   };
 
-  const handleUpdatePrice = (id, types, currentPrice) => {
-    setUpdatePriceId(() => ({
-      id: id,
-      filmTypes: types,
-      currentPrice: currentPrice,
-    }));
-  };
+  // const handleUpdatePrice = (id, types, currentPrice) => {
+  //   setUpdatePriceId(() => ({
+  //     id: id,
+  //     filmTypes: types,
+  //     currentPrice: currentPrice,
+  //   }));
+  // };
 
-  const handleUpdatePriceClose = () => {
-    setUpdatePriceId(() => null);
-  };
+  // const handleUpdatePriceClose = () => {
+  //   setUpdatePriceId(() => null);
+  // };
 
-  const handleUpdatePriceSubmit = (data) => {
-    //updatePrice(data)
-  };
+  // const handleUpdatePriceSubmit = (data) => {
+  //   //updatePrice(data)
+  // };
 
-  const handleAPISubmission = (editInfo) => {
-    //updateSeasonMutation.mutate(editInfo);
-    updateVideoPriceMutation.mutate(editInfo, {
-      onSuccess: async (data, variables, context) => {
-        // console.log("run second");
-        setSnackbarMessage({ message: data.message, severity: "success" });
-        setVideoTrailer(() => null);
-        setVideoSD(() => null);
-        setVideoHD(() => null);
-        setVideoUHD(() => null);
-        setVideoFHD(() => null);
-        handleUpdatePriceClose();
-        await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
-      },
-      onError: (error) => {
-        //  console.log("error", error);
-        if (error?.message) {
-          setSnackbarMessage(() => ({
-            message: error.message,
-            severity: "error",
-          }));
-          handleUpdatePriceClose();
-        }
-      },
-    });
-  };
+  // const handleAPISubmission = (editInfo) => {
+  //   //updateSeasonMutation.mutate(editInfo);
+  //   updateVideoPriceMutation.mutate(editInfo, {
+  //     onSuccess: async (data, variables, context) => {
+  //       // console.log("run second");
+  //       setSnackbarMessage({ message: data.message, severity: "success" });
+  //       setVideoTrailer(() => null);
+  //       setVideoSD(() => null);
+  //       setVideoHD(() => null);
+  //       setVideoUHD(() => null);
+  //       setVideoFHD(() => null);
+  //       // handleUpdatePriceClose();
+  //       await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
+  //     },
+  //     onError: (error) => {
+  //       //  console.log("error", error);
+  //       if (error?.message) {
+  //         setSnackbarMessage(() => ({
+  //           message: error.message,
+  //           severity: "error",
+  //         }));
+  //         handleUpdatePriceClose();
+  //       }
+  //     },
+  //   });
+  // };
+
+  console.log(isLoading)
+
+  if (isLoading) {
+    return (
+      <>
+        <CustomLoader />
+      </>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full w-full gap-14 max-w-[1000px] relative">
@@ -231,613 +236,203 @@ const ViewTrailerFilm = ({ film, type }) => {
       ) : (
         <>
           {type !== "episode" && (
-            <div className="flex flex-col  gap-6">
-              <div className="flex flex-row  gap-8 items-center max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px] ">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    Trailer
-                  </h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    You can upload a file that contains full-motion (digital
-                    video) that is at least 1-3 minute video
-                  </p>
-                </div>
-
-                <div className="">
-                  <Button
-                    onClick={() => {
-                      setVideoType("Trailer");
-                      handleVideoModalOpen();
-                    }}
-                    className="w-max min-w-[150px]"
-                  >
-                    Upload File
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <div className="flex flex-col gap-[20px]">
-                  <div className="bg-[#36323E] w-[470px] h-[266px] flex "></div>
-
-                  <div className="flex flex-row gap-10">
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Duration
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Size
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+            <TrailerUploadVideo
+              videoType={"Trailer"}
+           
+              film={film}
+              type={type}
+              videoPrice={videoPrice}
+              setErrorUpload={setErrorUpload}
+              setSucessUpload={setSucessUpload}
+              errorUpload={errorUpload}
+              sucessUpload={sucessUpload}
+            />
           )}
         </>
       )}
-
-      {/** SD */}
 
       {film?.type !== "series" && type !== "series" && (
         <>
-          {videoSD ? (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    SD (480P)
-                  </h1>
-                </div>
-
-                {type !== "episode" && (
-                  <div className="">
-                    <Button
-                      onClick={() =>
-                        handleUpdatePrice(
-                          videoSD?.id,
-                          "SD",
-                          videoSD?.videoPrice?.price
-                        )
-                      }
-                      className="w-max min-w-[150px]"
-                    >
-                      Update Price
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX {videoSD?.videoPrice?.price}
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <Player
-                    src={videoSD?.url}
-                    controls
-                    className="w-full object-cover "
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                </div>
-                {/** delete video */}
-                <div className="flex flex-row gap-10 mt-10">
-                  <Button
-                    onClick={() => deleteFun(videoSD?.id)}
-                    className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                  >
-                    Delete Video
-                  </Button>
-                </div>
-              </div>
-            </div>
+          {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
+            <>
+              <MultipleUploadVideo
+                videoType={"all"}
+                
+                film={film}
+                type={type}
+                videoPrice={videoPrice}
+                setErrorUpload={setErrorUpload}
+                setSucessUpload={setSucessUpload}
+                errorUpload={errorUpload}
+                sucessUpload={sucessUpload}
+              />
+            </>
           ) : (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    SD (480P)
-                  </h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Please upload a file that contains a digital video in SD
-                    (480p) format for optimal playback and compatibility.
-                  </p>
-                </div>
-
-                <div className="">
-                  <Button
-                    onClick={() => {
-                      setVideoPrice(7000);
-                      setVideoType("SD");
-                      handleVideoModalOpen();
-                    }}
-                    className="w-max min-w-[150px]"
-                  >
-                    Upload File
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX ??
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="flex flex-col gap-[20px]">
-                  <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
-                    {" "}
-                    No Video Uploaded
-                  </div>
-
-                  <div className="flex flex-row gap-10">
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Duration
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Size
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+            <>
+            <div className="w-[500px] flex flex-col items-center">
+              <Button onClick={() => deleteFun(params?.id)}>Delete The Resolutions</Button>
             </div>
+              {/** SD */}
+              {film?.type !== "series" && type !== "series" && (
+                <>
+                  {videoSD && (
+                    <div className="flex flex-col  gap-6">
+                      <div className="flex items-center gap-8 max-w-[80%]">
+                        <div className="flex flex-col gap-[7px] min-w-[150px]">
+                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                            SD (480P)
+                          </h1>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-5">
+                        {/** price */}
+                        {/** FILM */}
+                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                          <Player
+                            src={videoSD?.url}
+                            controls
+                            className="w-full object-cover "
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </div>
+                        {/** delete video */}
+                        {/* <div className="flex flex-row gap-10 mt-10">
+                          <Button
+                            onClick={() => deleteFun(videoSD?.id)}
+                            className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                          >
+                            Delete Video
+                          </Button>
+                        </div> */}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              {/** hd */}
+              {film?.type !== "series" && type !== "series" && (
+                <>
+                  {videoHD && (
+                    <div className="flex flex-col  gap-6">
+                      <div className="flex items-center gap-8 max-w-[80%]">
+                        <div className="flex flex-col gap-[7px] min-w-[150px]">
+                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                            HD (720P)
+                          </h1>
+                        </div>
+
+                       
+                      </div>
+
+                      <div className="flex flex-col gap-5">
+                        {/** price */}
+
+                        {/** FILM */}
+                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                          <Player
+                            src={videoHD?.url}
+                            controls
+                            className="w-full object-cover "
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </div>
+
+                        {/** delete video */}
+                        {/* <div className="flex flex-row gap-10 mt-10">
+                          <Button
+                            onClick={() => deleteFun(videoHD?.id)}
+                            className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                          >
+                            Delete Video
+                          </Button>
+                        </div> */}
+                      </div>
+                    </div>
+                  ) }
+                </>
+              )}
+
+              {/** fullhd */}
+              {film?.type !== "series" && type !== "series" && (
+                <>
+                  {videoFHD && (
+                    <div className="flex flex-col  gap-6">
+                      <div className="flex items-center gap-8 max-w-[80%]">
+                        <div className="flex flex-col gap-[7px] min-w-[150px]">
+                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                            Full HD (1080P)
+                          </h1>
+                        </div>
+                      </div>
+
+                      <div className="flex flex-col gap-5">
+                  
+                        {/** FILM */}
+                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                          <Player
+                            src={videoFHD?.url}
+                            controls
+                            className="w-full object-cover "
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </div>
+                       
+                      </div>
+                    </div>
+                  ) }
+                </>
+              )}
+
+              {/** ultrahd */}
+              {film?.type !== "series" && type !== "series" && (
+                <>
+                  {videoUHD && (
+                    <div className="flex flex-col  gap-6">
+                      <div className="flex items-center gap-8 max-w-[80%]">
+                        <div className="flex flex-col gap-[7px] min-w-[150px]">
+                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                            Ultra HD (2160p)
+                          </h1>
+                        </div>
+                   
+                      </div>
+
+                      <div className="flex flex-col gap-5">
+                        {/** price */}
+
+                        {/** FILM */}
+                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                          <Player
+                            src={videoUHD?.url}
+                            controls
+                            className="w-full object-cover "
+                            style={{ width: "100%", height: "100%" }}
+                          />
+                        </div>
+
+                        {/** delete video */}
+                        {/* <div className="flex flex-row gap-10 mt-10">
+                          <Button
+                            onClick={() => deleteFun(videoUHD?.id)}
+                            className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                          >
+                            Delete Video
+                          </Button>
+                        </div> */}
+                      </div>
+                    </div>
+                  ) }
+                </>
+              )}
+            </>
           )}
         </>
       )}
 
-      {/** hd */}
-      {film?.type !== "series" && type !== "series" && (
-        <>
-          {videoHD ? (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    HD (720P)
-                  </h1>
-                </div>
-
-                {type !== "episode" && (
-                  <div className="">
-                    <Button
-                      onClick={() =>
-                        handleUpdatePrice(
-                          videoHD?.id,
-                          "HD",
-                          videoHD?.videoPrice?.price
-                        )
-                      }
-                      className="w-max min-w-[150px]"
-                    >
-                      Update Price
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX {videoHD?.videoPrice?.price}
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <Player
-                    src={videoHD?.url}
-                    controls
-                    className="w-full object-cover "
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                </div>
-
-                {/** delete video */}
-                <div className="flex flex-row gap-10 mt-10">
-                  <Button
-                    onClick={() => deleteFun(videoHD?.id)}
-                    className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                  >
-                    Delete Video
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    HD (720P)
-                  </h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Please upload a file that contains a digital video in HD
-                    (720p) format for optimal playback and compatibility.
-                  </p>
-                </div>
-
-                <div className="">
-                  <Button
-                    onClick={() => {
-                      setVideoPrice(10000);
-
-                      setVideoType("HD");
-                      handleVideoModalOpen();
-                    }}
-                    className="w-max min-w-[150px]"
-                  >
-                    Upload File
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX ??
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="flex flex-col gap-[20px]">
-                  <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
-                    {" "}
-                    No Video Uploaded
-                  </div>
-
-                  <div className="flex flex-row gap-10">
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Duration
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Size
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/** fullhd */}
-
-      {film?.type !== "series" && type !== "series" && (
-        <>
-          {videoFHD ? (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    Full HD (1080P)
-                  </h1>
-                </div>
-
-                {type !== "episode" && (
-                  <div className="">
-                    <Button
-                      onClick={() =>
-                        handleUpdatePrice(
-                          videoFHD?.id,
-                          "FHD",
-                          videoFHD?.videoPrice?.price
-                        )
-                      }
-                      className="w-max min-w-[150px]"
-                    >
-                      Update Price
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX {videoFHD?.videoPrice?.price}
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <Player
-                    src={videoFHD?.url}
-                    controls
-                    className="w-full object-cover "
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                </div>
-
-                {/** delete video */}
-                <div className="flex flex-row gap-10 mt-10">
-                  <Button
-                    onClick={() => deleteFun(videoFHD?.id)}
-                    className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                  >
-                    Delete Video
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    Full HD (1080P)
-                  </h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Please upload a file that contains a digital video in Full
-                    HD (1080p) format for optimal playback and compatibility.
-                  </p>
-                </div>
-                <div className="">
-                  <Button
-                    onClick={() => {
-                      setVideoPrice(15000);
-
-                      setVideoType("FHD");
-                      handleVideoModalOpen();
-                    }}
-                    className="w-max min-w-[150px]"
-                  >
-                    Upload File
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX ??
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="flex flex-col gap-[20px]">
-                  <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
-                    {" "}
-                    No Video Uploaded
-                  </div>
-
-                  <div className="flex flex-row gap-10">
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Duration
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Size
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/** ultrahd */}
-
-      {film?.type !== "series" && type !== "series" && (
-        <>
-          {videoUHD ? (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    Ultra HD (2160p)
-                  </h1>
-                </div>
-                {type !== "episode" && (
-                  <div className="">
-                    <Button
-                      onClick={() =>
-                        handleUpdatePrice(
-                          videoUHD?.id,
-                          "UHD",
-                          videoUHD?.videoPrice?.price
-                        )
-                      }
-                      className="w-max min-w-[150px]"
-                    >
-                      Update Price
-                    </Button>
-                  </div>
-                )}
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX {videoUHD?.videoPrice?.price}
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                  <Player
-                    src={videoUHD?.url}
-                    controls
-                    className="w-full object-cover "
-                    style={{ width: "100%", height: "100%" }}
-                  />
-                </div>
-
-                {/** delete video */}
-                <div className="flex flex-row gap-10 mt-10">
-                  <Button
-                    onClick={() => deleteFun(videoUHD?.id)}
-                    className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                  >
-                    Delete Video
-                  </Button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="flex flex-col  gap-6">
-              <div className="flex items-center gap-8 max-w-[80%]">
-                <div className="flex flex-col gap-[7px] min-w-[150px]">
-                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                    Ultra HD (2160p)
-                  </h1>
-                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                    Please upload a file that contains a digital video in Ultra
-                    HD (2160p) format for optimal playback and compatibility.
-                  </p>
-                </div>
-                <div className="">
-                  <Button
-                    onClick={() => {
-                      setVideoPrice(20000);
-
-                      setVideoType("UHD");
-                      handleVideoModalOpen();
-                    }}
-                    className="w-max min-w-[150px]"
-                  >
-                    Upload File
-                  </Button>
-                </div>
-              </div>
-
-              <div className="flex flex-col gap-5">
-                {/** price */}
-                {type !== "episode" && (
-                  <div className="flex flex-col gap-[10px]">
-                    <p className="font-[Inter-Regular] text-base text-[#706E72]">
-                      Price (required).
-                    </p>
-                    <div className="bg-[#36323E] w-[500px] min-h-[43.09px] flex font-[Inter-SemiBold] text-base sm:text-lg text-whites-40 p-4 rounded-md">
-                      UGX
-                    </div>
-                  </div>
-                )}
-
-                {/** FILM */}
-                <div className="flex flex-col gap-[20px]">
-                  <div className="bg-[#36323E] w-[500px] h-[266px] flex items-center justify-center text-whites-40 font-[Inter-SemiBold] text-base sm:text-lg">
-                    {" "}
-                    No Video Uploaded
-                  </div>
-
-                  <div className="flex flex-row gap-10">
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Duration
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-
-                    <div className="flex flex-col gap-1">
-                      <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                        Size
-                      </h1>
-                      <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                        ??
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {/** video modal */}
-      {openVideoModal && (
+      {/** video single upload modal */}
+      {/* {openVideoModal && (
         <div className="flex flex-col gap-8 absolute top-0 left-0 w-full h-full  cursor-pointer">
           <VideoUpload
             videoType={videoType}
@@ -851,7 +446,24 @@ const ViewTrailerFilm = ({ film, type }) => {
             sucessUpload={sucessUpload}
           />
         </div>
-      )}
+      )} */}
+
+      {/** video multiple upload modal */}
+      {/* {openVideoMultipleModal && (
+        <div className="flex flex-col gap-8 absolute top-0 left-0 w-full h-full  cursor-pointer">
+          <VideoUploadMultiple
+            videoType={videoType}
+            handleModalClose={handleVideoMultipleModalClose}
+            film={film}
+            type={type}
+            videoPrice={videoPrice}
+            setErrorUpload={setErrorUpload}
+            setSucessUpload={setSucessUpload}
+            errorUpload={errorUpload}
+            sucessUpload={sucessUpload}
+          />
+        </div>
+      )} */}
 
       {/** error & sucess message */}
 

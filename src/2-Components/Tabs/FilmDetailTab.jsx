@@ -30,7 +30,7 @@ const displayTabs = [
 },
 
 ]
-const FilmDetailTab = ({film, type}) => {
+const FilmDetailTab = ({film, type, isLoading, refetch}) => {
     const [currentTabValue, setCurrentTabValue] = React.useState("1");
     const [allDisplayTabs, setAllDisplayTabs] = React.useState([
         {
@@ -46,7 +46,7 @@ const FilmDetailTab = ({film, type}) => {
             position: "3"
         },
             {
-            title: "Thumbnails & Backdrops",
+            title: "Posters",
             position: "4"
         },
             {
@@ -55,7 +55,6 @@ const FilmDetailTab = ({film, type}) => {
         },
     ])
 
-    console.log("type", type)
 
     React.useState(()=> {
         if (type?.includes("film") || type?.includes("movie")){
@@ -73,7 +72,7 @@ const FilmDetailTab = ({film, type}) => {
                     position: "3"
                 },
                     {
-                    title: "Thumbnails & Backdrops",
+                    title: "Posters",
                     position: "4"
                 },
                     {
@@ -101,7 +100,7 @@ const FilmDetailTab = ({film, type}) => {
                     position: "3"
                 },
                     {
-                    title: "Thumbnails & Backdrops",
+                    title: "Posters",
                     position: "4"
                 },
                     {
@@ -126,10 +125,10 @@ const FilmDetailTab = ({film, type}) => {
                 return <CastTab film={film} type={type ? type : "film"}/>;
             case "Audience, Visibility":
                 return <AudienceTab film={film} type={type ? type : "film"} />;
-            case "Thumbnails & Backdrops":
+            case "Posters":
                 return <ThumbnailTab film={film} type={type ? type : "film"}/>;
             case "Trailer & Film":
-                return <TrailerTab film={film} type={type ? type : "film"} />;
+                return <TrailerTab film={film} type={type ? type : "film"} isLoading={isLoading} refetch={refetch} />;
                 case "Pricing":
                     return <PricingTab film={film} type={film?.type} />;
             default:

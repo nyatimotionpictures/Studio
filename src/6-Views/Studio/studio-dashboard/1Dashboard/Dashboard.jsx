@@ -306,7 +306,7 @@ const Dashboard = () => {
               {/* <WatchedListTable /> */}
 
               <VideoListTable
-              films={filmsQuery.isPending ? [] : filmsQuery.data.films}
+              films={filmsQuery.isPending ? [] : filmsQuery?.data?.films}
             />
             </div>
           </div>

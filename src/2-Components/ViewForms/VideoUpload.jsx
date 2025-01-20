@@ -62,8 +62,8 @@ const VideoUpload = ({
               }
               // return true;
             }),
-          price: yup.number().required("Price is required"),
-          currency: yup.string().required("Currency is required"),
+          // price: yup.number().required("Price is required"),
+          // currency: yup.string().required("Currency is required"),
         }) : yup.object().shape({
           film: yup
             .mixed()
@@ -88,8 +88,8 @@ const VideoUpload = ({
         }
       : type !== "episode" ? {
           film: null,
-          price: videoPrice ? videoPrice : 0,
-          currency: "UGX",
+          // price: videoPrice ? videoPrice : 0,
+          // currency: "UGX",
 
           resolution: videoType,
         } : {
@@ -175,8 +175,8 @@ const VideoUpload = ({
                       formData.append("type", values.type);
                       // formData.append("isTrailer", values.isTrailer);
                      
-                     type !== "episode" && formData.append("price", values?.price?.toString());
-                     type !== "episode" && formData.append("currency", values.currency);
+                    //  type !== "episode" && formData.append("price", values?.price?.toString());
+                    //  type !== "episode" && formData.append("currency", values.currency);
                       formData.append("resolution", values.resolution);
 
                       let id =
@@ -273,7 +273,7 @@ const VideoUpload = ({
                     <Form>
                       <div className="flex flex-col gap-8 h-full w-full">
                         {/** video price */}
-                        {videoType !== "Trailer" && type !== "episode" && (
+                        {/* {videoType !== "Trailer" && type !== "episode" && (
                           <FormContainer>
                             <label
                               htmlFor="yearOfProduction"
@@ -299,7 +299,7 @@ const VideoUpload = ({
                               message={errors?.price && errors.price}
                             />
                           </FormContainer>
-                        )}
+                        )} */}
 
                         <div className="flex flex-col gap-8 h-full w-full">
                           {/** video uploader & preview */}
