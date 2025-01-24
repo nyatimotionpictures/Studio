@@ -11,7 +11,7 @@ import { visibilityData, accessData } from "../../1-Assets/data/FilmSelectData";
 import CustomRatingButton from "../RadioButtons/CustomRatingButton";
 import ErrorMessage from "./ErrorMessage";
 
-const Audience = ({ innerref, handleStepNext, editdata, film }) => {
+const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
   /**
  *    audienceTarget: null,
     audienceAgeGroup: null,
@@ -20,13 +20,20 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
  * 
  */
   // console.log(film)
-  const validationSchema = yup.object().shape({
-    audienceTarget: yup.string().required("required"),
-    audienceAgeGroup: yup.string().required("required"),
-    visibility: yup.string().required("required"),
-    enableDonation: yup.string().required("required"),
-    // access: yup.string().required("required"),
-  });
+  const validationSchema =
+    type === "season"
+      ? yup.object().shape({
+          visibility: yup.string().required("required"),
+          // enableDonation: yup.string().required("required"),
+          // access: yup.string().required("required"),
+        })
+      : yup.object().shape({
+          audienceTarget: yup.string().required("required"),
+          audienceAgeGroup: yup.string().required("required"),
+          visibility: yup.string().required("required"),
+          // enableDonation: yup.string().required("required"),
+          // access: yup.string().required("required"),
+        });
 
   const initialValues = editdata
     ? {
@@ -54,88 +61,95 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
       initialValues={initialValues}
       validationSchema={validationSchema}
       onSubmit={(values, helpers) => {
-         console.log(values);
+        console.log(values);
         handleStepNext(values);
       }}
     >
       {({ values, handleChange, errors, touched, setFieldValue }) => (
         <Form>
           <CustomStack className="h-full w-full flex flex-col gap-5">
-            {/** title */}
-            <FormContainer className="gap-2 border-b-2 border-t-secondary-500 pb-4">
-              <CustomStack className="flex-col ">
-                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Audience
-                </Typography>
-                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  Is this video made for kids? (required)
-                </Typography>
-              </CustomStack>
+            {type !== "season" && (
+              <>
+                {/** title */}
+                <FormContainer className="gap-2 border-b-2 border-t-secondary-500 pb-4">
+                  <CustomStack className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Audience
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                      Is this video made for kids? (required)
+                    </Typography>
+                  </CustomStack>
 
-              {/** radio buttons */}
-              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
-                <div className="flex relative h-5 items-center gap-3 ">
-                  <input
-                    checked={values.audienceTarget === "MadeForChildren"}
-                    value={"MadeForChildren"}
-                    onChange={handleChange}
-                    name="audienceTarget"
-                    type="radio"
-                    id="MadeForChildren"
-                  />
-                  <label htmlFor="MadeForChildren">
-                    Yes, its made for children
-                  </label>
-                </div>
-                <div className="flex relative h-5 items-center gap-3">
-                  <input
-                    checked={values.audienceTarget === "NotMadeForChildren"}
-                    value={"NotMadeForChildren"}
-                    onChange={handleChange}
-                    name="audienceTarget"
-                    type="radio"
-                    id="NotMadeForChildren"
-                  />
-                  <label htmlFor="NotMadeForChildren">
-                    No, it's not made for children
-                  </label>
-                </div>
-                <ErrorMessage
-                  errors={
-                    touched?.audienceTarget && errors?.audienceTarget
-                      ? true
-                      : false
-                  }
-                  name="audienceTarget"
-                  message={errors?.audienceTarget && errors.audienceTarget}
-                />
-              </CustomStack>
-
-              {/** radio ratings */}
-
-              <CustomStack className="flex-wrap gap-3">
-                {ratingArray.map((data, index) => {
-                  return (
-                    <CustomRatingButton
-                      key={data.ratedId}
-                      checked={values.audienceAgeGroup === data.ratedId}
-                      ratedId={data.ratedId}
-                      btntitle={data.btntitle}
-                      radiogroupName={"audienceAgeGroup"}
-                      btnText={data.btnText}
-                      btnImg={data.btnImg}
-                      handleChange={setFieldValue}
-                      value={values.audienceAgeGroup}
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+                    <div className="flex relative h-5 items-center gap-3 ">
+                      <input
+                        checked={values.audienceTarget === "MadeForChildren"}
+                        value={"MadeForChildren"}
+                        onChange={handleChange}
+                        name="audienceTarget"
+                        type="radio"
+                        id="MadeForChildren"
+                      />
+                      <label htmlFor="MadeForChildren">
+                        Yes, its made for children
+                      </label>
+                    </div>
+                    <div className="flex relative h-5 items-center gap-3">
+                      <input
+                        checked={values.audienceTarget === "NotMadeForChildren"}
+                        value={"NotMadeForChildren"}
+                        onChange={handleChange}
+                        name="audienceTarget"
+                        type="radio"
+                        id="NotMadeForChildren"
+                      />
+                      <label htmlFor="NotMadeForChildren">
+                        No, it's not made for children
+                      </label>
+                    </div>
+                    <ErrorMessage
+                      errors={
+                        touched?.audienceTarget && errors?.audienceTarget
+                          ? true
+                          : false
+                      }
+                      name="audienceTarget"
+                      message={errors?.audienceTarget && errors.audienceTarget}
                     />
-                  );
-                })}
-              </CustomStack>
-              <ErrorMessage
-                errors={errors?.audienceAgeGroup ? true : false}
-                name="audienceTarget"
-                message={errors?.audienceAgeGroup && errors.audienceAgeGroup}
-              />
-            </FormContainer>
+                  </CustomStack>
+
+                  {/** radio ratings */}
+
+                  <CustomStack className="flex-wrap gap-3">
+                    {ratingArray.map((data, index) => {
+                      return (
+                        <CustomRatingButton
+                          key={data.ratedId}
+                          checked={values.audienceAgeGroup === data.ratedId}
+                          ratedId={data.ratedId}
+                          btntitle={data.btntitle}
+                          radiogroupName={"audienceAgeGroup"}
+                          btnText={data.btnText}
+                          btnImg={data.btnImg}
+                          handleChange={setFieldValue}
+                          value={values.audienceAgeGroup}
+                        />
+                      );
+                    })}
+                  </CustomStack>
+                  <ErrorMessage
+                    errors={errors?.audienceAgeGroup ? true : false}
+                    name="audienceTarget"
+                    message={
+                      errors?.audienceAgeGroup && errors.audienceAgeGroup
+                    }
+                  />
+                </FormContainer>
+              </>
+            )}
+
             {/** visibility */}
             <FormContainer className="gap-2  border-t-secondary-500 pb-4">
               <CustomStack className="flex-col ">
@@ -174,145 +188,151 @@ const Audience = ({ innerref, handleStepNext, editdata, film }) => {
               />
             </FormContainer>
 
-            {/** Access */}
-            <FormContainer className="gap-2  border-t-secondary-500 pb-4">
-              <CustomStack className="flex-col ">
-                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Access
-                </Typography>
-                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  Choose how the video should be accessed
-                </Typography>
-              </CustomStack>
-              {/** radio buttons */}
-              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
-                {accessData.map((data, index) => {
-                  return (
-                    <div
-                      key={data.title}
-                      className="flex relative h-5 items-center gap-3"
-                    >
-                      <input
-                        checked={values.access === data.title}
-                        onChange={() => setFieldValue("access", data.title)}
-                        name="access"
-                        type="radio"
-                        id={data.title}
-                      />
-                      <label htmlFor={data.title}>{data.title}</label>
-                    </div>
-                  );
-                })}
-              </CustomStack>
-
-              <ErrorMessage
-                errors={errors?.access ? true : false}
-                name="access"
-                message={errors?.access && errors.access}
-              />
-            </FormContainer>
-
-
-            {/** Duration */}
-            {
-              values.access === "Rent" && (
+            {type !== "episode" && (
+              <>
+                {/** Access */}
                 <FormContainer className="gap-2  border-t-secondary-500 pb-4">
                   <CustomStack className="flex-col ">
                     <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                      Duration (in hours)
+                      Access
                     </Typography>
                     <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                      How long will you rent this film?
+                      Choose how the video should be accessed
                     </Typography>
-                  
-                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
-                  <input 
-                    id="duration"
-                    type="text"
-                    placeholder="Duration e.g 24"
-                    value={values.duration}
-                    onChange={handleChange}
-                  />
-
                   </CustomStack>
-                 
-                    <ErrorMessage
-                      errors={errors?.duration ? true : false}
-                      name="duration"
-                      message={errors?.duration && errors.duration}
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+                    {accessData.map((data, index) => {
+                      return (
+                        <div
+                          key={data.title}
+                          className="flex relative h-5 items-center gap-3"
+                        >
+                          <input
+                            checked={values.access === data.title}
+                            onChange={() => setFieldValue("access", data.title)}
+                            name="access"
+                            type="radio"
+                            id={data.title}
+                          />
+                          <label htmlFor={data.title}>{data.title}</label>
+                        </div>
+                      );
+                    })}
+                  </CustomStack>
+
+                  <ErrorMessage
+                    errors={errors?.access ? true : false}
+                    name="access"
+                    message={errors?.access && errors.access}
+                  />
+                </FormContainer>
+              </>
+            )}
+
+            {/** Duration */}
+            {values.access === "Rent" && (
+              <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                <CustomStack className="flex-col ">
+                  <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                    Duration (in hours)
+                  </Typography>
+                  <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                    How long will you rent this film?
+                  </Typography>
+
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                    <input
+                      id="duration"
+                      type="text"
+                      placeholder="Duration e.g 24"
+                      value={values.duration}
+                      onChange={handleChange}
                     />
                   </CustomStack>
-                </FormContainer>
-              ) 
-            }
 
+                  <ErrorMessage
+                    errors={errors?.duration ? true : false}
+                    name="duration"
+                    message={errors?.duration && errors.duration}
+                  />
+                </CustomStack>
+              </FormContainer>
+            )}
 
-            {/** Donations */}
-            <FormContainer className="gap-2  border-t-secondary-500 pb-4">
-              <CustomStack className="flex-col ">
-                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Donations
-                </Typography>
-                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  Do you want to allow people to donate to this film?
-                </Typography>
-              </CustomStack>
-              {/** radio buttons */}
-              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
-                <div className="flex relative h-5 items-center gap-3">
-                  <input
-                    checked={values.enableDonation === true}
-                    onChange={(e) => {
-                      setFieldValue("enableDonation", e.target.checked);
-                    }}
+            {values.visibility === "coming soon" && type !== "episode" && (
+              <>
+                {/** Donations */}
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Donations
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                      Do you want to allow people to donate to this film?
+                    </Typography>
+                  </CustomStack>
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+                    <div className="flex relative h-5 items-center gap-3">
+                      <input
+                        checked={values.enableDonation === true}
+                        onChange={(e) => {
+                          setFieldValue("enableDonation", e.target.checked);
+                        }}
+                        name="enableDonation"
+                        type="checkbox"
+                        id={"enableDonation"}
+                      />
+                      <label htmlFor={"enableDonation"}>Enable Donations</label>
+                    </div>
+                  </CustomStack>
+
+                  <ErrorMessage
+                    errors={errors?.enableDonation ? true : false}
                     name="enableDonation"
-                    type="checkbox"
-                    id={"enableDonation"}
+                    message={errors?.enableDonation && errors.enableDonation}
                   />
-                  <label htmlFor={"enableDonation"}>Enable Donations</label>
-                </div>
-              </CustomStack>
+                </FormContainer>
+              </>
+            )}
 
-              <ErrorMessage
-                errors={errors?.enableDonation ? true : false}
-                name="enableDonation"
-                message={errors?.enableDonation && errors.enableDonation}
-              />
-            </FormContainer>
+            {type !== "episode" && (
+              <>
+                {/** Featured */}
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Featured
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                      Do you want to appear on the featured film slider?
+                    </Typography>
+                  </CustomStack>
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
+                    <div className="flex relative h-5 items-center gap-3">
+                      <input
+                        checked={values.featured === true}
+                        onChange={(e) => {
+                          setFieldValue("featured", e.target.checked);
+                        }}
+                        name="featuredFilm"
+                        type="checkbox"
+                        id={"featured"}
+                      />
+                      <label htmlFor={"featured"}>Featured </label>
+                    </div>
+                  </CustomStack>
 
-            {/** Featured */}
-            <FormContainer className="gap-2  border-t-secondary-500 pb-4">
-              <CustomStack className="flex-col ">
-                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                  Featured
-                </Typography>
-                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                  Do you want to appear on the featured film slider?
-                </Typography>
-              </CustomStack>
-              {/** radio buttons */}
-              <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
-                <div className="flex relative h-5 items-center gap-3">
-                  <input
-                    checked={values.featured === true}
-                    onChange={(e) => {
-                     
-                      setFieldValue("featured", e.target.checked);
-                    }}
-                    name="featuredFilm"
-                    type="checkbox"
-                    id={"featured"}
+                  <ErrorMessage
+                    errors={errors?.featured ? true : false}
+                    name="enableDonation"
+                    message={errors?.featured && errors.featured}
                   />
-                  <label htmlFor={"featured"}>Featured </label>
-                </div>
-              </CustomStack>
-
-              <ErrorMessage
-                errors={errors?.featured ? true : false}
-                name="enableDonation"
-                message={errors?.featured && errors.featured}
-              />
-            </FormContainer>
+                </FormContainer>
+              </>
+            )}
           </CustomStack>
         </Form>
       )}

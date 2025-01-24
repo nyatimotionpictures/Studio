@@ -7,6 +7,7 @@ import ThumbnailTab from "./ThumbnailTab";
 import TrailerTab from "./TrailerTab";
 import AudienceTab from "./AudienceTab";
 import PricingTab from "./PricingTab";
+import SeasonAudienceTab from "./SeasonAudienceTab";
 
 const displayTabs = [
   {
@@ -57,7 +58,7 @@ const SeasonTabs = ({ handleNewEpisode, film, season }) => {
       case "Season/Segment Details":
         return <SeasonDetails film={film} season={season} />;
         case "Audience, Visibility":
-          return <AudienceTab film={season} type={film?.type} />;
+          return <SeasonAudienceTab film={season} type={"season"} />;
       case "Posters":
         return <ThumbnailTab film={season} />;
       case "Trailer":

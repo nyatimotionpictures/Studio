@@ -466,10 +466,62 @@ export const createNewCategory = async (
 
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
   }
 };
+
+/** get all categories */
+export const getAllCategories = async () => {
+  try {
+    const response = await apiRequest.get(
+      "/v1/studio/categories"
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
+  }
+}
+
+/** get one category */
+export const getSingleCategory = async (categoryId: String) => {
+  try {
+    const response = await apiRequest.get(
+      "/v1/studio/category/" + categoryId
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
+  }
+}
 
 /** mutation: update category */
 export const updateCategory = async (
@@ -478,54 +530,104 @@ export const updateCategory = async (
   try {
     let { id, ...rest } = categoryContent;
     const response = await apiRequest.put(
-      `/v1/studio/category/${id}`,
+      `/v1/studio/category/update/${id}`,
       rest
     );
 
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
   }
 };
 
 
 /** mutation: connect film to category */
-export const connectFilmToCategory = async (
+export const addFilmToCategory = async (
   categoryContent: any
 ) => {
   try {
     let { id, ...rest } = categoryContent;
-    const response = await apiRequest.post(
-      `/v1/studio/connectfilmtocategory/${id}`,
+    const response = await apiRequest.put(
+      `/v1/studio/category/addfilm/${id}`,
       rest
     );
 
     return response.data;
   } catch (error) {
-    const axiosError = error as AxiosError<ErrorResponse>;
-    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
+  }
+};
+
+/** mutation: remove film from category */
+export const removeFilmonCategory = async (
+  categoryContent: any
+) => {
+  try {
+    let { id, ...rest } = categoryContent;
+    const response = await apiRequest.put(
+      `/v1/studio/category/remove/${id}`,
+      rest
+    );
+
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
   }
 };
 
 
 /** mutation: delete category */
-// export const deleteCategory = async (
-//   categoryId: String
-// ): Promise<categoryDeleteResponse> => {
-//   try {
-//     const response = await apiRequest.delete<categoryDeleteResponse>(
-//       `/v1/studio/category/${categoryId}`
-//     );
+export const deleteCategory = async (
+  categoryId: String
+) => {
+  try {
+    const response = await apiRequest.delete(
+      `/v1/studio/category/${categoryId}`
+    );
 
-//     return response.data;
-//   } catch (error) {
-//     const axiosError = error as AxiosError<ErrorResponse>;
-//     throw axiosError.response?.data ?? { message: "An unknown error occurred" };
-//   }
-// };
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
+  }
+};
 
-// /** mutation: get all categories */
+/** get all categories */
 // export const getAllCategories = async () => {
 //   try {
 //     const response = await apiRequest.get<GetAllCategories[]>(

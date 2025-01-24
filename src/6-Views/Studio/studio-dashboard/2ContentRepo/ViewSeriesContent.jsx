@@ -221,7 +221,7 @@ const ViewSeriesContent = () => {
                 <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
                   <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
                     <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                      Add New Season
+                      Add New Season / Segement
                     </Typography>
 
                     <div className="flex gap-5">

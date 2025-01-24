@@ -27,23 +27,24 @@ const ContentRepo = () => {
   const mutation = useMutation({
     mutationFn: postFilmContent,
     onSuccess: (data) => {
-     // console.log("data", data);
-      setSnackbarMessage({message: data.message, severity: "success"});
-      if(data.film.type === "movie" || data.film.type?.includes("film")) {
-       navigate(`/content/view/film/${data.film.id}`);
-      } else if(data.film.type === "series") {
+      // console.log("data", data);
+      setSnackbarMessage({ message: data.message, severity: "success" });
+      if (data.film.type === "movie" || data.film.type?.includes("film")) {
+        navigate(`/content/view/film/${data.film.id}`);
+      } else if (data.film.type === "series") {
         navigate(`/content/view/series/${data.film.id}`);
       }
-      
     },
     onError: (error) => {
-       console.log("error", error);
-     if (error?.message){
-      setSnackbarMessage(() => ({message: error.message, severity: "error"}));
-     }else {
-      setSnackbarMessage(() => ({message: error.error, severity: "error"}));
-     }
-      
+      console.log("error", error);
+      if (error?.message) {
+        setSnackbarMessage(() => ({
+          message: error.message,
+          severity: "error",
+        }));
+      } else {
+        setSnackbarMessage(() => ({ message: error.error, severity: "error" }));
+      }
     },
     onSettled: async (_, error) => {
       if (error) {
@@ -60,7 +61,6 @@ const ContentRepo = () => {
       stats: 0,
       icon: false,
     },
-   
 
     {
       title: "Total TV Series",
@@ -85,20 +85,22 @@ const ContentRepo = () => {
 
   React.useEffect(() => {
     setCurrentStep(() => stepperArray?.[0].title);
-   
   }, []);
   React.useEffect(() => {
-    if(filmsQuery.isSuccess) {
-      const filterMovies = filmsQuery.data?.films?.filter((data)=> data.type === "movie" || data?.type?.includes("film"));
-      const filterSeries = filmsQuery.data?.films?.filter((data)=> data.type === "series");
-      setStatsArray(()=> ([
+    if (filmsQuery.isSuccess) {
+      const filterMovies = filmsQuery.data?.films?.filter(
+        (data) => data.type === "movie" || data?.type?.includes("film")
+      );
+      const filterSeries = filmsQuery.data?.films?.filter(
+        (data) => data.type === "series"
+      );
+      setStatsArray(() => [
         {
           title: "Total Videos",
           stats: filmsQuery.data?.films?.length ?? 0,
           icon: false,
         },
-       
-    
+
         {
           title: "Total TV Series",
           stats: filterSeries?.length ?? 0,
@@ -109,10 +111,7 @@ const ContentRepo = () => {
           stats: filterMovies?.length ?? 0,
           icon: false,
         },
-       
-      ]
-      
-      ))
+      ]);
     }
   }, [filmsQuery.data]);
 
@@ -253,16 +252,9 @@ const ContentRepo = () => {
             />
           </div>
         </div>
-
-        
-
       </div>
 
-      {
-        mutation?.isPending && (
-          <CustomLoader text="Uploading..." />
-        )
-      }
+      {mutation?.isPending && <CustomLoader text="Uploading..." />}
 
       {/** snackbar */}
       {/* <Snackbar
@@ -276,7 +268,13 @@ const ContentRepo = () => {
         </Alert>
       </Snackbar> */}
 
-<SuccessErrorModal open={snackbarMessage !== null} severity={snackbarMessage?.severity} modalTitle={snackbarMessage?.severity} message={snackbarMessage?.message} handleModalClose={() => setSnackbarMessage(null)} />
+      <SuccessErrorModal
+        open={snackbarMessage !== null}
+        severity={snackbarMessage?.severity}
+        modalTitle={snackbarMessage?.severity}
+        message={snackbarMessage?.message}
+        handleModalClose={() => setSnackbarMessage(null)}
+      />
 
       {/** popup upload Movie Modal */}
       {openFilmModal && (

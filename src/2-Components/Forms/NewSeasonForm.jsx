@@ -25,7 +25,7 @@ const NewSeasonForm = ({ innerref, handleStepNext, film }) => {
       });
 
     const initialValues = {
-        season: null,
+        season:"",
         title: "",
         filmId: film?.id,
     };
@@ -47,7 +47,7 @@ const NewSeasonForm = ({ innerref, handleStepNext, film }) => {
                     htmlFor="season"
                     className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                   >
-                   Season Number (required)
+                   Segment Number (required)
                   </label>
                   <input
                     id="season"
@@ -72,7 +72,7 @@ const NewSeasonForm = ({ innerref, handleStepNext, film }) => {
                     htmlFor="title"
                     className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                   >
-                 Season Title (required)
+                 Segment Title (required)
                   </label>
                   <input
                     id="title"

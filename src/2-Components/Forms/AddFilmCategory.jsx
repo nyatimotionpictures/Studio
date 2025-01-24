@@ -1,90 +1,91 @@
 import { Form, Formik } from "formik";
 import React from "react";
-import { useContext } from "react";
 import * as yup from "yup";
 import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import ErrorMessage from "./ErrorMessage";
 import { Autocomplete, Box, TextField } from "@mui/material";
 import { useGetSingleFilms } from "../../5-Store/TanstackStore/services/queries";
+import { useParams } from "react-router-dom";
 
 const categoryTypes = [
-  { label: "mixed (series&films)", data: "mixed" },
-  { label: "films", data: "films" },
-  { label: "series", data: "series" },
-  { label: "genres", data: "genre" },
-];
+    { label: "mixed (series&films)", data: "mixed" },
+    { label: "films", data: "films" },
+    { label: "series", data: "series" },
+    { label: "genres", data: "genre" },
+  ];
 
-const NewCategoryForm = ({
-  innerref,
-  handleStepNext,
-  genreOptions,
-  serieOptions,
-  moviesOptions,
-  mixedOptions,
-}) => {
-  const [serieArray, setSerieArray] = React.useState([]);
-  const [seasonsArray, setSeasonsArray] = React.useState([]);
+const AddFilmCategory = ({
+    innerref,
+    handleStepNext,
+    editData,
+    genreOptions,
+    serieOptions,
+    moviesOptions,
+    mixedOptions,
+  }) => {
+    const [serieArray, setSerieArray] = React.useState([]);
+      const [seasonsArray, setSeasonsArray] = React.useState([]);
+      let parmas= useParams();
+    
+      const validationSchema = yup.object().shape({
+        name: yup.string().required("required"),
+        // postion: yup.number().required("required"),
+        type: yup.string().required("required"),
+        id: yup.string().required("required"),
+        // status: yup.string().required("required"),
+      });
 
-  const validationSchema = yup.object().shape({
-    name: yup.string().required("required"),
-    // postion: yup.number().required("required"),
-    type: yup.string().required("required"),
-    // status: yup.string().required("required"),
-  });
-
-  const initialValues = {
-    name: "",
-    type: "",
-    genre: [],
-    series: [],
-    seasons: [],
-    films: [],
-    // episodes: [],
-  };
-
-  const serieGetData = React.useMemo(() => {
-    return serieArray.map((option) => {
-      return option.id;
-    });
-  }, [serieArray]);
-
-  let queriedData = useGetSingleFilms(serieGetData);
-
-  let seasonsOptions = React.useMemo(() => {
-    if (!queriedData || queriedData?.length === 0) return [];
-    return queriedData
-      ?.map((data) =>
-        data?.data?.film?.season?.map((season) => ({
-          id: season.id,
-          title: season.title,
-          season: season.season,
-          filmId: season.filmId,
-          filmtitle: data?.data?.film?.title,
-          episodes: season?.episodes,
-        }))
-      )
-      .flat();
-  }, [queriedData]);
-
-  let episodesOptions = React.useMemo(() => {
-    if (seasonsArray.length === 0) return [];
-    return seasonsArray
-      ?.map((data) =>
-        data?.episodes?.map((episode) => ({
-          id: episode.id,
-          title: episode.title,
-          season: data?.season,
-          episode: episode.episode,
-          filmId: data?.filmId,
-          filmtitle: data?.filmtitle,
-        }))
-      )
-      .flat();
-  }, [seasonsArray]);
-
-  //console.log("episodesOptions",seasonsArray, episodesOptions)
-
+       const initialValues = {
+        id: parmas?.id,
+          name: editData?.name ?? "",
+          type: editData?.type ?? "",
+          genre: [],
+          series: [],
+          seasons: editData?.seasons ?? [],
+          films: editData?.films ?? [],
+          // episodes: [],
+        };
+      
+        const serieGetData = React.useMemo(() => {
+          return serieArray.map((option) => {
+            return option.id;
+          });
+        }, [serieArray]);
+      
+        let queriedData = useGetSingleFilms(serieGetData);
+      
+        let seasonsOptions = React.useMemo(() => {
+          if (!queriedData || queriedData?.length === 0) return [];
+          return queriedData
+            ?.map((data) =>
+              data?.data?.film?.season?.map((season) => ({
+                id: season.id,
+                title: season.title,
+                season: season.season,
+                filmId: season.filmId,
+                filmtitle: data?.data?.film?.title,
+                episodes: season?.episodes,
+              }))
+            )
+            .flat();
+        }, [queriedData]);
+      
+        let episodesOptions = React.useMemo(() => {
+          if (seasonsArray.length === 0) return [];
+          return seasonsArray
+            ?.map((data) =>
+              data?.episodes?.map((episode) => ({
+                id: episode.id,
+                title: episode.title,
+                season: data?.season,
+                episode: episode.episode,
+                filmId: data?.filmId,
+                filmtitle: data?.filmtitle,
+              }))
+            )
+            .flat();
+        }, [seasonsArray]);
   return (
     <Formik
       innerRef={innerref}
@@ -102,6 +103,7 @@ const NewCategoryForm = ({
 
           
         let newCategory = {
+            id: values.id,
           name: name,
           type: type,
           genre: genre,
@@ -138,9 +140,9 @@ const NewCategoryForm = ({
                 type="text"
                 value={values.name}
                 name="name"
-                onChange={handleChange}
+                readOnly 
                 placeholder="Category Title i.e Most Rated Movies"
-                onBlur={handleBlur}
+               
               />
 
               <ErrorMessage
@@ -163,16 +165,7 @@ const NewCategoryForm = ({
                 id="type"
                 value={values.type}
                 name="type"
-                onChange={(e) => {
-                  //resetForm({genre: [], series: [], seasons: []});
-                  setFieldValue("type", e.target.value);
-                  setFieldValue("genre", []);
-                  setFieldValue("series", []);
-                  setFieldValue("seasons", []);
-                  setFieldValue("films", []);
-                  setFieldValue("episodes", []);
-                }}
-                onBlur={handleBlur}
+            
               >
                 <option value="">select option</option>
                 {categoryTypes.map((option) => (
@@ -610,7 +603,7 @@ const NewCategoryForm = ({
         </Form>
       )}
     </Formik>
-  );
-};
+  )
+}
 
-export default NewCategoryForm;
+export default AddFilmCategory
