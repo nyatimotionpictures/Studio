@@ -44,7 +44,8 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
         visibility: film?.visibility ?? "",
         access: film?.access ?? "",
         enableDonation: film?.enableDonation ?? false,
-        featured: film?.featuredFilm ?? false,
+        featured: film?.featured ?? false,
+      
       }
     : {
         audienceTarget: "",
@@ -170,7 +171,17 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                     >
                       <input
                         checked={values.visibility === data.title}
-                        onChange={() => setFieldValue("visibility", data.title)}
+                        onChange={() => {
+                          if (data?.title === "coming soon") {
+                            setFieldValue("visibility", data.title)
+                            setFieldValue("access", 'free')
+                            setFieldValue("featured", false)
+                          }else {
+                            setFieldValue("visibility", data.title)
+                            setFieldValue("enableDonation", false);
+                          }
+                         
+                        }}
                         name="visibility"
                         type="radio"
                         id={data.title}
@@ -188,7 +199,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
               />
             </FormContainer>
 
-            {type !== "episode" && (
+            {type !== "episode" && values.visibility !== "coming soon" && (
               <>
                 {/** Access */}
                 <FormContainer className="gap-2  border-t-secondary-500 pb-4">
@@ -215,7 +226,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                             type="radio"
                             id={data.title}
                           />
-                          <label htmlFor={data.title}>{data.title}</label>
+                          <label className="capitalize" htmlFor={data.title}>{data.title}</label>
                         </div>
                       );
                     })}
@@ -231,7 +242,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
             )}
 
             {/** Duration */}
-            {values.access === "Rent" && (
+            {/* {values.access === "rent" && (
               <FormContainer className="gap-2  border-t-secondary-500 pb-4">
                 <CustomStack className="flex-col ">
                   <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
@@ -258,7 +269,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                   />
                 </CustomStack>
               </FormContainer>
-            )}
+            )} */}
 
             {values.visibility === "coming soon" && type !== "episode" && (
               <>
@@ -294,10 +305,65 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                     message={errors?.enableDonation && errors.enableDonation}
                   />
                 </FormContainer>
+
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack htmlFor="donationTarget" className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Donations Target Amount
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                     Total amount of donations to be collected from viewers
+                    </Typography>
+                  </CustomStack>
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                    <input
+                      id="donationTargetAmount"
+                      type="number"
+                      placeholder="donationTargetAmount e.g 1000000"
+                      value={values.donationTargetAmount}
+                      onChange={handleChange}
+                    />
+                  </CustomStack>
+
+                  <ErrorMessage
+                    errors={errors?.enableDonation ? true : false}
+                    name="enableDonation"
+                    message={errors?.enableDonation && errors.enableDonation}
+                  />
+                </FormContainer>
+
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack htmlFor="donationTarget" className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Donations Deadline
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                    Set Period for Donation
+                    </Typography>
+                  </CustomStack>
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                    <input
+                      id="donationDeadline"
+                      type="datetime-local"
+                      placeholder="donationDeadline e.g 2023-01-01T00:00:00"
+                      value={values.donationDeadline}
+                      onChange={handleChange}
+                      className="text-whites-40"
+                    />
+                  </CustomStack>
+
+                  <ErrorMessage
+                    errors={errors?.enableDonation ? true : false}
+                    name="enableDonation"
+                    message={errors?.enableDonation && errors.enableDonation}
+                  />
+                </FormContainer>
               </>
             )}
 
-            {type !== "episode" && (
+            {type !== "episode" && values.visibility !== "coming soon" && (
               <>
                 {/** Featured */}
                 <FormContainer className="gap-2  border-t-secondary-500 pb-4">

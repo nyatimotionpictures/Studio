@@ -30,7 +30,7 @@ const AudienceTab = ({film, type}) => {
       onError: (error) => {
         console.log("error", error);
         setSnackbarMessage({
-          message: "error updating film",
+          message: error?.message,
           severity: "error",
         });
       }

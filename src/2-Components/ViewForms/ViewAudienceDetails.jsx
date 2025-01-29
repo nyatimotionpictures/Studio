@@ -210,10 +210,55 @@ const ViewAudienceDetails = ({ film, type }) => {
                     </div>
                   </CustomStack>
                 </FormContainer>
+
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack htmlFor="donationTarget" className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Donations Target Amount
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                     Total amount of donations to be collected from viewers
+                    </Typography>
+                  </CustomStack>
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                    <input
+                      id="donationTargetAmount"
+                      type="number"
+                      placeholder="donationTargetAmount e.g 1000000"
+                      value={film?.donationTargetAmount}
+                      readOnly
+                    />
+                  </CustomStack>
+
+                
+                </FormContainer>
+
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack htmlFor="donationTarget" className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Donations Deadline
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                    Set Period for Donation
+                    </Typography>
+                  </CustomStack>
+                  {/** radio buttons */}
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                    <input
+                      id="donationDeadline"
+                      type="datetime-local"
+                      placeholder="donationDeadline e.g 2023-01-01T00:00:00"
+                      value={film?.donationDeadline}
+                      readOnly
+                      className="text-whites-40"
+                    />
+                  </CustomStack>
+                </FormContainer>
               </>
             )}
 
-            {type !== "episode" && (
+            {type !== "episode" && film?.visibility !== "coming soon" && (
               <>
                 {/** featured */}
                 <FormContainer className="gap-2  border-t-secondary-500 pb-4">
