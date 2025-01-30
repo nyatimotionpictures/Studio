@@ -48,6 +48,8 @@ const ContentDetails = ({ innerref, handleStepNext, editdata, film }) => {
         releaseDate: film?.releaseDate
           ? setDateFromString(film?.releaseDate)
           : "",
+          donationTargetAmount: film?.donationTargetAmount ?? 0,
+          donationDeadline: film?.donationDeadline ?? "",
         genre: film?.genre ?? [],
         tags: film?.tags ?? [],
         overview: film?.overview ?? "",

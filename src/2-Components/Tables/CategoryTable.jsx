@@ -78,11 +78,12 @@ const CategoryTable = ({ categories }) => {
       accessorKey: "type",
       footer: "type",
     },
-    {
-      header: "status",
-      accessorKey: "status",
-      footer: "status",
-    },
+    columnHelper.accessor("films", {
+      cell: (info) => (
+        <p className="px-2">{info.getValue().length}</p>
+      ),
+      header: "Total Films",
+    }),
     columnHelper.accessor("dateCreated", {
       cell: (info) => (
         <p>{moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}</p>
