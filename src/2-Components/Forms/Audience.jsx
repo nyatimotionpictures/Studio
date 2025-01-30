@@ -42,10 +42,9 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
         audienceTarget: film?.audienceTarget ?? "",
         audienceAgeGroup: film?.audienceAgeGroup ?? "",
         visibility: film?.visibility ?? "",
-        access: film?.access ?? "",
+        access: film?.type === "series" ? "free" : film?.access ?? "",
         enableDonation: film?.enableDonation ?? false,
         featured: film?.featured ?? false,
-      
       }
     : {
         audienceTarget: "",
@@ -173,14 +172,13 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                         checked={values.visibility === data.title}
                         onChange={() => {
                           if (data?.title === "coming soon") {
-                            setFieldValue("visibility", data.title)
-                            setFieldValue("access", 'free')
-                            setFieldValue("featured", false)
-                          }else {
-                            setFieldValue("visibility", data.title)
+                            setFieldValue("visibility", data.title);
+                            setFieldValue("access", "free");
+                            setFieldValue("featured", false);
+                          } else {
+                            setFieldValue("visibility", data.title);
                             setFieldValue("enableDonation", false);
                           }
-                         
                         }}
                         name="visibility"
                         type="radio"
@@ -213,23 +211,49 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                   </CustomStack>
                   {/** radio buttons */}
                   <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
-                    {accessData.map((data, index) => {
-                      return (
-                        <div
-                          key={data.title}
-                          className="flex relative h-5 items-center gap-3"
-                        >
+                    {values?.type === "series" ? (
+                      <>
+                        <div className="flex relative h-5 items-center gap-3">
                           <input
-                            checked={values.access === data.title}
-                            onChange={() => setFieldValue("access", data.title)}
+                            checked={values.access === "free"}
+                            onChange={() => setFieldValue("access", "free")}
                             name="access"
                             type="radio"
-                            id={data.title}
+                            id={"free"}
                           />
-                          <label className="capitalize" htmlFor={data.title}>{data.title}</label>
+                          <label className="capitalize" htmlFor={"free"}>
+                            {"Free"}
+                          </label>
                         </div>
-                      );
-                    })}
+                      </>
+                    ) : (
+                      <>
+                        {accessData.map((data, index) => {
+                          return (
+                            <div
+                              key={data.title}
+                              className="flex relative h-5 items-center gap-3"
+                            >
+                              <input
+                                checked={values.access === data.title}
+                                onChange={() =>
+                                  setFieldValue("access", data.title)
+                                }
+                                name="access"
+                                type="radio"
+                                id={data.title}
+                              />
+                              <label
+                                className="capitalize"
+                                htmlFor={data.title}
+                              >
+                                {data.title}
+                              </label>
+                            </div>
+                          );
+                        })}
+                      </>
+                    )}
                   </CustomStack>
 
                   <ErrorMessage
@@ -312,7 +336,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                       Donations Target Amount
                     </Typography>
                     <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                     Total amount of donations to be collected from viewers
+                      Total amount of donations to be collected from viewers
                     </Typography>
                   </CustomStack>
                   {/** radio buttons */}
@@ -339,7 +363,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                       Donations Deadline
                     </Typography>
                     <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                    Set Period for Donation
+                      Set Period for Donation
                     </Typography>
                   </CustomStack>
                   {/** radio buttons */}
