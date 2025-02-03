@@ -209,8 +209,8 @@ let confirmDeleteFun = () => {
           </thead>
 
           <tbody>
-            { table.getRowModel()?.rows?.length > 0 ? (
-              table.getRowModel().rows?.map((row) => (
+            { table?.getRowModel()?.rows?.length > 0 ? (
+              table?.getRowModel().rows?.map((row) => (
                 <tr key={row.id} className="border-y border-secondary-600 hover:bg-secondary-400">
                   {row.getVisibleCells().map((cell) => (
                     <td

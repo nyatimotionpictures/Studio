@@ -54,21 +54,21 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   useEffect(() => {
     if (film?.video?.length > 0) {
       film?.video?.filter((data) => {
-        //console.log("data", data)
+        console.log("data", data)
         if (data.isTrailer === true && data.resolution === "HD") {
           setVideoTrailer(data);
         }
 
-        if (data.resolution === "SD") {
+        if (data?.resolution?.toLowerCase() === "sd") {
           setVideoSD(data);
         }
-        if (data.resolution === "HD" && data.isTrailer === false) {
+        if (data?.resolution?.toLowerCase() === "hd" && data.isTrailer === false) {
           setVideoHD(data);
         }
-        if (data.resolution === "FHD") {
+        if (data?.resolution?.toLowerCase() === "full_hd") {
           setVideoFHD(data);
         }
-        if (data.resolution === "UHD") {
+        if (data?.resolution?.toLowerCase() === "ultra_hd") {
           setVideoUHD(data);
         }
       });

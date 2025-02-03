@@ -29,6 +29,7 @@ const MultipleVideoForm = ({
   const [preview, setPreview] = useState(null);
   const [chunkProgress, setChunkProgress] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [transcodeProgress, setTranscodeProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
@@ -74,10 +75,12 @@ const MultipleVideoForm = ({
       ? {
           film: null,
           resolution: videoType,
+          // type: film?.type?.includes("film") ? "film" : "series",
         }
       : {
           film: null,
           resolution: videoType,
+          type: type?.includes("episode") ? "episode" : "",
         };
 
   const handleFileChange = (event) => {
@@ -86,6 +89,7 @@ const MultipleVideoForm = ({
       setFile(selectedFile);
       setChunkProgress(0);
       setUploadProgress(0);
+      setTranscodeProgress(0);
       setUploadedChunks([]);
       setTotalChunks(Math.ceil(selectedFile.size / chunkSize));
       const videoURL = URL.createObjectURL(selectedFile);
@@ -98,7 +102,7 @@ const MultipleVideoForm = ({
   const checkChunkExists = async (start) => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/check-chunk",
+        `${BaseUrl}/v1/studio/check-upload-chunk`,
         {
           params: { fileName: file.name, start },
         }
@@ -127,15 +131,24 @@ const MultipleVideoForm = ({
       let axiosurl;
 
       if (videoType === "Trailer") {
-        axiosurl =
+        // axiosurl =
+        //   type === "season"
+        //     ? `${BaseUrl}/v1/studio/upload-chunk/season/${params?.seasonId}`
+        //     : `${BaseUrl}/v1/studio/upload-chunk${id}`;
+
+         axiosurl =
           type === "season"
-            ? `${BaseUrl}/v1/studio/uploadtrailer/upload-chunk/season/${params?.seasonId}`
-            : `${BaseUrl}/v1/studio/uploadtrailer/${id}`;
+            ? `${BaseUrl}/v1/studio/upload-chunk/season/${params?.seasonId}`
+            : `${BaseUrl}/v1/studio/upload-chunk${id}`;
       } else {
+        // axiosurl =
+        //   type === "episode"
+        //     ? `${BaseUrl}/api/v1/studio/upload-chunk/${film?.id}`
+        //     : `${BaseUrl}/api/v1/studio/upload-chunk/${params?.id}`;
         axiosurl =
           type === "episode"
-            ? `${BaseUrl}/v1/studio/episodeupload/${film?.id}`
-            : `${BaseUrl}/v1/studio/filmupload/${params?.id}`;
+            ? `${BaseUrl}/v1/studio/upload-chunk`
+            : `${BaseUrl}/v1/studio/upload-chunk`;
       }
 
       // "http://localhost:5000/api/upload-chunk",
@@ -157,7 +170,7 @@ const MultipleVideoForm = ({
         console.log("Upload paused");
       } else {
         if (retries < MAX_RETRIES) {
-          console.warn(`Retrying chunk ${start}... (${retries + 1})`);
+          // console.warn(`Retrying chunk ${start}... (${retries + 1})`);
           await new Promise((resolve) =>
             setTimeout(resolve, Math.pow(2, retries) * 1000)
           );
@@ -226,15 +239,22 @@ const MultipleVideoForm = ({
     const token = user !== null && user.token ? user.token : null;
     // let id =
     // type === "episode" ? params?.episodeId : film?.id;
+    // let axiosurl =
+    //   type === "episode"
+    //     ? `${BaseUrl}/v1/studio/complete-upload/${film?.id}`
+    //     : `${BaseUrl}/v1/studio/complete-upload${params?.id}`;
+
     let axiosurl =
-      type === "episode"
-        ? `${BaseUrl}/v1/studio/episodeupload/complete-upload/${film?.id}`
-        : `${BaseUrl}/v1/studio/filmupload/complete-upload/${params?.id}`;
+    type === "episode"
+      ? `${BaseUrl}/v1/studio/complete-upload`
+      : `${BaseUrl}/v1/studio/complete-upload`;
     try {
       // "http://localhost:5000/api/complete-upload",
       const response = await axios.post(
         axiosurl,
         {
+          type: type?.includes("episode") ? "episode" : type.includes("film") ? "film" : type?.includes("series") ? "film" : type?.includes("season") ? "season" : "",
+          resourceId: film?.id,
           fileName: file.name,
           clientId: socket.id,
         },
@@ -313,15 +333,24 @@ const MultipleVideoForm = ({
     // socketRef.current = io("ws://localhost:5000");
     socket.connect();
 
-    socket.on("uploadProgress", ({ resolution, progress }) => {
+    socket.on("uploadProgress", ({ content, progress }) => {
       setUploadProgress((prev) => ({
         ...prev,
-        [resolution]: progress,
+        [content?.resolution]: progress,
+      }));
+    });
+
+    socket.on("TranscodeProgress", ({ label, customProgress }) => {
+      setTranscodeProgress((prev) => ({
+        ...prev,
+        [label]: customProgress,
       }));
     });
 
     return () => {
       socket.off("uploadProgress");
+      socket.off("TranscodeProgress");
+      setTranscodeProgress(0)
       socket.disconnect();
     };
   }, []);
@@ -391,6 +420,34 @@ const MultipleVideoForm = ({
                           </div>
                         )}
 
+                           {/** transcode upload progress */}
+                           {Object.keys(transcodeProgress).length > 0 && (
+                          <div className="w-full max-w-md mt-4">
+                            <p className="mb-2 font-semibold">
+                             Conversion Upload Progress:
+                            </p>
+                            {Object.entries(transcodeProgress).map(
+                              ([resolution, progress]) => (
+                                <div key={resolution} className="mb-2">
+                                  <p className="text-sm font-medium">
+                                    {resolution.toUpperCase()}
+                                  </p>
+                                  <div className="w-full bg-[gray] rounded-full h-4">
+                                    <div
+                                      className="bg-[green] h-4 rounded-full flex items-center justify-center"
+                                      style={{ width: `${progress}%` }}
+                                    >
+                                      <p className="text-sm text-whites-40">
+                                        {progress}%
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
+
                         {/** resolution upload progress */}
                         {Object.keys(uploadProgress).length > 0 && (
                           <div className="w-full max-w-md mt-4">
@@ -403,9 +460,9 @@ const MultipleVideoForm = ({
                                   <p className="text-sm font-medium">
                                     {resolution.toUpperCase()}
                                   </p>
-                                  <div className="w-full bg-gray-200 rounded-full h-4">
+                                  <div className="w-full bg-[gray] rounded-full h-4">
                                     <div
-                                      className="bg-green-600 h-4 rounded-full flex items-center justify-center"
+                                      className="bg-[green] h-4 rounded-full flex items-center justify-center"
                                       style={{ width: `${progress}%` }}
                                     >
                                       <p className="text-sm text-whites-40">

@@ -13,7 +13,6 @@ import { queryClient } from "../../lib/tanstack";
 import { useParams } from "react-router-dom";
 import socket from "../../lib/socket";
 
-
 const TrailerForm = ({
   videoType,
   film,
@@ -30,6 +29,7 @@ const TrailerForm = ({
   const [preview, setPreview] = useState(null);
   const [chunkProgress, setChunkProgress] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [transcodeProgress, setTranscodeProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
@@ -58,7 +58,16 @@ const TrailerForm = ({
   let initialValues = {
     film: null,
 
-    type: type === "episode" ? "episode" : "film",
+    type:
+      type === "episode"
+        ? "episode"
+        : type?.includes("film")
+        ? "film"
+        : type?.includes("season")
+        ? "season"
+        : type?.includes("series")
+        ? "film"
+        : "",
   };
 
   const handleFileChange = (event) => {
@@ -67,6 +76,7 @@ const TrailerForm = ({
       setFile(selectedFile);
       setChunkProgress(0);
       setUploadProgress(0);
+      setTranscodeProgress(0);
       setUploadedChunks([]);
       setTotalChunks(Math.ceil(selectedFile.size / chunkSize));
       const videoURL = URL.createObjectURL(selectedFile);
@@ -79,7 +89,7 @@ const TrailerForm = ({
   const checkChunkExists = async (start) => {
     try {
       const response = await axios.get(
-        "http://localhost:5000/api/check-chunk",
+        `${BaseUrl}/v1/studio/check-upload-chunk`,
         {
           params: { fileName: file.name, start },
         }
@@ -109,13 +119,9 @@ const TrailerForm = ({
       if (videoType === "Trailer") {
         axiosurl =
           type === "season"
-            ? `${BaseUrl}/v1/studio/uploadtrailer/upload-chunk/season/${params?.seasonId}`
-            : `${BaseUrl}/v1/studio/uploadtrailer/${id}`;
+            ? `${BaseUrl}/v1/studio/upload-chunk`
+            : `${BaseUrl}/v1/studio/upload-chunk`;
       } else {
-        axiosurl =
-          type === "episode"
-            ? `${BaseUrl}/v1/studio/episodeupload/${film?.id}`
-            : `${BaseUrl}/v1/studio/filmupload/${params?.id}`;
       }
 
       // "http://localhost:5000/api/upload-chunk",
@@ -203,13 +209,24 @@ const TrailerForm = ({
   const completeUpload = async () => {
     let axiosurl =
       type === "season"
-        ? `${BaseUrl}/v1/studio/uploadtrailer/complete-upload/season/${params?.seasonId}`
-        : `${BaseUrl}/v1/studio/uploadtrailer/complete-upload/${id}`;
+        ? `${BaseUrl}/v1/studio/complete-upload`
+        : `${BaseUrl}/v1/studio/complete-upload`;
     try {
       // "http://localhost:5000/api/complete-upload",
       const response = await axios.post(axiosurl, {
+        type: type?.includes("episode")
+          ? "episode"
+          : type.includes("film")
+          ? "film"
+          : type?.includes("series")
+          ? "film"
+          : type?.includes("season")
+          ? "season"
+          : "",
+        resourceId: type?.includes("season") ? params?.seasonId : film?.id,
         fileName: file.name,
         clientId: socket.id,
+        isTrailer: true,
       });
 
       if (response.data) {
@@ -243,8 +260,8 @@ const TrailerForm = ({
 
   const handlePauseUpload = () => {
     if (abortController?.current) {
-        abortController.current.abort();
-      }
+      abortController.current.abort();
+    }
 
     setIsPaused(true);
     setIsUploading(false);
@@ -253,8 +270,8 @@ const TrailerForm = ({
   const handleResumeUpload = () => {
     abortController.current = new AbortController();
     setIsPaused(false);
-    setIsUploading(()=>true);
-    
+    setIsUploading(() => true);
+
     handleUpload();
   };
 
@@ -263,6 +280,7 @@ const TrailerForm = ({
     setIsUploading(false);
     setIsPaused(false);
     setUploadProgress({});
+    setTranscodeProgress({});
     setChunkProgress(0);
     setUploadedChunks([]);
     setPreview(null);
@@ -279,15 +297,23 @@ const TrailerForm = ({
     // socketRef.current = io("ws://localhost:5000");
     socket.connect();
 
-    socket.on("uploadProgress", ({ resolution, progress }) => {
+    socket.on("uploadProgress", ({ content, progress }) => {
       setUploadProgress((prev) => ({
         ...prev,
-        [resolution]: progress,
+        [content?.resolution]: progress,
+      }));
+    });
+
+    socket.on("TranscodeProgress", ({ label, customProgress }) => {
+      setTranscodeProgress((prev) => ({
+        ...prev,
+        [label]: customProgress,
       }));
     });
 
     return () => {
       socket.off("uploadProgress");
+      socket.off("TranscodeProgress");
       socket.disconnect();
     };
   }, []);
@@ -357,6 +383,34 @@ const TrailerForm = ({
                           </div>
                         )}
 
+                        {/** transcode upload progress */}
+                        {Object.keys(transcodeProgress).length > 0 && (
+                          <div className="w-full max-w-md mt-4">
+                            <p className="mb-2 font-semibold">
+                              Conversion Upload Progress:
+                            </p>
+                            {Object.entries(transcodeProgress).map(
+                              ([resolution, progress]) => (
+                                <div key={resolution} className="mb-2">
+                                  <p className="text-sm font-medium">
+                                    {resolution.toUpperCase()}
+                                  </p>
+                                  <div className="w-full bg-[gray] rounded-full h-4">
+                                    <div
+                                      className="bg-[green] h-4 rounded-full flex items-center justify-center"
+                                      style={{ width: `${progress}%` }}
+                                    >
+                                      <p className="text-sm text-whites-40">
+                                        {progress}%
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            )}
+                          </div>
+                        )}
+
                         {/** resolution upload progress */}
                         {Object.keys(uploadProgress).length > 0 && (
                           <div className="w-full max-w-md mt-4">
@@ -369,9 +423,9 @@ const TrailerForm = ({
                                   <p className="text-sm font-medium">
                                     {resolution.toUpperCase()}
                                   </p>
-                                  <div className="w-full bg-gray-200 rounded-full h-4">
+                                  <div className="w-full bg-[gray] rounded-full h-4">
                                     <div
-                                      className="bg-green-600 h-4 rounded-full flex items-center justify-center"
+                                      className="bg-[green] h-4 rounded-full flex items-center justify-center"
                                       style={{ width: `${progress}%` }}
                                     >
                                       <p className="text-sm text-whites-40">
@@ -397,7 +451,11 @@ const TrailerForm = ({
                                   className="w-full object-cover h-[286.37px]"
                                   style={{ width: "400px", height: "286.37px" }}
                                 />
-                               <ErrorMessage errors={errors?.film ? true : false} name="film" message={errors?.film && errors.film} />
+                                <ErrorMessage
+                                  errors={errors?.film ? true : false}
+                                  name="film"
+                                  message={errors?.film && errors.film}
+                                />
                               </div>
                             ) : (
                               <FormContainer className="w-[300px]">
