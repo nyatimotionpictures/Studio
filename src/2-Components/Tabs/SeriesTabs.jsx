@@ -45,7 +45,7 @@ const displayUpcomingFilms = [
   },
 ];
 
-const SeriesTabs = ({ film, handleNewSeason }) => {
+const SeriesTabs = ({ film, handleNewSeason, type }) => {
   const [currentTabValue, setCurrentTabValue] = React.useState("1");
 
   const handleTabChange = (event, newValue) => {
@@ -65,7 +65,7 @@ const SeriesTabs = ({ film, handleNewSeason }) => {
       case "Thumbnails & Backdrops":
         return <ThumbnailTab film={film} />;
       case "Trailer":
-        return <TrailerTab film={film} />;
+        return <TrailerTab film={film} type={type} />;
       default:
         break;
     }

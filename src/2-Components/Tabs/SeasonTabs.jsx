@@ -36,7 +36,7 @@ const displayTabs = [
   },
 ];
 
-const SeasonTabs = ({ handleNewEpisode, film, season }) => {
+const SeasonTabs = ({ handleNewEpisode, film, season, type }) => {
   const [currentTabValue, setCurrentTabValue] = React.useState("1");
 
   const handleTabChange = (event, newValue) => {
@@ -60,11 +60,11 @@ const SeasonTabs = ({ handleNewEpisode, film, season }) => {
         case "Audience, Visibility":
           return <SeasonAudienceTab film={season} type={"season"} />;
       case "Posters":
-        return <ThumbnailTab film={season} />;
+        return <ThumbnailTab film={season} type={type} />;
       case "Trailer":
-        return <TrailerTab film={season} type={film?.type} />;
+        return <TrailerTab film={season} type={type} />;
         case "Pricing":
-          return <PricingTab film={season} type={film?.type} />;
+          return <PricingTab film={season} type={type} />;
       default:
         break;
     }

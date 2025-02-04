@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomStack from "../Stacks/CustomStack";
-import { Alert, Snackbar, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import Button from "../Buttons/Button";
 import * as yup from "yup";
 import { Form, Formik } from "formik";
@@ -100,11 +100,16 @@ const MultipleVideoForm = ({
   };
 
   const checkChunkExists = async (start) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
         `${BaseUrl}/v1/studio/check-upload-chunk`,
         {
           params: { fileName: file.name, start },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       return response.data.exists;
@@ -128,28 +133,11 @@ const MultipleVideoForm = ({
     try {
       let id = type === "episode" ? params?.episodeId : film?.id;
 
-      let axiosurl;
-
-      if (videoType === "Trailer") {
-        // axiosurl =
-        //   type === "season"
-        //     ? `${BaseUrl}/v1/studio/upload-chunk/season/${params?.seasonId}`
-        //     : `${BaseUrl}/v1/studio/upload-chunk${id}`;
-
-         axiosurl =
-          type === "season"
-            ? `${BaseUrl}/v1/studio/upload-chunk/season/${params?.seasonId}`
-            : `${BaseUrl}/v1/studio/upload-chunk${id}`;
-      } else {
-        // axiosurl =
-        //   type === "episode"
-        //     ? `${BaseUrl}/api/v1/studio/upload-chunk/${film?.id}`
-        //     : `${BaseUrl}/api/v1/studio/upload-chunk/${params?.id}`;
-        axiosurl =
+     let  axiosurl =
           type === "episode"
             ? `${BaseUrl}/v1/studio/upload-chunk`
             : `${BaseUrl}/v1/studio/upload-chunk`;
-      }
+      
 
       // "http://localhost:5000/api/upload-chunk",
       await axios.post(axiosurl, formData, {

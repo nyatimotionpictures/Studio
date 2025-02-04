@@ -25,6 +25,7 @@ const TrailerForm = ({
   handleModalClose,
 }) => {
   let params = useParams();
+ 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [chunkProgress, setChunkProgress] = useState(0);
@@ -36,6 +37,7 @@ const TrailerForm = ({
   const [totalChunks, setTotalChunks] = useState(0);
   const [chunkSize, setChunkSize] = useState(1 * 1024 * 1024); // Default to 1 MB
   //const [eventStreamMessages, setEventStreamMessages] = useState([]);
+
 
   const abortController = React.useRef(null);
   const MAX_RETRIES = 3;
@@ -87,11 +89,16 @@ const TrailerForm = ({
   };
 
   const checkChunkExists = async (start) => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
         `${BaseUrl}/v1/studio/check-upload-chunk`,
         {
           params: { fileName: file.name, start },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
       );
       return response.data.exists;
@@ -207,27 +214,39 @@ const TrailerForm = ({
   };
 
   const completeUpload = async () => {
+    const user = JSON.parse(localStorage.getItem("user"));
+    const token = user !== null && user.token ? user.token : null;
     let axiosurl =
       type === "season"
-        ? `${BaseUrl}/v1/studio/complete-upload`
-        : `${BaseUrl}/v1/studio/complete-upload`;
+        ? `${BaseUrl}/v1/studio/trailer-upload`
+        : `${BaseUrl}/v1/studio/trailer-upload`;
     try {
       // "http://localhost:5000/api/complete-upload",
+      let ftypes = type?.includes("episode")
+      ? "episode"
+      : type?.includes("film")
+      ? "film"
+      : type?.includes("series")
+      ? "film"
+      : type?.includes("season")
+      ? "season"
+      : "";
+      console.log("flim",type,ftypes, film);
+      let resourceId = film?.id;
       const response = await axios.post(axiosurl, {
-        type: type?.includes("episode")
-          ? "episode"
-          : type.includes("film")
-          ? "film"
-          : type?.includes("series")
-          ? "film"
-          : type?.includes("season")
-          ? "season"
-          : "",
-        resourceId: type?.includes("season") ? params?.seasonId : film?.id,
+        type: ftypes,
+        resourceId: resourceId,
         fileName: file.name,
         clientId: socket.id,
         isTrailer: true,
-      });
+      },
+      {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        }, 
+      }
+    );
 
       if (response.data) {
         setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
@@ -300,7 +319,7 @@ const TrailerForm = ({
     socket.on("uploadProgress", ({ content, progress }) => {
       setUploadProgress((prev) => ({
         ...prev,
-        [content?.resolution]: progress,
+        [content?.type]: progress,
       }));
     });
 
@@ -309,6 +328,7 @@ const TrailerForm = ({
         ...prev,
         [label]: customProgress,
       }));
+      
     });
 
     return () => {

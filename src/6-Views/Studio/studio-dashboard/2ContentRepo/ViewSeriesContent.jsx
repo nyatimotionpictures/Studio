@@ -197,6 +197,7 @@ const ViewSeriesContent = () => {
             <div className="mt-7">
               <SeriesTabs
                 film={filmsQuery.data?.film}
+                type={"series"}
                 handleNewSeason={handleNewSeason}
               />
             </div>

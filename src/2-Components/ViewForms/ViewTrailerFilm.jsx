@@ -18,7 +18,7 @@ import TrailerUploadVideo from "../UploadsVideo/TrailerUploadVideo";
 import MultipleUploadVideo from "../UploadsVideo/MultipleUploadVideo";
 
 const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
-  //console.log("films", film);
+  console.log("films", film);
   const [updatePriceId, setUpdatePriceId] = React.useState(null);
   let params = useParams();
 
@@ -52,33 +52,42 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
   //console.log("video", film?.video)
   useEffect(() => {
-    if (film?.video?.length > 0) {
-      film?.video?.filter((data) => {
-        console.log("data", data)
-        if (data.isTrailer === true && data.resolution === "HD") {
-          setVideoTrailer(data);
-        }
-
-        if (data?.resolution?.toLowerCase() === "sd") {
-          setVideoSD(data);
-        }
-        if (data?.resolution?.toLowerCase() === "hd" && data.isTrailer === false) {
-          setVideoHD(data);
-        }
-        if (data?.resolution?.toLowerCase() === "full_hd") {
-          setVideoFHD(data);
-        }
-        if (data?.resolution?.toLowerCase() === "ultra_hd") {
-          setVideoUHD(data);
-        }
-      });
-    } else {
-      setVideoTrailer(null);
-      setVideoSD(null);
-      setVideoHD(null);
-      setVideoFHD(null);
-      setVideoUHD(null);
+    if (type !== "season"){
+      if (film?.video?.length > 0) {
+        film?.video?.filter((data) => {
+          console.log("data", data)
+          if (data.isTrailer === true && data.resolution === "HD") {
+            setVideoTrailer(data);
+          }
+  
+          if (data?.resolution?.toLowerCase() === "sd") {
+            setVideoSD(data);
+          }
+          if (data?.resolution?.toLowerCase() === "hd" && data.isTrailer === false) {
+            setVideoHD(data);
+          }
+          if (data?.resolution?.toLowerCase() === "full_hd") {
+            setVideoFHD(data);
+          }
+          if (data?.resolution?.toLowerCase() === "ultra_hd") {
+            setVideoUHD(data);
+          }
+        });
+      } else {
+        setVideoTrailer(null);
+        setVideoSD(null);
+        setVideoHD(null);
+        setVideoFHD(null);
+        setVideoUHD(null);
+      }
+    }else {
+      if (film?.trailers?.length > 0) {
+        setVideoTrailer(film?.trailers[0]);
+      }else {
+        setVideoTrailer(null);
+      }
     }
+
   }, [film?.video, isLoading]);
 
   let deleteFun = (id) => {
@@ -251,7 +260,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
         </>
       )}
 
-      {film?.type !== "series" && type !== "series" && (
+      {film?.type !== "series" && type !== "season" && (
         <>
           {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
             <>
