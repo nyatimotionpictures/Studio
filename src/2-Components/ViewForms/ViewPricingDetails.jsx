@@ -1,6 +1,6 @@
 import React from "react";
 
-const ViewPricingDetails = ({ film, season }) => {
+const ViewPricingDetails = ({ film, season, pricingData, pricingSD, pricingHD, pricingFHD, pricingUHD }) => {
   return (
     <div className="flex flex-col h-full w-full gap-5 max-w-[1000px]">
       {/** Season SD Pricing */}
@@ -10,7 +10,7 @@ const ViewPricingDetails = ({ film, season }) => {
             SD Pricing
           </h1>
           <p className="font-[Inter-Regular] text-base text-[#706E72]">
-            {season?.sdPricing ?? "N/A"}
+           {pricingData?.currency} {pricingSD?.price ?? "N/A"}
           </p>
         </div>
       </div>
@@ -22,7 +22,8 @@ const ViewPricingDetails = ({ film, season }) => {
             HD Pricing
           </h1>
           <p className="font-[Inter-Regular] text-base text-[#706E72]">
-            {season?.hdPricing ?? "N/A"}
+            {pricingData?.currency} {pricingHD?.price ?? "N/A"}
+            
           </p>
         </div>
       </div>
@@ -34,7 +35,8 @@ const ViewPricingDetails = ({ film, season }) => {
             Full HD Pricing
           </h1>
           <p className="font-[Inter-Regular] text-base text-[#706E72]">
-            {season?.fullHDPricing ?? "N/A"}
+            {pricingData?.currency} {pricingFHD?.price ?? "N/A"}
+            
           </p>
         </div>
       </div>
@@ -46,7 +48,8 @@ const ViewPricingDetails = ({ film, season }) => {
             Ultra HD Pricing
           </h1>
           <p className="font-[Inter-Regular] text-base text-[#706E72]">
-            {season?.ultraHDPricing ?? "N/A"}
+            {pricingData?.currency} {pricingUHD?.price ?? "N/A"}
+           
           </p>
         </div>
       </div>

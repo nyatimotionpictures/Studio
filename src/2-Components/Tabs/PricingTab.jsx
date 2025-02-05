@@ -1,20 +1,27 @@
 import { useMutation } from '@tanstack/react-query';
 import React from 'react'
 import { useParams } from 'react-router-dom';
-import { updateSeason } from '../../5-Store/TanstackStore/services/api';
+import { createPrice, updatePrice, updateSeason } from '../../5-Store/TanstackStore/services/api';
 import EditPricingForm from '../Forms/EditPricingForm';
 import ViewPricingDetails from '../ViewForms/ViewPricingDetails';
 import Button from '../Buttons/Button';
 import { Alert, Snackbar } from '@mui/material';
+import { queryClient } from '../../lib/tanstack';
 
-const PricingTab = ({film, season}) => {
+const PricingTab = ({film, type}) => {
   const [editing, setEditing] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+  const [pricingData, setPricingData] = React.useState(null);
+  const [pricingSD, setPricingSD] = React.useState(null);
+  const [pricingHD, setPricingHD] = React.useState(null);
+  const [pricingFHD, setPricingFHD] = React.useState(null);
+  const [pricingUHD, setPricingUHD] = React.useState(null);
+
   let params = useParams();
 
-  const updateSeasonMutation = useMutation(
+  const createPriceMutation = useMutation(
     {
-      mutationFn: updateSeason,
+      mutationFn: createPrice,
       onSuccess: async (data) => {
         console.log("success", data);
         setSnackbarMessage({ message: data.message, severity: "success" });
@@ -24,7 +31,26 @@ const PricingTab = ({film, season}) => {
       onError: (error) => {
        
         setSnackbarMessage({
-          message: "error updating season",
+          message: error?.message,
+          severity: "error",
+        });
+      },
+    }
+   );
+
+   const updatePriceMutation = useMutation(
+    {
+      mutationFn: updatePrice,
+      onSuccess: async (data) => {
+        console.log("success", data);
+        setSnackbarMessage({ message: data.message, severity: "success" });
+        await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
+        handleEditing();
+      },
+      onError: (error) => {
+       
+        setSnackbarMessage({
+          message: error?.message,
           severity: "error",
         });
       },
@@ -47,8 +73,54 @@ const PricingTab = ({film, season}) => {
 
 
       const handleAPISubmission = (editInfo) => {
-        updateSeasonMutation.mutate(editInfo);
+        if (editInfo?.id !== null) {
+          updatePriceMutation.mutate(editInfo);
+        } else {
+          createPriceMutation.mutate(editInfo);
+        }
       };
+
+      React.useEffect(() => {
+        console.log("film", film)
+        if(type !== "season"){
+            if (film?.pricing?.length > 0) {
+              let data = film?.pricing[0]
+              data?.priceList?.filter((data) => {
+                if(data.resolution === "SD"){
+                 setPricingSD(() => data)
+                } else if(data.resolution === "HD"){
+                  setPricingHD(() => data)
+                } else if(data.resolution === "FHD"){
+                  setPricingFHD(() => data)
+                } else if(data.resolution === "UHD"){
+                  setPricingUHD(() => data)
+                }
+              })
+              
+              setPricingData(() => data)
+            } else {
+              setPricingData(() => null)
+            }
+        }else {
+          if (film?.pricing?.length > 0) {
+            let data = film?.pricing[0]
+            data?.priceList?.filter((data) => {
+              if(data.resolution === "SD"){
+               setPricingSD(() => data)
+              } else if(data.resolution === "HD"){
+                setPricingHD(() => data)
+              } else if(data.resolution === "FHD"){
+                setPricingFHD(() => data)
+              } else if(data.resolution === "UHD"){
+                setPricingUHD(() => data)
+              }
+            })
+            setPricingData(() => data)
+          } else {
+            setPricingData(() => null)
+          }
+        }
+      },[film]);
 
   return <div className='flex relative flex-col gap-6'>
     {editing ? (
@@ -56,12 +128,12 @@ const PricingTab = ({film, season}) => {
         <EditPricingForm innerref={formRef}
           handleStepNext={handleAPISubmission}
           editdata={true}
-          film={film} season={season} />
+          film={film} season={film} type={type} pricingData={pricingData} pricingSD={pricingSD} pricingHD={pricingHD} pricingFHD={pricingFHD} pricingUHD={pricingUHD} />
           
       </div>
     ) : (
       <div>
-        <ViewPricingDetails film={film} season={season} />
+        <ViewPricingDetails film={film} season={film} pricingData={pricingData} pricingSD={pricingSD} pricingHD={pricingHD} pricingFHD={pricingFHD} pricingUHD={pricingUHD} />
        
       </div>
     )}
@@ -76,7 +148,7 @@ const PricingTab = ({film, season}) => {
           Back
         </Button>
         {
-          updateSeasonMutation.isPending ? (
+          createPriceMutation.isPending || updatePriceMutation.isPending ? (
             <Button
               disabled
               className="w-max min-w-[150px] px-4 rounded-full"

@@ -111,7 +111,7 @@ const newEpisodeMutation = useMutation(
 
             <div className="mt-0">
               {/* <EpisodesListTable handleNewEpisode={handleNewEpisode} /> */}
-              <SeasonTabs type={"season"} handleNewEpisode={handleNewEpisode} film={filmsQuery.data?.film} season={seasonData}  />
+              <SeasonTabs type={"season"} handleNewEpisode={handleNewEpisode} film={filmsQuery.data?.film} season={seasonData}   />
             </div>
           </div>
         </div>

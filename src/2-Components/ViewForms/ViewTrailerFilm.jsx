@@ -82,13 +82,14 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
       }
     }else {
       if (film?.trailers?.length > 0) {
+        // console.log("trailers", film?.trailers[0])
         setVideoTrailer(film?.trailers[0]);
       }else {
         setVideoTrailer(null);
       }
     }
 
-  }, [film?.video, isLoading]);
+  }, [film, isLoading]);
 
   let deleteFun = (id) => {
     console.log(id);

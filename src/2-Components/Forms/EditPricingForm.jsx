@@ -5,28 +5,32 @@ import { FormContainer } from '../Stacks/InputFormStack';
 import CustomStack from '../Stacks/CustomStack';
 import ErrorMessage from './ErrorMessage';
 
-const EditPricingForm = ({ innerref, handleStepNext, editdata, film, season }) => {
+const EditPricingForm = ({ innerref, handleStepNext, editdata, film, season, pricingData, pricingSD, pricingHD, pricingFHD, pricingUHD, type }) => {
      const validationSchema = yup.object().shape({
-              sdPricing: yup.number().required("required"),
-              hdPricing: yup.number().required("required"),
-              fullHDPricing: yup.number().required("required"),
-              ultraHDPricing: yup.number().required("required"),
-              filmId: yup.string().required("required"),
+              SD: yup.number().required("required"),
+              HD: yup.number().required("required"),
+              FHD: yup.number().required("required"),
+              UHD: yup.number().required("required"),
+              type: yup.string().required("required"),
+              resourceId: yup.string().required("required"),
             });
 
             const initialValues = editdata ? {
-              id: season?.id ?? null,
-              sdPricing: season?.sdPricing ?? null,
-              hdPricing: season?.hdPricing ?? null,
-              fullHDPricing: season?.fullHDPricing ?? null,
-              ultraHDPricing: season?.ultraHDPricing ?? null,
-              filmId: film?.id ?? "",
-            } : {
-              sdPricing: null,
-              hdPricing: null,
-              fullHDPricing: null,
-              ultraHDPricing: null,
-              filmId: ""
+              id: pricingData?.id ?? null,
+              SD:  pricingSD?.price ?? 1000,
+              HD: pricingHD?.price ?? 1000,
+              FHD: pricingFHD?.price ?? 1000,
+              UHD: pricingUHD?.price ?? 1000,
+              currency: pricingData?.currency ?? "UGX",
+              type: type === "season" ? "season" : "movie",
+              resourceId: type === "season" ? season?.id : film?.id ?? "",
+            }
+             : {
+              SD: 1000,
+              HD:  1000,
+              FHD: 1000,
+              UHD:  1000,
+              resourceId: type === "season" ? season?.id : film?.id ?? "",
             };
   return (
       <Formik
@@ -34,7 +38,37 @@ const EditPricingForm = ({ innerref, handleStepNext, editdata, film, season }) =
         initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={(values, helpers) => {
-          handleStepNext(values);
+          let newValues = {
+            type: values.type,
+            resourceId: values.resourceId,
+            id: values.id,
+            priceList: [
+              {
+                ...pricingSD,
+                price: values.SD,
+                resolution: "SD",
+              },
+              {
+                ...pricingHD,
+                price: values.HD,
+                resolution: "HD",
+              },
+              {
+                ...pricingFHD,
+                price: values.FHD,
+                resolution: "FHD",
+              },
+              {
+                ...pricingUHD,
+                price: values.UHD,
+                resolution: "UHD",  
+              }
+            ],
+           
+            currency: values.currency,
+            
+          }
+          handleStepNext(newValues);
         }}
       >
 
@@ -44,97 +78,97 @@ const EditPricingForm = ({ innerref, handleStepNext, editdata, film, season }) =
                 {/** SD Pricing */}
                 <FormContainer>
                   <label
-                    htmlFor="sdPricing"
+                    htmlFor="SD"
                     className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                   >
                     SD Pricing (required)
                   </label>
                   <input
-                    id="sdPricing"
+                    id="SD"
                     type="number"
-                    value={values.sdPricing}
-                    name="sdPricing"
+                    value={values.SD}
+                    name="SD"
                     onChange={handleChange}
                     placeholder="SD Pricing"
                     onBlur={handleBlur}
                   />
 
                   <ErrorMessage
-                    errors={touched?.sdPricing && errors?.sdPricing ? true : false}
-                    name="sdPricing"
-                    message={errors?.sdPricing && errors.sdPricing}
+                    errors={touched?.SD && errors?.SD ? true : false}
+                    name="SD"
+                    message={errors?.SD && errors.SD}
                   />
                 </FormContainer>
                 {/** HD Pricing */}
                 <FormContainer>
                   <label
-                    htmlFor="hdPricing"
+                    htmlFor="HD"
                     className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                   >
                     HD Pricing (required)
                   </label>
                   <input
-                    id="hdPricing"
+                    id="HD"
                     type="number"
-                    value={values.hdPricing}
-                    name="hdPricing"
+                    value={values.HD}
+                    name="HD"
                     onChange={handleChange}
                     placeholder="HD Pricing"
                     onBlur={handleBlur}
                   />
 
                   <ErrorMessage
-                    errors={touched?.hdPricing && errors?.hdPricing ? true : false}
-                    name="hdPricing"
-                    message={errors?.hdPricing && errors.hdPricing}
+                    errors={touched?.HD && errors?.HD ? true : false}
+                    name="HD"
+                    message={errors?.HD && errors.HD}
                   />
                 </FormContainer>
                 {/** Full HD Pricing */}
                 <FormContainer>
                   <label
-                    htmlFor="fullHDPricing"
+                    htmlFor="FHD"
                     className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                   >
                     Full HD Pricing (required)
                   </label>
                   <input
-                    id="fullHDPricing"
+                    id="FHD"
                     type="number"
-                    value={values.fullHDPricing}
-                    name="fullHDPricing"
+                    value={values.FHD}
+                    name="FHD"
                     onChange={handleChange}
                     placeholder="Full HD Pricing"
                     onBlur={handleBlur}
                   />
 
                   <ErrorMessage
-                    errors={touched?.fullHDPricing && errors?.fullHDPricing ? true : false}
-                    name="fullHDPricing"
-                    message={errors?.fullHDPricing && errors.fullHDPricing}
+                    errors={touched?.FHD && errors?.FHD ? true : false}
+                    name="FHD"
+                    message={errors?.FHD && errors.FHD}
                   />
                 </FormContainer>
                 {/** Ultra HD Pricing */}
                 <FormContainer>
                   <label
-                    htmlFor="ultraHDPricing"
+                    htmlFor="UHD"
                     className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
                   >
                     Ultra HD Pricing (required)
                   </label>
                   <input
-                    id="ultraHDPricing"
+                    id="UHD"
                     type="number"
-                    value={values.ultraHDPricing}
-                    name="ultraHDPricing"
+                    value={values.UHD}
+                    name="UHD"
                     onChange={handleChange}
                     placeholder="Ultra HD Pricing"
                     onBlur={handleBlur}
                   />
 
                   <ErrorMessage
-                    errors={touched?.ultraHDPricing && errors?.ultraHDPricing ? true : false}
-                    name="ultraHDPricing"
-                    message={errors?.ultraHDPricing && errors.ultraHDPricing}
+                    errors={touched?.UHD && errors?.UHD ? true : false}
+                    name="UHD"
+                    message={errors?.UHD && errors.UHD}
                   />
                 </FormContainer>
              </CustomStack>

@@ -643,6 +643,46 @@ export const deleteCategory = async (
   }
 };
 
+/** create a price */
+export const createPrice = async (pricedata: any) => {
+  try {
+    let { id, ...rest } = pricedata
+    const response = await apiRequest.post(`/v1/studio/pricing`, rest);
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
+  }
+}
+
+/** create a price */
+export const updatePrice = async (pricedata: any) => {
+  try {
+    let { id, ...rest } = pricedata
+    const response = await apiRequest.put(`/v1/studio/pricing/${id}`, rest);
+    return response.data;
+  } catch (error) {
+    if (error?.response) {
+      throw {message: `Error ${error.response.status}: ${error.response.statusText}`}
+     
+    } else if (error.request) {
+      throw {message: "No response from server. Please check your network connection."}
+      
+    } else {
+      throw {message: `Request failed: ${error.message}`}
+     
+    }
+  }
+}
+
 /** get all categories */
 // export const getAllCategories = async () => {
 //   try {
