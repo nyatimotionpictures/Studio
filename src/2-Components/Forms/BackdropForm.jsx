@@ -13,6 +13,7 @@ import axios from "axios";
 import { BaseUrl } from "../../3-Middleware/apiRequest";
 import { queryClient } from "../../lib/tanstack";
 import { useParams } from "react-router-dom";
+import socket from "../../lib/socket";
 
 const BackdropForm = ({ handleModalClose, film, type }) => {
   //console.log("film", film, type)
@@ -20,6 +21,7 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
     const [preview, setPreview] = React.useState(null);
     const [snackbarMessage, setSnackbarMessage] = React.useState(null);
     const [uploadProgress, setUploadProgress] = React.useState(0);
+     const [sendProgress, setSendProgress] = React.useState(0);
   const posterValidationSchema = yup.object().shape({
     poster: yup
       .mixed()
@@ -107,31 +109,60 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
     accept: "image/*",
   });
 
+  React.useEffect(() => {
+    socket.connect();
 
+    socket.on("uploadProgress", ({ content, progress }) => {
+      setSendProgress((prev) => ({
+        ...prev,
+        [content?.type]: progress,
+      }));
+    });
+
+    return () => {
+      socket.off("uploadProgress");
+      // socket.off("TranscodeProgress");
+      // setTranscodeProgress(0)
+      socket.disconnect();
+    };
+  }, []);
   return (
     <>
-    {/* {
-     formik.isSubmitting && <div className="h-full w-full absolute bg-seconday-500 bg-opacity-20 top-0 left-0 flex justify-center items-center">
-
-        <UploadProgress url={`http://localhost:4500/api/v1/studio/posterupload/${film?.id}`} />
-        <CustomLoader />
-      </div>
-    } */}
-    
-     
-      
+ 
       <form onSubmit={formik.handleSubmit} >
         <div className="flex flex-col gap-8 h-full ">
           <div className="flex flex-col gap-5 flex-wrap items-center ">
           {uploadProgress > 0 && (
               <div className="flex flex-col gap-2">
-                <h4>Upload Progress: {uploadProgress}%</h4>
+                <h4>Sending Progress: {uploadProgress}%</h4>
                 <div className="w-full bg-secondary-500 rounded-lg h-2 relative">
                   <div
                     className="h-2 bg-primary-500 rounded-lg absolute"
                     style={{ width: `${uploadProgress}%` }}
                   ></div>
                 </div>
+              </div>
+            )}
+
+            {/** transcode upload progress */}
+            {Object.keys(sendProgress).length > 0 && (
+              <div className="w-full max-w-md mt-4">
+                <p className="mb-2 font-semibold">Upload Progress:</p>
+                {Object.entries(sendProgress).map(([resolution, progress]) => (
+                  <div key={resolution} className="mb-2">
+                    <p className="text-sm font-medium">
+                      {resolution.toUpperCase()}
+                    </p>
+                    <div className="w-full bg-[gray] rounded-full h-4">
+                      <div
+                        className="bg-[green] h-4 rounded-full flex items-center justify-center"
+                        style={{ width: `${progress}%` }}
+                      >
+                        <p className="text-sm text-whites-40">{progress}%</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
             {preview ? (
@@ -171,9 +202,6 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
             </FormContainer>
 
             )}
-
-         
-
           </div>
 
           {/** stepper control */}

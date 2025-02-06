@@ -29,7 +29,6 @@ const ViewSeasonContent = () => {
     if (params?.seasonId) {
       const filterSeason = filmsQuery.data?.film?.season?.filter((data) => data.id === params?.seasonId);
       setSeasonData(() => filterSeason?.length > 0 ? filterSeason[0] : null)
-     // console.log("seasonData", seasonData)
     } else {
       setSeasonData(() => null)
     }
@@ -51,9 +50,6 @@ const newEpisodeMutation = useMutation(
     }
 )
 
-  const handleEditSeason = () => {
-    setEditSeason(() => !editSeason)
-  }
 
   const handleNewEpisode = () => {
     setNewEpisode(() => !newEpisode)

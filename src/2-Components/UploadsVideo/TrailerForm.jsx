@@ -231,7 +231,7 @@ const TrailerForm = ({
       : type?.includes("season")
       ? "season"
       : "";
-      console.log("flim",type,ftypes, film);
+      // console.log("flim",type,ftypes, film);
       let resourceId = film?.id;
       const response = await axios.post(axiosurl, {
         type: ftypes,
