@@ -23,11 +23,20 @@ const EditSeasonForm = ({ innerref, handleStepNext, editdata, film, season }) =>
           title: yup.string().required("required"),
           filmId: yup.string().required("required"),
         });
+
+        console.log("season")
     
       const initialValues = editdata ? {
+        ...season,
         id: season?.id ?? null,
         season: season?.season ?? null,
         title: season?.title ?? "",
+        overview: season?.overview ?? "",
+        audienceTarget: season?.audienceTarget ?? "",
+        audienceAgeGroup: season?.audienceAgeGroup ?? "",
+        visibility: season?.visibility ?? "not published",
+        access: season?.access ?? "free",
+        featured: season?.featured ?? false,
        filmId: film?.id ?? "",
       } : {
         season: null,
@@ -97,6 +106,28 @@ const EditSeasonForm = ({ innerref, handleStepNext, editdata, film, season }) =>
                errors={touched?.title && errors?.title ? true : false}
                name="title"
                message={errors?.title && errors.title}
+             />
+           </FormContainer>
+
+           <FormContainer>
+             <label
+               htmlFor="title"
+               className="label font-[Inter-Regular] text-base text-whites-100 text-opacity-75"
+             >
+            Overiew (required)
+             </label>
+             <textarea
+                onBlur={handleBlur}
+                className="textarealg"
+                name="overview"
+                value={values.overview}
+                onChange={handleChange}
+                placeholder="overview"
+              />
+             <ErrorMessage
+               errors={touched?.overview && errors?.overview ? true : false}
+               name="title"
+               message={errors?.overview && errors.overview}
              />
            </FormContainer>
          

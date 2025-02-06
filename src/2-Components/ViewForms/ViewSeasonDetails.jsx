@@ -42,6 +42,17 @@ const ViewSeasonDetails = ({ film, season }) => {
       <div className="flex items-center gap-10">
         <div className="flex flex-col gap-[7px] min-w-[150px]">
           <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+            Overview
+          </h1>
+          <p className="font-[Inter-Regular] text-base text-[#706E72]">
+          {season?.overview}
+          </p>
+        </div>
+      </div>
+
+      <div className="flex items-center gap-10">
+        <div className="flex flex-col gap-[7px] min-w-[150px]">
+          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
             Created At
           </h1>
           <p className="font-[Inter-Regular] text-base text-[#706E72]">

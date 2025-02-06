@@ -4,6 +4,7 @@ import VideoUpload from "./VideoUpload";
 import { queryClient } from "../../lib/tanstack";
 import CustomStack from "../Stacks/CustomStack";
 import {
+  useDeleteAllVideo,
   useDeleteVideo,
   useUpdateVideoPrice,
 } from "../../5-Store/TanstackStore/services/mutations";
@@ -28,6 +29,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
 
   const [videoDeleteId, setVideoDeleteId] = React.useState(null);
+  const [videoIds, setVideoIds] = React.useState(null);
+
   const [videoTrailer, setVideoTrailer] = React.useState(null);
 
   const [videoSD, setVideoSD] = React.useState(null);
@@ -100,9 +103,56 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     setVideoDeleteId(() => null);
   };
 
+  //Delete All Videos
+  let deleteAllVideosMutation = useDeleteAllVideo();
+
+  let deleteAllVideos = (ids) => {
+   
+    let videostoDelete = {
+      videoIds: ids,
+    }
+    setVideoIds(() => (videostoDelete))
+  }
+
+  let cancelAllDeleteFun = () => {
+    setVideoIds(() => null);
+  };
+
+  let confirmDeleteAllFun = (ids) => {
+    // console.log(posterId)
+    deleteAllVideosMutation.mutate(ids, {
+      onSuccess: async (data, variables, context) => {
+        // console.log("run second");
+        // refetch();
+        setSnackbarMessage({ message: data.message, severity: "success" });
+         //await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
+        //  await queryClient.prefetchQuery({ queryKey: ["film", params?.id] });
+        setVideoTrailer(() => null);
+        setVideoSD(() => null);
+        setVideoHD(() => null);
+        setVideoUHD(() => null);
+        setVideoFHD(() => null);
+        cancelAllDeleteFun();
+        await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
+      },
+      onError: (error) => {
+        if (error?.message) {
+          setSnackbarMessage(() => ({
+            message: error.message,
+            severity: "error",
+          }));
+          cancelAllDeleteFun();
+        }
+      },
+    });
+    //cancelDeleteFun()
+  };
+
+
+
   let deleteVideoMutation = useDeleteVideo();
 
-  let updateVideoPriceMutation = useUpdateVideoPrice();
+ 
 
   let confirmDeleteFun = (posterId) => {
     // console.log(posterId)
@@ -279,8 +329,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             </>
           ) : (
             <>
-            <div className="w-[500px] flex flex-col items-center">
-              <Button onClick={() => deleteFun(params?.id)}>Delete The Resolutions</Button>
+            <div className="w-[500px] flex flex-col items-start">
+              <Button onClick={() => deleteAllVideos([ videoSD?.id, videoHD?.id, videoUHD?.id, videoFHD?.id])}>Delete Videos</Button>
             </div>
               {/** SD */}
               {film?.type !== "series" && type !== "series" && (
@@ -441,43 +491,12 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
         </>
       )}
 
-      {/** video single upload modal */}
-      {/* {openVideoModal && (
-        <div className="flex flex-col gap-8 absolute top-0 left-0 w-full h-full  cursor-pointer">
-          <VideoUpload
-            videoType={videoType}
-            handleModalClose={handleVideoModalClose}
-            film={film}
-            type={type}
-            videoPrice={videoPrice}
-            setErrorUpload={setErrorUpload}
-            setSucessUpload={setSucessUpload}
-            errorUpload={errorUpload}
-            sucessUpload={sucessUpload}
-          />
-        </div>
-      )} */}
 
-      {/** video multiple upload modal */}
-      {/* {openVideoMultipleModal && (
-        <div className="flex flex-col gap-8 absolute top-0 left-0 w-full h-full  cursor-pointer">
-          <VideoUploadMultiple
-            videoType={videoType}
-            handleModalClose={handleVideoMultipleModalClose}
-            film={film}
-            type={type}
-            videoPrice={videoPrice}
-            setErrorUpload={setErrorUpload}
-            setSucessUpload={setSucessUpload}
-            errorUpload={errorUpload}
-            sucessUpload={sucessUpload}
-          />
-        </div>
-      )} */}
+     
 
       {/** error & sucess message */}
 
-      {/** Modal for deleting Film */}
+      {/** Modal for deleting Trailer */}
       {videoDeleteId && (
         <CustomStack
           className="relative z-50"
@@ -520,75 +539,50 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
         </CustomStack>
       )}
 
-      {/** Popup for Updating Price */}
-      {updatePriceId && type !== "episode" && (
+
+        {/** Modal for deleting All Videos */}
+        {videoIds?.videoIds?.length > 0 && (
         <CustomStack
           className="relative z-50"
           aria-labelledby="modal-title"
           role="dialog"
           aria-modal="false"
         >
-          <div className="fixed inset-0 border rounded-xl bg-secondary-500 bg-opacity-75 transition-opacity"></div>
-
           <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden">
-            <div className="relative transform overflow-y-auto rounded-lg  bg-opacity-20 flex items-center justify-center h-screen text-left shadow-xl transition-all">
-              <div className="bg-secondary-900 px-16 pt-0 w-full max-w-[700px] rounded-lg  h-max">
-                {/** Edit forms  */}
-                <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
-                  <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
-                    <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                      Update Price for{" "}
-                      {updatePriceId?.filmTypes ? updatePriceId?.filmTypes : ""}
-                    </Typography>
-
-                    <div className="flex gap-5">
+            <div className="flex justify-center items-center top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-50 cursor-pointer">
+              <div className="flex flex-col items-center bg-whites-500 text-white rounded-lg p-4 shadow-lg gap-5">
+                <div className="text-xl font-bold font-[Inter-Bold]">
+                  Are you sure you want to delete all videos?
+                </div>
+                <div className="flex flex-col items-center bg-whites-500 text-white gap-5">
+                  {deleteAllVideosMutation.isPending ? (
+                    <Button className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]">
+                      Deleting...
+                    </Button>
+                  ) : (
+                    <>
+                      {" "}
                       <Button
-                        onClick={handleUpdatePriceClose}
-                        className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700"
+                        className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]"
+                        onClick={() => confirmDeleteAllFun(videoIds)}
                       >
-                        CANCEL & CLOSE
+                        Yes
                       </Button>
-                    </div>
-                  </CustomStack>
-
-                  {/** stepper show case */}
-
-                  {/** form */}
-                  <div className="block mb-3 h-full">
-                    <UpdatePriceForm
-                      innerref={formRef}
-                      handleStepNext={handleAPISubmission}
-                      film={film}
-                      filmTypes={updatePriceId}
-                    />
-                  </div>
-
-                  {/** stepper control */}
-                  <div className="border-t-2 border-t-secondary-500 relative">
-                    <div className="container flex items-center justify-end mx-0  mt-4 mb-8 ">
-                      {updateVideoPriceMutation.isPending ? (
-                        <Button
-                          disabled
-                          className="w-max min-w-[150px] px-5 rounded-lg"
-                        >
-                          Submitting...
-                        </Button>
-                      ) : (
-                        <Button
-                          onClick={handleFormSubmit}
-                          className="w-max min-w-[150px] px-5 rounded-lg"
-                        >
-                          Save & Close form
-                        </Button>
-                      )}
-                    </div>
-                  </div>
+                      <Button
+                        className="bg-secondary-500 hover:bg-secondary-700 text-whites-40 font-bold font-[Inter-SemiBold] py-2 px-4 rounded min-w-[150px]"
+                        onClick={cancelAllDeleteFun}
+                      >
+                        No
+                      </Button>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
           </div>
         </CustomStack>
       )}
+    
 
       {/** snackbar */}
       <Snackbar
