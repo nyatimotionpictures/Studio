@@ -1,7 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import axios from "axios";
 //http://localhost:4500/api
-export const sockeUrl = "api.nyatimotionpictures.com"
+export const sockeUrl = "https://api.nyatimotionpictures.com"
 // export const sockeUrl = "localhost:4500"
 
 export const BaseUrl = "https://api.nyatimotionpictures.com/api"; 
