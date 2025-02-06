@@ -1,7 +1,8 @@
 import {io } from "socket.io-client";
+import { sockeUrl } from "../3-Middleware/apiRequest";
 
 // Configure the socket connection
-const socket = io('ws://localhost:4500', {
+const socket = io(`ws://${sockeUrl}`, {
     autoConnect: false, // Prevent auto-connection; connect explicitly when needed
   });
   
