@@ -3,7 +3,6 @@ import Sidebar from '../../../../2-Components/Navigation/Sidebar'
 import CustomStack from '../../../../2-Components/Stacks/CustomStack'
 import { Alert, Snackbar, Typography } from '@mui/material'
 import Button from '../../../../2-Components/Buttons/Button.tsx'
-import posterImage from "../../../../1-Assets/Posterimage.png"
 import EpisodesListTable from '../../../../2-Components/Tables/EpisodesListTable.jsx'
 import EditSeasonForm from '../../../../2-Components/Forms/EditSeasonForm.jsx'
 import NewEpisodeForm from '../../../../2-Components/Forms/NewEpisodeForm.jsx'
@@ -30,7 +29,6 @@ const ViewSeasonContent = () => {
     if (params?.seasonId) {
       const filterSeason = filmsQuery.data?.film?.season?.filter((data) => data.id === params?.seasonId);
       setSeasonData(() => filterSeason?.length > 0 ? filterSeason[0] : null)
-     // console.log("seasonData", seasonData)
     } else {
       setSeasonData(() => null)
     }
@@ -52,9 +50,6 @@ const newEpisodeMutation = useMutation(
     }
 )
 
-  const handleEditSeason = () => {
-    setEditSeason(() => !editSeason)
-  }
 
   const handleNewEpisode = () => {
     setNewEpisode(() => !newEpisode)
@@ -90,7 +85,7 @@ const newEpisodeMutation = useMutation(
 
             <div className="flex flex-row items-center gap-9">
               <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-               Season: {seasonData?.title}
+               Season/Segment: {seasonData?.title}
               </Typography>
 
             
@@ -103,16 +98,6 @@ const newEpisodeMutation = useMutation(
                 
               </ul>
             </div>
-
-            {/* <div className="absolute right-0">
-              <Button
-                onClick={() => handleEditSeason()}
-                className="flex items-center gap-2 w-max bg-primary-500 bg-opacity-40 rounded-lg px-4"
-              >
-                <span className="icon-[solar--pen-new-square-linear] w-4 h-4"></span>
-                <Typography className="font-[Inter-SemiBold]">Edit Season Details</Typography>
-              </Button>
-            </div> */}
           </CustomStack>
 
           {/** Movie Details & Tabs  */}
@@ -121,7 +106,7 @@ const newEpisodeMutation = useMutation(
 
             <div className="mt-0">
               {/* <EpisodesListTable handleNewEpisode={handleNewEpisode} /> */}
-              <SeasonTabs handleNewEpisode={handleNewEpisode} film={filmsQuery.data?.film} season={seasonData}  />
+              <SeasonTabs type={"season"} handleNewEpisode={handleNewEpisode} film={filmsQuery.data?.film} season={seasonData}   />
             </div>
           </div>
         </div>

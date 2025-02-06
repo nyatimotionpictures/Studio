@@ -1,5 +1,21 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
-import { getAdminUser, getAllDonations, getAllFilms, getAllPurchases, getAllUsers, getFilmContent } from "./api";
+import { getAdminUser, getAllCategories, getAllDonations, getAllFilms, getAllPurchases, getAllUsers, getFilmContent, getSingleCategory } from "./api";
+
+export function useGetAllCategories() {
+    return useQuery({
+        queryKey: ["categories"],
+        queryFn: getAllCategories,
+       
+    });
+}
+
+export function useGetSingleCategory(id: String) {
+    return useQuery({
+        queryKey: ["category", id],
+        queryFn: () => getSingleCategory(id),
+       
+    });
+}
 
 export function useGetAllFilms() {
     return useQuery({

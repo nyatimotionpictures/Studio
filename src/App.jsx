@@ -20,6 +20,7 @@ import ViewSeasonContent from './6-Views/Studio/studio-dashboard/2ContentRepo/Vi
 import ViewEpisodeContent from './6-Views/Studio/studio-dashboard/2ContentRepo/ViewEpisodeContent.jsx';
 import Register from './6-Views/Studio/studio-auth/Register.jsx';
 import StreamSetting from './6-Views/Studio/studio-dashboard/7StreamSettings/StreamSetting.jsx';
+import ViewCategory from './6-Views/Studio/studio-dashboard/7StreamSettings/ViewCategory.jsx';
 
 function App() {
 let theme = useMemo(()=>createTheme(themeSettings), []);
@@ -44,6 +45,7 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               <Route path="/people" element={<People />} />
               <Route path="/setting" element={<Setting />} />
               <Route path="/streamsettings" element={<StreamSetting />} />
+              <Route path="/category/:id" element={<ViewCategory />} />
              
 
              

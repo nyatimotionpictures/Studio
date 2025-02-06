@@ -15,9 +15,9 @@ export const visibilityData = [
 export const accessData = [
   
   {
-    title: "Rent",
+    title: "rent",
   },
   {
-    title: "Free",
+    title: "free",
   }
 ];

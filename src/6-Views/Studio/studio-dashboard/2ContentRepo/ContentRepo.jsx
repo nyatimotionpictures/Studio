@@ -13,8 +13,10 @@ import { useGetAllFilms } from "../../../../5-Store/TanstackStore/services/queri
 import { useCreateFilm } from "../../../../5-Store/TanstackStore/services/mutations.ts";
 import { useMutation } from "@tanstack/react-query";
 import { postFilmContent } from "../../../../5-Store/TanstackStore/services/api.ts";
-import { data } from "autoprefixer";
+
 import { queryClient } from "../../../../lib/tanstack.ts";
+import SuccessErrorModal from "../../../../2-Components/Modals/SuccessErrorModal.jsx";
+import CustomLoader from "../../../../2-Components/Loader/CustomLoader.jsx";
 
 const ContentRepo = () => {
   const [openFilmModal, setOpenFilmModal] = React.useState(false);
@@ -25,21 +27,24 @@ const ContentRepo = () => {
   const mutation = useMutation({
     mutationFn: postFilmContent,
     onSuccess: (data) => {
-     // console.log("data", data);
-      setSnackbarMessage({message: data.message, severity: "success"});
-      if(data.film.type === "movie") {
-       navigate(`/content/view/film/${data.film.id}`);
-      } else if(data.film.type === "series") {
+      // console.log("data", data);
+      setSnackbarMessage({ message: data.message, severity: "success" });
+      if (data.film.type === "movie" || data.film.type?.includes("film")) {
+        navigate(`/content/view/film/${data.film.id}`);
+      } else if (data.film.type === "series") {
         navigate(`/content/view/series/${data.film.id}`);
       }
-      
     },
     onError: (error) => {
       console.log("error", error);
-     if (error?.message){
-      setSnackbarMessage(() => ({message: error.message, severity: "error"}));
-     }
-      
+      if (error?.message) {
+        setSnackbarMessage(() => ({
+          message: error.message,
+          severity: "error",
+        }));
+      } else {
+        setSnackbarMessage(() => ({ message: error.error, severity: "error" }));
+      }
     },
     onSettled: async (_, error) => {
       if (error) {
@@ -56,7 +61,6 @@ const ContentRepo = () => {
       stats: 0,
       icon: false,
     },
-   
 
     {
       title: "Total TV Series",
@@ -81,20 +85,22 @@ const ContentRepo = () => {
 
   React.useEffect(() => {
     setCurrentStep(() => stepperArray?.[0].title);
-   
   }, []);
   React.useEffect(() => {
-    if(filmsQuery.isSuccess) {
-      const filterMovies = filmsQuery.data?.films?.filter((data)=> data.type === "movie");
-      const filterSeries = filmsQuery.data?.films?.filter((data)=> data.type === "series");
-      setStatsArray(()=> ([
+    if (filmsQuery.isSuccess) {
+      const filterMovies = filmsQuery.data?.films?.filter(
+        (data) => data.type === "movie" || data?.type?.includes("film")
+      );
+      const filterSeries = filmsQuery.data?.films?.filter(
+        (data) => data.type === "series"
+      );
+      setStatsArray(() => [
         {
           title: "Total Videos",
           stats: filmsQuery.data?.films?.length ?? 0,
           icon: false,
         },
-       
-    
+
         {
           title: "Total TV Series",
           stats: filterSeries?.length ?? 0,
@@ -105,10 +111,7 @@ const ContentRepo = () => {
           stats: filterMovies?.length ?? 0,
           icon: false,
         },
-       
-      ]
-      
-      ))
+      ]);
     }
   }, [filmsQuery.data]);
 
@@ -251,8 +254,10 @@ const ContentRepo = () => {
         </div>
       </div>
 
+      {mutation?.isPending && <CustomLoader text="Uploading..." />}
+
       {/** snackbar */}
-      <Snackbar
+      {/* <Snackbar
         open={snackbarMessage !== null}
         autoHideDuration={6000}
         onClose={() => setSnackbarMessage(null)}
@@ -261,11 +266,20 @@ const ContentRepo = () => {
         <Alert severity={snackbarMessage?.severity} variant="filled">
           {snackbarMessage?.message}
         </Alert>
-      </Snackbar>
+      </Snackbar> */}
+
+      <SuccessErrorModal
+        open={snackbarMessage !== null}
+        severity={snackbarMessage?.severity}
+        modalTitle={snackbarMessage?.severity}
+        message={snackbarMessage?.message}
+        handleModalClose={() => setSnackbarMessage(null)}
+      />
+
       {/** popup upload Movie Modal */}
       {openFilmModal && (
         <CustomStack
-          className="relative z-50"
+          className="relative z-40"
           aria-labelledby="modal-title"
           role="dialog"
           aria-modal="false"
@@ -318,6 +332,7 @@ const ContentRepo = () => {
                       currentStep={currentStep}
                       handleStepPrev={handleStepPrev}
                       handleFormSubmit={handleFormSubmit}
+                      isSubmitting={mutation?.isPending}
                     />
                   </div>
                 </div>

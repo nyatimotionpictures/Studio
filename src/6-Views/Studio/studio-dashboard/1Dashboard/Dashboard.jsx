@@ -167,7 +167,7 @@ const Dashboard = () => {
     onSuccess: (data) => {
      // console.log("data", data);
       setSnackbarMessage({message: data.message, severity: "success"});
-      if(data.film.type === "movie") {
+      if(data.film.type === "movie" || data.film.type?.includes("film")) {
        navigate(`/content/view/film/${data.film.id}`);
       } else if(data.film.type === "series") {
         navigate(`/content/view/series/${data.film.id}`);
@@ -306,7 +306,7 @@ const Dashboard = () => {
               {/* <WatchedListTable /> */}
 
               <VideoListTable
-              films={filmsQuery.isPending ? [] : filmsQuery.data.films}
+              films={filmsQuery.isPending ? [] : filmsQuery?.data?.films}
             />
             </div>
           </div>
@@ -389,6 +389,8 @@ const Dashboard = () => {
           </div>
         </CustomStack>
       )}
+
+      
     </div>
   );
 };

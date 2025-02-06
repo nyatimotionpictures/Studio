@@ -30,7 +30,7 @@ const AudienceTab = ({film, type}) => {
       onError: (error) => {
         console.log("error", error);
         setSnackbarMessage({
-          message: "error updating film",
+          message: error?.message,
           severity: "error",
         });
       }
@@ -59,11 +59,11 @@ const AudienceTab = ({film, type}) => {
       {
         editing ? (
           <div >
-            <Audience innerref={formRef} handleStepNext={handleAPISubmission}   editdata={true}
+            <Audience innerref={formRef} handleStepNext={handleAPISubmission} type={type}   editdata={true}
             film={film} />
           </div>
         ) : (<div>
-          <ViewAudienceDetails film={film}  />
+          <ViewAudienceDetails film={film} type={type}  />
         </div>)
       }
 

@@ -21,12 +21,10 @@ const Thumbnails = ({ film, type }) => {
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   let params = useParams();
 
-  console.log(film)
+  // console.log(film)
 
   const [posterData, setPosterData] = React.useState([]);
   const [backdropData, setBackdropData] = React.useState([]);
-
-  //console.log("film", film);
 
   React.useEffect(() => {
     let posterArray = [];

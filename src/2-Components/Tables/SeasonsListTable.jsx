@@ -71,7 +71,7 @@ const SeasonsListTable = ({ handleNewSeason, film }) => {
             footer: "seasonNumber",
         },
         {
-            header: "Season Title",
+            header: "Season/Segment Title",
             accessorKey: "title",
             footer: "seasonTitle",
         },

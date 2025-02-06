@@ -291,7 +291,7 @@ const EpisodesListTable = ({ handleNewEpisode, season }) => {
           </div>
 
           {
- /** Modal for deleting Season */
+ /** Modal for deleting Episode */
          }
       {episodeDeleteId && (
         <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-50 cursor-pointer">
