@@ -68,6 +68,7 @@ const PosterForm = ({ handleModalClose, film, type }) => {
         formData.append("filmId", values.filmId);
         formData.append("poster", values.files[0]);
         formData.append("isCover", values.isCover);
+        formData.append("type", type);
 
         //  updateFilmMutation.mutate(formData);
         let url =

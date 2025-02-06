@@ -3,7 +3,6 @@ import Sidebar from '../../../../2-Components/Navigation/Sidebar'
 import CustomStack from '../../../../2-Components/Stacks/CustomStack'
 import { Alert, Snackbar, Typography } from '@mui/material'
 import Button from '../../../../2-Components/Buttons/Button.tsx'
-import posterImage from "../../../../1-Assets/Posterimage.png"
 import EpisodesListTable from '../../../../2-Components/Tables/EpisodesListTable.jsx'
 import EditSeasonForm from '../../../../2-Components/Forms/EditSeasonForm.jsx'
 import NewEpisodeForm from '../../../../2-Components/Forms/NewEpisodeForm.jsx'

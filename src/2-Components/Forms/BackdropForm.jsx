@@ -50,7 +50,7 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
     validationSchema: posterValidationSchema,
     onSubmit: async (values, helpers) => {
       try {
-        console.log("values", values);
+        // console.log("values", values);
         const user = JSON.parse(localStorage.getItem("user"));
         helpers.setSubmitting(true);
            
@@ -60,6 +60,7 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
              //formData.append("filmId", values.filmId);
              formData.append("poster", values.files[0]);
                formData.append("isCover", values.isCover);
+               formData.append("type", type);
        
            //  updateFilmMutation.mutate(formData);
            let axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
