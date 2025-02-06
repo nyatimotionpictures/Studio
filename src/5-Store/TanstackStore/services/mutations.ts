@@ -1,5 +1,5 @@
 import { useMutation } from "@tanstack/react-query";
-import { changePassword, deleteFilm, deletePoster, deleteVideo, postFilmContent, updateFilmContent, updateVideoPrice } from "./api.ts";
+import { changePassword, deleteAllVideos, deleteFilm, deletePoster, deleteVideo, postFilmContent, updateFilmContent, updateVideoPrice } from "./api.ts";
 import { CreateNewFilmRequest, UpdateFilmRequest } from "../../types/film.ts";
 import { queryClient } from "../../../lib/tanstack.ts";
 /** create film mutation */
@@ -88,6 +88,21 @@ export function useDeleteVideo() {
  
   return useMutation({
     mutationFn: (data: String) => deleteVideo(data),
+    onSettled: async (_, error) => {
+      if (error) {
+      //  console.log("error", error);
+      } else {
+       // await queryClient.invalidateQueries({ queryKey: ["films"] });
+      }
+    },
+  });
+}
+
+/** delete video mutation */
+export function useDeleteAllVideo() {
+ 
+  return useMutation({
+    mutationFn: (data: any) => deleteAllVideos(data),
     onSettled: async (_, error) => {
       if (error) {
       //  console.log("error", error);

@@ -23,12 +23,20 @@ const EditSeasonForm = ({ innerref, handleStepNext, editdata, film, season }) =>
           title: yup.string().required("required"),
           filmId: yup.string().required("required"),
         });
+
+        console.log("season")
     
       const initialValues = editdata ? {
         ...season,
         id: season?.id ?? null,
         season: season?.season ?? null,
         title: season?.title ?? "",
+        overview: season?.overview ?? "",
+        audienceTarget: season?.audienceTarget ?? "",
+        audienceAgeGroup: season?.audienceAgeGroup ?? "",
+        visibility: season?.visibility ?? "not published",
+        access: season?.access ?? "free",
+        featured: season?.featured ?? false,
        filmId: film?.id ?? "",
       } : {
         season: null,

@@ -469,6 +469,24 @@ export const deleteVideo = async (
   }
 };
 
+/** delete video by film id : used */
+export const deleteAllVideos = async (
+  videoIds:any
+) => {
+  try {
+    const response = await apiRequest.delete(
+      `/v1/studio/videos`, {
+        data: videoIds
+      }
+    );
+
+    return response.data;
+  } catch (error) {
+    const axiosError = error as AxiosError<ErrorResponse>;
+    throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+  }
+};
+
 /** Categories */
 /** mutation: create new category */
 export const createNewCategory = async (
