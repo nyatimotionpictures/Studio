@@ -6,7 +6,11 @@ import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import { Typography } from "@mui/material";
 import { ratingArray } from "../../1-Assets/data/Ratings";
-import { visibilityData, accessData } from "../../1-Assets/data/FilmSelectData";
+import {
+  visibilityData,
+  accessData,
+  visibilitySeasonData,
+} from "../../1-Assets/data/FilmSelectData";
 
 import CustomRatingButton from "../RadioButtons/CustomRatingButton";
 import ErrorMessage from "./ErrorMessage";
@@ -162,32 +166,65 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
               </CustomStack>
               {/** radio buttons */}
               <CustomStack className="flex-col gap-2 text-[#f2f2f2]">
-                {visibilityData.map((data, index) => {
-                  return (
-                    <div
-                      key={data.title}
-                      className="flex relative h-5 items-center gap-3"
-                    >
-                      <input
-                        checked={values.visibility === data.title}
-                        onChange={() => {
-                          if (data?.title === "coming soon") {
-                            setFieldValue("visibility", data.title);
-                            setFieldValue("access", "free");
-                            setFieldValue("featured", false);
-                          } else {
-                            setFieldValue("visibility", data.title);
-                            setFieldValue("enableDonation", false);
-                          }
-                        }}
-                        name="visibility"
-                        type="radio"
-                        id={data.title}
-                      />
-                      <label htmlFor={data.title}>{data.title}</label>
-                    </div>
-                  );
-                })}
+                {type !== "season" ? (
+                  <>
+                    {visibilityData.map((data, index) => {
+                      return (
+                        <div
+                          key={data.title}
+                          className="flex relative h-5 items-center gap-3"
+                        >
+                          <input
+                            checked={values.visibility === data.title}
+                            onChange={() => {
+                              if (data?.title === "coming soon") {
+                                setFieldValue("visibility", data.title);
+                                setFieldValue("access", "free");
+                                setFieldValue("featured", false);
+                              } else {
+                                setFieldValue("visibility", data.title);
+                                setFieldValue("enableDonation", false);
+                              }
+                            }}
+                            name="visibility"
+                            type="radio"
+                            id={data.title}
+                          />
+                          <label htmlFor={data.title}>{data.title}</label>
+                        </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <>
+                    {visibilitySeasonData.map((data, index) => {
+                      return (
+                        <div
+                          key={data.title}
+                          className="flex relative h-5 items-center gap-3"
+                        >
+                          <input
+                            checked={values.visibility === data.title}
+                            onChange={() => {
+                              if (data?.title === "coming soon") {
+                                setFieldValue("visibility", data.title);
+                                setFieldValue("access", "free");
+                                setFieldValue("featured", false);
+                              } else {
+                                setFieldValue("visibility", data.title);
+                                setFieldValue("enableDonation", false);
+                              }
+                            }}
+                            name="visibility"
+                            type="radio"
+                            id={data.title}
+                          />
+                          <label htmlFor={data.title}>{data.title}</label>
+                        </div>
+                      );
+                    })}
+                  </>
+                )}
               </CustomStack>
 
               <ErrorMessage

@@ -12,6 +12,18 @@ export const visibilityData = [
 
 ];
 
+export const visibilitySeasonData = [
+  {
+    title: "not published",
+  },
+  {
+    title: "published",
+  },
+  
+
+
+];
+
 export const accessData = [
   
   {
