@@ -35,7 +35,7 @@ const TrailerForm = ({
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
-  const [chunkSize, setChunkSize] = useState(1 * 1024 * 1024); // Default to 1 MB
+  const [chunkSize, setChunkSize] = useState(10 * 1024 * 1024); // Default to 1 MB
   //const [eventStreamMessages, setEventStreamMessages] = useState([]);
 
 
