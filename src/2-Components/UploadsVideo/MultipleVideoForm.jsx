@@ -8,7 +8,6 @@ import { FormContainer } from "../Stacks/InputFormStack";
 import ErrorMessage from "../Forms/ErrorMessage";
 import axios from "axios";
 import { BaseUrl } from "../../3-Middleware/apiRequest";
-//import UploadProgress from "../TrackProgress/UploadProgress";
 import { queryClient } from "../../lib/tanstack";
 import { useParams } from "react-router-dom";
 import socket from "../../lib/socket";
@@ -210,7 +209,9 @@ const MultipleVideoForm = ({
         setUploadedChunks([...localUploadedChunks]);
         localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
       } catch (error) {
-        alert("Error uploading chunk. Pausing upload.");
+        setErrorUpload(
+          "Error uploading chunk. Try again"
+        );
         handlePauseUpload();
         break;
       }
@@ -243,13 +244,21 @@ const MultipleVideoForm = ({
       console.log(response.data);
       if (response.data.success) {
         await completeUpload();
-        // setIsUploading(false);
-        // setIsPaused(false);
-        // alert("Chunks combined successfully!");
+       
       }
     } catch (error) {
-      console.error("Error combining chunks:", error);
-      alert("Failed to combine chunks.");
+      if (error?.response) {
+        setErrorUpload(
+          `Error ${error.response.status}: ${error.response.statusText}`
+        );
+      } else if (error.request) {
+        setErrorUpload(
+          "No response from server. Please check your network connection."
+        );
+      } else {
+        setErrorUpload(`combining chunks failed: ${error.message}`);
+      }
+      throw error
     } finally {
       setIsUploading(false);
     }
@@ -294,11 +303,9 @@ const MultipleVideoForm = ({
         await queryClient.invalidateQueries({
           queryKey: ["film", params?.id],
         });
-        alert("Upload to DigitalOcean Spaces completed successfully!");
-        //   setUploadProgress(100);
+       
       }
     } catch (error) {
-      console.error("Error completing upload:", error);
       localStorage.removeItem(file.name);
       if (error?.response) {
         setErrorUpload(
@@ -413,13 +420,8 @@ const MultipleVideoForm = ({
                   onSubmit={async (values, helpers) => {}}
                 >
                   {({
-                    values,
-                    handleChange,
                     errors,
-                    touched,
                     setFieldValue,
-                    handleBlur,
-                    isSubmitting,
                   }) => (
                     <Form>
                       <div className="flex flex-col gap-8 h-full w-full">
@@ -633,7 +635,8 @@ const MultipleVideoForm = ({
                       <div className="flex flex-row gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            // setSnackbarMessage(null)
+                            setErrorUpload(null);
+                            setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
@@ -671,7 +674,8 @@ const MultipleVideoForm = ({
                       <div className="flex flex-col gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            // setSnackbarMessage(null)
+                            setErrorUpload(null);
+                            setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"

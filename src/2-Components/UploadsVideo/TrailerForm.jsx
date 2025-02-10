@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import CustomStack from "../Stacks/CustomStack";
-import { Alert, Snackbar, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import Button from "../Buttons/Button";
 import * as yup from "yup";
 import { Form, Formik } from "formik";
@@ -17,7 +17,6 @@ const TrailerForm = ({
   videoType,
   film,
   type,
-  videoPrice,
   setErrorUpload,
   setSucessUpload,
   errorUpload,
@@ -72,6 +71,7 @@ const TrailerForm = ({
         : "",
   };
 
+  //video file change
   const handleFileChange = (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile && selectedFile.type.startsWith("video/")) {
@@ -88,6 +88,7 @@ const TrailerForm = ({
     }
   };
 
+  /** Check if Chunk exists */
   const checkChunkExists = async (start) => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = user !== null && user.token ? user.token : null;
@@ -108,6 +109,7 @@ const TrailerForm = ({
     }
   };
 
+  /** Upload Chunk */
   const uploadChunk = async (chunk, start, retries = 0) => {
     const user = JSON.parse(localStorage.getItem("user"));
 
@@ -147,7 +149,7 @@ const TrailerForm = ({
       });
     } catch (error) {
       if (axios.isCancel(error)) {
-        console.log("Upload paused");
+        // console.log("Upload paused");
       } else {
         if (retries < MAX_RETRIES) {
           console.warn(`Retrying chunk ${start}... (${retries + 1})`);
@@ -202,7 +204,7 @@ const TrailerForm = ({
         setUploadedChunks([...localUploadedChunks]);
         localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
       } catch (error) {
-        alert("Error uploading chunk. Pausing upload.");
+        // alert("Error uploading chunk. Pausing upload.");
         handlePauseUpload();
         break;
       }
@@ -232,16 +234,14 @@ const TrailerForm = ({
             },
           }
         );
-        console.log(response.data);
+
         if (response.data.success) {
           await completeUpload();
-          // setIsUploading(false);
-          // setIsPaused(false);
-          // alert("Chunks combined successfully!");
         }
       } catch (error) {
-        console.error("Error combining chunks:", error);
-        alert("Failed to combine chunks.");
+        setErrorUpload(`Error combining chunks: ${error.message}`);
+        // console.error("Error combining chunks:", error);
+      
       } finally {
         setIsUploading(false);
       }
@@ -288,11 +288,10 @@ const TrailerForm = ({
         await queryClient.invalidateQueries({
           queryKey: ["film", params?.id],
         });
-        alert("Upload to DigitalOcean Spaces completed successfully!");
+        // alert("Upload to DigitalOcean Spaces completed successfully!");
         //   setUploadProgress(100);
       }
     } catch (error) {
-      console.error("Error completing upload:", error);
       localStorage.removeItem(file.name);
       if (error?.response) {
         setErrorUpload(
@@ -305,7 +304,7 @@ const TrailerForm = ({
       } else {
         setErrorUpload(`Request failed: ${error.message}`);
       }
-      alert("Failed to complete upload.");
+      // alert("Failed to complete upload.");
     } finally {
       setIsUploading(false);
     }
@@ -400,21 +399,14 @@ const TrailerForm = ({
 
               {/** form */}
               <div className="flex w-full items-center justify-center h-full ">
-                {/* <PosterForm handleModalClose={handleModalClose} /> */}
-
                 <Formik
                   initialValues={initialValues}
                   validationSchema={validationSchema}
                   onSubmit={async (values, helpers) => {}}
                 >
                   {({
-                    values,
-                    handleChange,
                     errors,
-                    touched,
                     setFieldValue,
-                    handleBlur,
-                    isSubmitting,
                   }) => (
                     <Form>
                       <div className="flex flex-col gap-8 h-full w-full">
@@ -594,21 +586,6 @@ const TrailerForm = ({
                               Cancel Upload
                             </Button>
                           )}
-                          {/* <Button
-                              type="submit"
-                              className="font-[Inter-Medium]  bg-primary-500 rounded-lg"
-                            >
-                              Submit
-                            </Button> */}
-                          {/* <Button
-                              onClick={() => {
-                                setPreview(null);
-                                handleModalClose();
-                              }}
-                              className="font-[Inter-Medium]  bg-secondary-500 rounded-lg"
-                            >
-                              Cancel
-                            </Button>{" "} */}
                         </div>
                       </div>
                     </Form>
@@ -642,7 +619,8 @@ const TrailerForm = ({
                       <div className="flex flex-row gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            // setSnackbarMessage(null)
+                            setErrorUpload(null);
+                            setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
@@ -680,7 +658,8 @@ const TrailerForm = ({
                       <div className="flex flex-col gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            // setSnackbarMessage(null)
+                            setErrorUpload(null);
+                            setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"

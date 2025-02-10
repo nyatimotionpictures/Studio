@@ -3,8 +3,6 @@ import Sidebar from '../../../../2-Components/Navigation/Sidebar'
 import CustomStack from '../../../../2-Components/Stacks/CustomStack'
 import { Alert, Snackbar, Typography } from '@mui/material'
 import Button from '../../../../2-Components/Buttons/Button.tsx'
-import EpisodesListTable from '../../../../2-Components/Tables/EpisodesListTable.jsx'
-import EditSeasonForm from '../../../../2-Components/Forms/EditSeasonForm.jsx'
 import NewEpisodeForm from '../../../../2-Components/Forms/NewEpisodeForm.jsx'
 import SeasonTabs from '../../../../2-Components/Tabs/SeasonTabs.jsx'
 import { useGetFilm } from '../../../../5-Store/TanstackStore/services/queries.ts'
@@ -14,7 +12,6 @@ import { createNewEpisode } from '../../../../5-Store/TanstackStore/services/api
 import { queryClient } from '../../../../lib/tanstack.ts'
 
 const ViewSeasonContent = () => {
-  const [editSeason, setEditSeason] = React.useState(false)
   const [newEpisode, setNewEpisode] = React.useState(false)
   const [seasonData, setSeasonData] = React.useState(null)
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);

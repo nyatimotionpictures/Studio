@@ -2,12 +2,9 @@ import React from "react";
 import Sidebar from "../../../../2-Components/Navigation/Sidebar";
 import CustomStack from "../../../../2-Components/Stacks/CustomStack";
 import { Alert, Snackbar, Typography } from "@mui/material";
-import posterImage from "../../../../1-Assets/Posterimage.png";
 
 import Button from "../../../../2-Components/Buttons/Button.tsx";
-import EditSeriesForm from "../../../../2-Components/Forms/EditSeriesForm.jsx";
 import NewSeasonForm from "../../../../2-Components/Forms/NewSeasonForm.jsx";
-import SeasonsListTable from "../../../../2-Components/Tables/SeasonsListTable.jsx";
 import { useGetFilm } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import { useParams } from "react-router-dom";
 import SeriesTabs from "../../../../2-Components/Tabs/SeriesTabs.jsx";

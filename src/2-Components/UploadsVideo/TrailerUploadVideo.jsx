@@ -1,23 +1,11 @@
-import React, { useState } from "react";
-import CustomStack from "../Stacks/CustomStack";
-import { Alert, Snackbar, Typography } from "@mui/material";
+import React from "react";
 import Button from "../Buttons/Button";
-import * as yup from "yup";
-import { Form, Formik } from "formik";
-import { FormContainer } from "../Stacks/InputFormStack";
-import ErrorMessage from "../Forms/ErrorMessage";
-import axios from "axios";
-import { BaseUrl } from "../../3-Middleware/apiRequest";
-//import UploadProgress from "../TrackProgress/UploadProgress";
-import { queryClient } from "../../lib/tanstack";
-import { useParams } from "react-router-dom";
 import TrailerForm from "./TrailerForm";
 
 const TrailerUploadVideo = ({
   videoType,
   film,
   type,
-  videoPrice,
   setErrorUpload,
   setSucessUpload,
   errorUpload,

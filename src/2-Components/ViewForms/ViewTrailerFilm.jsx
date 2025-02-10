@@ -6,28 +6,18 @@ import CustomStack from "../Stacks/CustomStack";
 import {
   useDeleteAllVideo,
   useDeleteVideo,
-  useUpdateVideoPrice,
 } from "../../5-Store/TanstackStore/services/mutations";
 import { Alert, Snackbar, Typography } from "@mui/material";
-import UpdatePriceForm from "../Forms/UpdatePriceForm";
 import { useParams } from "react-router-dom";
 import { Player } from "video-react";
 import "video-react/dist/video-react.css";
-import VideoUploadMultiple from "./VideoUploadMultiple";
 import CustomLoader from "../Loader/CustomLoader";
 import TrailerUploadVideo from "../UploadsVideo/TrailerUploadVideo";
 import MultipleUploadVideo from "../UploadsVideo/MultipleUploadVideo";
 
 const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
-  console.log("films", film);
-  const [updatePriceId, setUpdatePriceId] = React.useState(null);
   let params = useParams();
-
-  const [videoType, setVideoType] = React.useState(null);
-  const [videoPrice, setVideoPrice] = React.useState(null);
-
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
-
   const [videoDeleteId, setVideoDeleteId] = React.useState(null);
   const [videoIds, setVideoIds] = React.useState(null);
 
@@ -50,10 +40,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     }
   };
 
-
-
-
-  //console.log("video", film?.video)
   useEffect(() => {
     if (type !== "season"){
       if (film?.video?.length > 0) {
@@ -85,7 +71,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
       }
     }else {
       if (film?.trailers?.length > 0) {
-        // console.log("trailers", film?.trailers[0])
+       
         setVideoTrailer(film?.trailers[0]);
       }else {
         setVideoTrailer(null);
@@ -122,11 +108,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     // console.log(posterId)
     deleteAllVideosMutation.mutate(ids, {
       onSuccess: async (data, variables, context) => {
-        // console.log("run second");
-        // refetch();
         setSnackbarMessage({ message: data.message, severity: "success" });
-         //await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
-        //  await queryClient.prefetchQuery({ queryKey: ["film", params?.id] });
+         
         setVideoTrailer(() => null);
         setVideoSD(() => null);
         setVideoHD(() => null);
@@ -152,17 +135,11 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
   let deleteVideoMutation = useDeleteVideo();
 
- 
-
   let confirmDeleteFun = (posterId) => {
     // console.log(posterId)
     deleteVideoMutation.mutate(posterId, {
       onSuccess: async (data, variables, context) => {
-        // console.log("run second");
-        // refetch();
         setSnackbarMessage({ message: data.message, severity: "success" });
-         //await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
-        //  await queryClient.prefetchQuery({ queryKey: ["film", params?.id] });
         setVideoTrailer(() => null);
         setVideoSD(() => null);
         setVideoHD(() => null);
@@ -183,49 +160,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     });
     //cancelDeleteFun()
   };
-
-  // const handleUpdatePrice = (id, types, currentPrice) => {
-  //   setUpdatePriceId(() => ({
-  //     id: id,
-  //     filmTypes: types,
-  //     currentPrice: currentPrice,
-  //   }));
-  // };
-
-  // const handleUpdatePriceClose = () => {
-  //   setUpdatePriceId(() => null);
-  // };
-
-  // const handleUpdatePriceSubmit = (data) => {
-  //   //updatePrice(data)
-  // };
-
-  // const handleAPISubmission = (editInfo) => {
-  //   //updateSeasonMutation.mutate(editInfo);
-  //   updateVideoPriceMutation.mutate(editInfo, {
-  //     onSuccess: async (data, variables, context) => {
-  //       // console.log("run second");
-  //       setSnackbarMessage({ message: data.message, severity: "success" });
-  //       setVideoTrailer(() => null);
-  //       setVideoSD(() => null);
-  //       setVideoHD(() => null);
-  //       setVideoUHD(() => null);
-  //       setVideoFHD(() => null);
-  //       // handleUpdatePriceClose();
-  //       await queryClient.invalidateQueries({ queryKey: ["film", params?.id] });
-  //     },
-  //     onError: (error) => {
-  //       //  console.log("error", error);
-  //       if (error?.message) {
-  //         setSnackbarMessage(() => ({
-  //           message: error.message,
-  //           severity: "error",
-  //         }));
-  //         handleUpdatePriceClose();
-  //       }
-  //     },
-  //   });
-  // };
 
   console.log(isLoading)
 
@@ -301,7 +235,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
            
               film={film}
               type={type}
-              videoPrice={videoPrice}
               setErrorUpload={setErrorUpload}
               setSucessUpload={setSucessUpload}
               errorUpload={errorUpload}
@@ -310,6 +243,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
           )}
         </>
       )}
+
+      {/** Multiple Upload Video */}
 
       {film?.type !== "series" && type !== "season" && (
         <>
@@ -320,7 +255,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                 
                 film={film}
                 type={type}
-                videoPrice={videoPrice}
                 setErrorUpload={setErrorUpload}
                 setSucessUpload={setSucessUpload}
                 errorUpload={errorUpload}

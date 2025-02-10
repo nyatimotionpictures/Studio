@@ -1,13 +1,11 @@
-import React, { useEffect, useRef, useState } from "react";
+import React from "react";
 import Sidebar from "../../../../2-Components/Navigation/Sidebar.tsx";
 import CustomStack from "../../../../2-Components/Stacks/CustomStack.jsx";
 import { Box, Typography } from "@mui/material";
-import posterImage from "../../../../1-Assets/Posterimage.png"
 import FilmDetailTab from "../../../../2-Components/Tabs/FilmDetailTab.jsx";
 import { useParams } from "react-router-dom";
 import { useGetFilm } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import NoImage from "../../../../1-Assets/no-image.svg"
-import CustomLoader from "../../../../2-Components/Loader/CustomLoader.jsx";
 
 const ViewEpisodeContent = () => {
   const [filmId, setFilmId] = React.useState(null);
