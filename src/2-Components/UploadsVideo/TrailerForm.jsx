@@ -35,7 +35,7 @@ const TrailerForm = ({
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
-  const [chunkSize, setChunkSize] = useState(10 * 1024 * 1024); // Default to 1 MB
+  const [chunkSize, setChunkSize] = useState(1 * 1024 * 1024); // Default to 1 MB
   //const [eventStreamMessages, setEventStreamMessages] = useState([]);
 
 
@@ -93,7 +93,7 @@ const TrailerForm = ({
     const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
-        `${BaseUrl}/v1/studio/check-upload-chunk`,
+        `${BaseUrl}/v1/studio/check-upload-chunks`,
         {
           params: { fileName: file.name, start },
           headers: {
@@ -126,8 +126,8 @@ const TrailerForm = ({
       if (videoType === "Trailer") {
         axiosurl =
           type === "season"
-            ? `${BaseUrl}/v1/studio/upload-chunk`
-            : `${BaseUrl}/v1/studio/upload-chunk`;
+            ? `${BaseUrl}/v1/studio/upload-chunks`
+            : `${BaseUrl}/v1/studio/upload-chunks`;
       } else {
       }
 
@@ -209,17 +209,51 @@ const TrailerForm = ({
     }
 
     if (localUploadedChunks.length === totalChunks) {
-      await completeUpload();
+      await handleCombineChunks();
     }
   };
+
+    //combing chunks
+    const handleCombineChunks = async () => {
+      try {
+        const user = JSON.parse(localStorage.getItem("user"));
+  
+        const token = user !== null && user.token ? user.token : null;
+        const response = await axios.post(
+         `${BaseUrl}/v1/studio/combine-chunks`,
+          {
+            fileName: file.name,
+            clientId: socket.id,
+          },
+          {
+            headers: {
+             
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        console.log(response.data);
+        if (response.data.success) {
+          await completeUpload();
+          // setIsUploading(false);
+          // setIsPaused(false);
+          // alert("Chunks combined successfully!");
+        }
+      } catch (error) {
+        console.error("Error combining chunks:", error);
+        alert("Failed to combine chunks.");
+      } finally {
+        setIsUploading(false);
+      }
+    };
 
   const completeUpload = async () => {
     const user = JSON.parse(localStorage.getItem("user"));
     const token = user !== null && user.token ? user.token : null;
     let axiosurl =
       type === "season"
-        ? `${BaseUrl}/v1/studio/trailer-upload`
-        : `${BaseUrl}/v1/studio/trailer-upload`;
+        ? `${BaseUrl}/v1/studio/trailer-uploads`
+        : `${BaseUrl}/v1/studio/trailer-uploads`;
     try {
       // "http://localhost:5000/api/complete-upload",
       let ftypes = type?.includes("episode")

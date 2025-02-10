@@ -69,10 +69,10 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
           if (data?.resolution?.toLowerCase() === "hd" && data.isTrailer === false) {
             setVideoHD(data);
           }
-          if (data?.resolution?.toLowerCase() === "full_hd") {
+          if (data?.resolution?.toLowerCase() === "fhd") {
             setVideoFHD(data);
           }
-          if (data?.resolution?.toLowerCase() === "ultra_hd") {
+          if (data?.resolution?.toLowerCase() === "uhd") {
             setVideoUHD(data);
           }
         });

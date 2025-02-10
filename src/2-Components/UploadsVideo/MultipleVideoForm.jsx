@@ -104,7 +104,7 @@ const MultipleVideoForm = ({
     const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
-        `${BaseUrl}/v1/studio/check-upload-chunk`,
+        `${BaseUrl}/v1/studio/check-upload-chunks`,
         {
           params: { fileName: file.name, start },
           headers: {
@@ -135,8 +135,8 @@ const MultipleVideoForm = ({
 
      let  axiosurl =
           type === "episode"
-            ? `${BaseUrl}/v1/studio/upload-chunk`
-            : `${BaseUrl}/v1/studio/upload-chunk`;
+            ? `${BaseUrl}/v1/studio/upload-chunks`
+            : `${BaseUrl}/v1/studio/upload-chunks`;
       
 
       // "http://localhost:5000/api/upload-chunk",
@@ -217,7 +217,41 @@ const MultipleVideoForm = ({
     }
 
     if (localUploadedChunks.length === totalChunks) {
-      await completeUpload();
+      await handleCombineChunks();
+    }
+  };
+
+  //combing chunks
+    const handleCombineChunks = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      const token = user !== null && user.token ? user.token : null;
+      const response = await axios.post(
+       `${BaseUrl}/v1/studio/combine-chunks`,
+        {
+          fileName: file.name,
+          clientId: socket.id,
+        },
+        {
+          headers: {
+           
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      if (response.data.success) {
+        await completeUpload();
+        // setIsUploading(false);
+        // setIsPaused(false);
+        // alert("Chunks combined successfully!");
+      }
+    } catch (error) {
+      console.error("Error combining chunks:", error);
+      alert("Failed to combine chunks.");
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -234,8 +268,8 @@ const MultipleVideoForm = ({
 
     let axiosurl =
     type === "episode"
-      ? `${BaseUrl}/v1/studio/complete-upload`
-      : `${BaseUrl}/v1/studio/complete-upload`;
+      ? `${BaseUrl}/v1/studio/complete-uploads`
+      : `${BaseUrl}/v1/studio/complete-uploads`;
     try {
       // "http://localhost:5000/api/complete-upload",
       const response = await axios.post(
