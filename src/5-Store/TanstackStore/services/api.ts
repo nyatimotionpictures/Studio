@@ -384,26 +384,6 @@ export const deleteEpisode = async (
           }
         };
 
-        /** Update Video Price */
-        export const updateVideoPrice = async ( 
-          priceDetails : any
-        ) => {
-          try {
-             let   {
-            videoId,
-           ...rest
-          } = priceDetails
-            const response = await apiRequest.put(
-              `/v1/studio/updateVideoPrice/${videoId}`, rest
-            );
-
-            return response.data;
-          } catch (error) {
-            const axiosError = error as AxiosError<ErrorResponse>;
-            throw axiosError.response?.data ?? { message: "An unknown error occurred" };
-          }
-        };
-
 /** mutation: upload film video */
 export const uploadVideoContent = async (
   filmContent: CreateNewFilmRequest

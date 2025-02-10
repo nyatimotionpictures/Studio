@@ -17,38 +17,42 @@ import { useMutation } from "@tanstack/react-query";
 import { useDeleteFilm } from "../../5-Store/TanstackStore/services/mutations";
 import moment from "moment-timezone";
 
-const VideoListTable = ({films
-}) => {
- 
-let navigate = useNavigate()
-const [filmDeleteId, setFilmDeleteId] = React.useState(null);
-const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+const VideoListTable = ({ films }) => {
+  let navigate = useNavigate();
+  const [filmDeleteId, setFilmDeleteId] = React.useState(null);
+  const [snackbarMessage, setSnackbarMessage] = React.useState(null);
 
-let deleteFun = (id) => {
-  setFilmDeleteId(()=> id)
-}
+  let deleteFun = (id) => {
+    setFilmDeleteId(() => id);
+  };
 
-let cancelDeleteFun = () => {
-  setFilmDeleteId(null)
-}
-let deleteFilmMutation = useDeleteFilm();
+  let cancelDeleteFun = () => {
+    setFilmDeleteId(null);
+  };
+  let deleteFilmMutation = useDeleteFilm();
 
-//console.log("all films", films)
+  //console.log("all films", films)
 
-let confirmDeleteFun = () => {
-      deleteFilmMutation.mutate(filmDeleteId, {onSuccess: (data, variables, context) => { 
-        console.log("run second")
-        setSnackbarMessage({message: data.message, severity: "success"});
-        cancelDeleteFun()
-       }, onError:(error)=>{
-        console.log("erroe", error)
-        if (error?.message){
-          setSnackbarMessage(() => ({message: error.message, severity: "error"}));
-          cancelDeleteFun()
-         }
-      }})
-  //cancelDeleteFun()
-}
+  let confirmDeleteFun = () => {
+    deleteFilmMutation.mutate(filmDeleteId, {
+      onSuccess: (data, variables, context) => {
+        console.log("run second");
+        setSnackbarMessage({ message: data.message, severity: "success" });
+        cancelDeleteFun();
+      },
+      onError: (error) => {
+        console.log("erroe", error);
+        if (error?.message) {
+          setSnackbarMessage(() => ({
+            message: error.message,
+            severity: "error",
+          }));
+          cancelDeleteFun();
+        }
+      },
+    });
+    //cancelDeleteFun()
+  };
   const data = useMemo(() => films, [films]);
   const columnHelper = createColumnHelper();
 
@@ -59,60 +63,47 @@ let confirmDeleteFun = () => {
       accessorKey: "title",
       footer: "Content",
     },
-    columnHelper.accessor("releaseDate", { 
-      cell: (info) => (
-        <p>
-         { moment(info.getValue()).format("DD/MMM/YYYY")}
-         
-        </p>
-      ),
+    columnHelper.accessor("releaseDate", {
+      cell: (info) => <p>{moment(info.getValue()).format("DD/MMM/YYYY")}</p>,
       header: "Release Date",
-     
-   }
-  ),
- 
+    }),
+
     columnHelper.accessor("type", {
       cell: (info) => (
-        
-          <div className=" w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">{info.getValue()}</div>
-      
+        <div className=" w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">
+          {info.getValue()}
+        </div>
       ),
       header: "Type",
     }),
 
-    columnHelper.accessor("genre", { 
-        cell: (info) => (
-          <ul>
-            {
-              info.getValue()?.length !== 0 && (
-                <>
-                 {info.getValue().map((genre, index) => (
-              <span key={index} className="text-whites-40  rounded-lg  ">{(index ? ", " : "") + genre}</span>
-            ))}
-                </>
-              )
-            }
-           
-          </ul>
-        )
-     }),
-   
+    columnHelper.accessor("genre", {
+      cell: (info) => (
+        <ul>
+          {info.getValue()?.length !== 0 && (
+            <>
+              {info.getValue().map((genre, index) => (
+                <span key={index} className="text-whites-40  rounded-lg  ">
+                  {(index ? ", " : "") + genre}
+                </span>
+              ))}
+            </>
+          )}
+        </ul>
+      ),
+    }),
+
     {
       header: "Year",
       accessorKey: "yearOfProduction",
-      footer: "Content"
+      footer: "Content",
     },
-    columnHelper.accessor("createdAt", { 
+    columnHelper.accessor("createdAt", {
       cell: (info) => (
-        <p>
-         { moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}
-         
-        </p>
+        <p>{moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}</p>
       ),
       header: "Date Created",
-     
-   }
-  ),
+    }),
     {
       header: "DTR",
       accessorKey: "DTO",
@@ -121,18 +112,25 @@ let confirmDeleteFun = () => {
     columnHelper.accessor("id", {
       cell: (info, cell) => (
         <div className="flex gap-4">
- <Button onClick={()=> info.row.original.type === "movie" || info.row.original.type?.includes("film") ? navigate(`/content/view/film/${info.row.original.id}`) : navigate(`/content/view/series/${info.row.original.id}`)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500 text-opacity-60">
-          <span className="icon-[solar--maximize-square-linear] w-6 h-6"></span>
-     
-        </Button>
+          <Button
+            onClick={() =>
+              info.row.original.type === "movie" ||
+              info.row.original.type?.includes("film")
+                ? navigate(`/content/view/film/${info.row.original.id}`)
+                : navigate(`/content/view/series/${info.row.original.id}`)
+            }
+            className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500 text-opacity-60"
+          >
+            <span className="icon-[solar--maximize-square-linear] w-6 h-6"></span>
+          </Button>
 
-        <Button onClick={()=> deleteFun(info.row.original.id)} className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500 text-opacity-60">
-          <span className="icon-[solar--trash-bin-trash-bold] w-6 h-6"></span>
-     
-        </Button>
-
+          <Button
+            onClick={() => deleteFun(info.row.original.id)}
+            className="h-max w-max flex items-center justify-center px-0 py-0 bg-transparent hover:bg-transparent hover:text-primary-500 text-opacity-60"
+          >
+            <span className="icon-[solar--trash-bin-trash-bold] w-6 h-6"></span>
+          </Button>
         </div>
-       
       ),
       header: "",
     }),
@@ -157,7 +155,7 @@ let confirmDeleteFun = () => {
     XLSX.writeFile(workbook, fileName ? `${fileName}.xlsx` : "data.xlsx");
   };
 
- // console.log(data)
+  // console.log(data)
   return (
     <CustomStack className="flex-col ">
       <CustomStack className="justify-between items-center">
@@ -209,9 +207,12 @@ let confirmDeleteFun = () => {
           </thead>
 
           <tbody>
-            { table?.getRowModel()?.rows?.length > 0 ? (
+            {table?.getRowModel()?.rows?.length > 0 ? (
               table?.getRowModel().rows?.map((row) => (
-                <tr key={row.id} className="border-y border-secondary-600 hover:bg-secondary-400">
+                <tr
+                  key={row.id}
+                  className="border-y border-secondary-600 hover:bg-secondary-400"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <td
                       key={cell.id}
@@ -299,35 +300,41 @@ let confirmDeleteFun = () => {
         </div>
       </div>
 
-{/** Modal for deleting Film */}
+      {/** Modal for deleting Film */}
       {filmDeleteId && (
         <div className="flex justify-center items-center absolute top-0 left-0 w-full h-full bg-black/50 backdrop-blur-sm z-50 cursor-pointer">
-          
           <div className="flex flex-col items-center bg-whites-500 text-white rounded-lg p-4 shadow-lg gap-5">
-            <div className="text-xl font-bold font-[Inter-Bold]">Are you sure you want to delete this?</div>
-            <div className="flex flex-col items-center bg-whites-500 text-white gap-5">
-
-{deleteFilmMutation.isPending ?(<Button className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]">Deleting...</Button>) : <>  <Button
-              className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]"
-              onClick={confirmDeleteFun}
-            >
-              Yes
-            </Button>
-            <Button
-              className="bg-secondary-500 hover:bg-secondary-700 text-whites-40 font-bold font-[Inter-SemiBold] py-2 px-4 rounded min-w-[150px]"
-              onClick={cancelDeleteFun}
-            >
-              No
-            </Button></>
-}
-          
+            <div className="text-xl font-bold font-[Inter-Bold]">
+              Are you sure you want to delete this?
             </div>
-           
+            <div className="flex flex-col items-center bg-whites-500 text-white gap-5">
+              {deleteFilmMutation.isPending ? (
+                <Button className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]">
+                  Deleting...
+                </Button>
+              ) : (
+                <>
+                  {" "}
+                  <Button
+                    className="bg-primary-500 hover:bg-primary-700 w-full text-whites-40 text-opacity-80 font-bold py-2 px-4 rounded min-w-[150px] font-[Inter-SemiBold]"
+                    onClick={confirmDeleteFun}
+                  >
+                    Yes
+                  </Button>
+                  <Button
+                    className="bg-secondary-500 hover:bg-secondary-700 text-whites-40 font-bold font-[Inter-SemiBold] py-2 px-4 rounded min-w-[150px]"
+                    onClick={cancelDeleteFun}
+                  >
+                    No
+                  </Button>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
 
-{/** snackbar */}
+      {/** snackbar */}
       <Snackbar
         open={snackbarMessage !== null}
         autoHideDuration={6000}

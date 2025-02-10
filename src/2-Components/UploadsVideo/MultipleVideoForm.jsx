@@ -8,7 +8,6 @@ import { FormContainer } from "../Stacks/InputFormStack";
 import ErrorMessage from "../Forms/ErrorMessage";
 import axios from "axios";
 import { BaseUrl } from "../../3-Middleware/apiRequest";
-//import UploadProgress from "../TrackProgress/UploadProgress";
 import { queryClient } from "../../lib/tanstack";
 import { useParams } from "react-router-dom";
 import socket from "../../lib/socket";
@@ -104,7 +103,7 @@ const MultipleVideoForm = ({
     const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
-        `${BaseUrl}/v1/studio/check-upload-chunk`,
+        `${BaseUrl}/v1/studio/check-upload-chunks`,
         {
           params: { fileName: file.name, start },
           headers: {
@@ -135,8 +134,8 @@ const MultipleVideoForm = ({
 
      let  axiosurl =
           type === "episode"
-            ? `${BaseUrl}/v1/studio/upload-chunk`
-            : `${BaseUrl}/v1/studio/upload-chunk`;
+            ? `${BaseUrl}/v1/studio/upload-chunks`
+            : `${BaseUrl}/v1/studio/upload-chunks`;
       
 
       // "http://localhost:5000/api/upload-chunk",
@@ -210,14 +209,58 @@ const MultipleVideoForm = ({
         setUploadedChunks([...localUploadedChunks]);
         localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
       } catch (error) {
-        alert("Error uploading chunk. Pausing upload.");
+        setErrorUpload(
+          "Error uploading chunk. Try again"
+        );
         handlePauseUpload();
         break;
       }
     }
 
     if (localUploadedChunks.length === totalChunks) {
-      await completeUpload();
+      await handleCombineChunks();
+    }
+  };
+
+  //combing chunks
+    const handleCombineChunks = async () => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+
+      const token = user !== null && user.token ? user.token : null;
+      const response = await axios.post(
+       `${BaseUrl}/v1/studio/combine-chunks`,
+        {
+          fileName: file.name,
+          clientId: socket.id,
+        },
+        {
+          headers: {
+           
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log(response.data);
+      if (response.data.success) {
+        await completeUpload();
+       
+      }
+    } catch (error) {
+      if (error?.response) {
+        setErrorUpload(
+          `Error ${error.response.status}: ${error.response.statusText}`
+        );
+      } else if (error.request) {
+        setErrorUpload(
+          "No response from server. Please check your network connection."
+        );
+      } else {
+        setErrorUpload(`combining chunks failed: ${error.message}`);
+      }
+      throw error
+    } finally {
+      setIsUploading(false);
     }
   };
 
@@ -234,8 +277,8 @@ const MultipleVideoForm = ({
 
     let axiosurl =
     type === "episode"
-      ? `${BaseUrl}/v1/studio/complete-upload`
-      : `${BaseUrl}/v1/studio/complete-upload`;
+      ? `${BaseUrl}/v1/studio/complete-uploads`
+      : `${BaseUrl}/v1/studio/complete-uploads`;
     try {
       // "http://localhost:5000/api/complete-upload",
       const response = await axios.post(
@@ -260,11 +303,9 @@ const MultipleVideoForm = ({
         await queryClient.invalidateQueries({
           queryKey: ["film", params?.id],
         });
-        alert("Upload to DigitalOcean Spaces completed successfully!");
-        //   setUploadProgress(100);
+       
       }
     } catch (error) {
-      console.error("Error completing upload:", error);
       localStorage.removeItem(file.name);
       if (error?.response) {
         setErrorUpload(
@@ -379,13 +420,8 @@ const MultipleVideoForm = ({
                   onSubmit={async (values, helpers) => {}}
                 >
                   {({
-                    values,
-                    handleChange,
                     errors,
-                    touched,
                     setFieldValue,
-                    handleBlur,
-                    isSubmitting,
                   }) => (
                     <Form>
                       <div className="flex flex-col gap-8 h-full w-full">
@@ -599,7 +635,8 @@ const MultipleVideoForm = ({
                       <div className="flex flex-row gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            // setSnackbarMessage(null)
+                            setErrorUpload(null);
+                            setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
@@ -637,7 +674,8 @@ const MultipleVideoForm = ({
                       <div className="flex flex-col gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            // setSnackbarMessage(null)
+                            setErrorUpload(null);
+                            setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"

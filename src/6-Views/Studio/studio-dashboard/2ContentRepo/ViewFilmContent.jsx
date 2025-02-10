@@ -3,8 +3,7 @@ import React from "react";
 import Sidebar from "../../../../2-Components/Navigation/Sidebar.tsx";
 import CustomStack from "../../../../2-Components/Stacks/CustomStack.jsx";
 import {  Typography } from "@mui/material";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import posterImage from "../../../../1-Assets/Posterimage.png"
+import { useNavigate, useParams } from "react-router-dom";
 import FilmDetailTab from "../../../../2-Components/Tabs/FilmDetailTab.jsx";
 import { useGetFilm } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import NoImage from "../../../../1-Assets/no-image.svg"
