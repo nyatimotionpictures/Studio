@@ -94,7 +94,7 @@ const TrailerForm = ({
     const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
-        `${BaseUrl}/v1/studio/check-upload-chunks`,
+        `${BaseUrl}/v1/studio/check-upload-chunk`,
         {
           params: { fileName: file.name, start },
           headers: {
@@ -128,8 +128,8 @@ const TrailerForm = ({
       if (videoType === "Trailer") {
         axiosurl =
           type === "season"
-            ? `${BaseUrl}/v1/studio/upload-chunks`
-            : `${BaseUrl}/v1/studio/upload-chunks`;
+            ? `${BaseUrl}/v1/studio/upload-chunk`
+            : `${BaseUrl}/v1/studio/upload-chunk`;
       } else {
       }
 
@@ -218,7 +218,8 @@ const TrailerForm = ({
     }
 
     if (localUploadedChunks.length === totalChunks) {
-      await handleCombineChunks();
+      // await handleCombineChunks();
+      await completeUpload();
     }
   };
 
@@ -259,8 +260,8 @@ const TrailerForm = ({
     const token = user !== null && user.token ? user.token : null;
     let axiosurl =
       type === "season"
-        ? `${BaseUrl}/v1/studio/trailer-uploads`
-        : `${BaseUrl}/v1/studio/trailer-uploads`;
+        ? `${BaseUrl}/v1/studio/trailer-upload`
+        : `${BaseUrl}/v1/studio/trailer-upload`;
     try {
       // "http://localhost:5000/api/complete-upload",
       let ftypes = type?.includes("episode")

@@ -7,7 +7,7 @@ import { sockeUrl } from "../3-Middleware/apiRequest";
 //   });
 
 const socket = io(`${sockeUrl}`, {
-  autoConnect: true, // Prevent auto-connection; connect explicitly when needed
+  autoConnect: false, // Prevent auto-connection; connect explicitly when needed
 });
   
   export default socket;
