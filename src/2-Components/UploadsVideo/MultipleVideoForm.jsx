@@ -200,6 +200,9 @@ const MultipleVideoForm = ({
       const exists = await checkChunkExists(start);
       if (exists) {
         console.log(`Chunk ${i} already exists, skipping...`);
+        localUploadedChunks.push(i);
+        setUploadedChunks([...localUploadedChunks]);
+        localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
         continue;
       }
 
@@ -212,6 +215,7 @@ const MultipleVideoForm = ({
         setErrorUpload(
           "Error uploading chunk. Try again"
         );
+        localStorage.removeItem(file.name);
         handlePauseUpload();
         break;
       }
@@ -300,9 +304,7 @@ const MultipleVideoForm = ({
       if (response.data) {
         setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
         localStorage.removeItem(file.name);
-        await queryClient.invalidateQueries({
-          queryKey: ["film", params?.id],
-        });
+       
        
       }
     } catch (error) {
@@ -635,8 +637,8 @@ const MultipleVideoForm = ({
                       <div className="flex flex-row gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            setErrorUpload(null);
-                            setSucessUpload(null);
+                            // setErrorUpload(null);
+                            // setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
@@ -674,9 +676,9 @@ const MultipleVideoForm = ({
                       <div className="flex flex-col gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            setErrorUpload(null);
-                            setSucessUpload(null);
-                            handleModalClose();
+                            // setErrorUpload(null);
+                            // setSucessUpload(null);
+                            handleModalClose('success');
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
                         >

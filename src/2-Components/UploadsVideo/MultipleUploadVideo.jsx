@@ -1,6 +1,7 @@
 import React from "react";
 import MultipleVideoForm from "./MultipleVideoForm";
 import Button from "../Buttons/Button";
+import { queryClient } from "../../lib/tanstack";
 
 const MultipleUploadVideo = ({
   videoType,
@@ -18,11 +19,16 @@ const MultipleUploadVideo = ({
       document.body.style.overflow = "hidden";
     }
   };
-  const handleVideoModalClose = () => {
+  const handleVideoModalClose = async (type) => {
     setOpenVideoModal(() => false);
     setErrorUpload(null);
     setSucessUpload(null);
     document.body.style.overflow = "unset";
+    if (type === "success") {
+         await queryClient.invalidateQueries({
+           queryKey: ["film", film?.id],
+         });
+       }
   };
   return (
     <div className="flex flex-col  gap-6">
