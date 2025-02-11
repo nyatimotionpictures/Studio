@@ -38,6 +38,15 @@ const MultipleVideoForm = ({
   const abortController = React.useRef(null);
   const MAX_RETRIES = 3;
 
+  React.useEffect(() => {
+    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    if (connection?.downlink) {
+      const speedMbps = connection.downlink;
+      const calculatedChunkSize = Math.min(Math.max(speedMbps * 1024 * 1024, 5 * 1024 * 1024), 50 * 1024 * 1024);
+      setChunkSize(calculatedChunkSize);
+    }
+  }, []);
+
   const validationSchema =
     type !== "episode"
       ? yup.object().shape({
@@ -103,7 +112,7 @@ const MultipleVideoForm = ({
     const token = user !== null && user.token ? user.token : null;
     try {
       const response = await axios.get(
-        `${BaseUrl}/v1/studio/check-upload-chunks`,
+        `${BaseUrl}/v1/studio/check-upload-chunk`,
         {
           params: { fileName: file.name, start },
           headers: {
@@ -134,8 +143,8 @@ const MultipleVideoForm = ({
 
      let  axiosurl =
           type === "episode"
-            ? `${BaseUrl}/v1/studio/upload-chunks`
-            : `${BaseUrl}/v1/studio/upload-chunks`;
+            ? `${BaseUrl}/v1/studio/upload-chunk`
+            : `${BaseUrl}/v1/studio/upload-chunk`;
       
 
       // "http://localhost:5000/api/upload-chunk",
@@ -222,7 +231,8 @@ const MultipleVideoForm = ({
     }
 
     if (localUploadedChunks.length === totalChunks) {
-      await handleCombineChunks();
+      // await handleCombineChunks();
+      await completeUpload();
     }
   };
 
