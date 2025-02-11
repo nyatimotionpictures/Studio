@@ -1,6 +1,8 @@
 import React from "react";
 import Button from "../Buttons/Button";
 import TrailerForm from "./TrailerForm";
+import { queryClient } from "../../lib/tanstack";
+
 
 const TrailerUploadVideo = ({
   videoType,
@@ -11,6 +13,7 @@ const TrailerUploadVideo = ({
   errorUpload,
   sucessUpload,
 }) => {
+  
   const [openVideoModal, setOpenVideoModal] = React.useState(false);
   const handleVideoModalOpen = () => {
     setOpenVideoModal(() => true);
@@ -18,11 +21,18 @@ const TrailerUploadVideo = ({
       document.body.style.overflow = "hidden";
     }
   };
-  const handleVideoModalClose = () => {
+  const handleVideoModalClose = async (type) => {
+    setErrorUpload(() => null);
+    setSucessUpload(() => null);
+    
     setOpenVideoModal(() => false);
-    setErrorUpload(null);
-    setSucessUpload(null);
+  
     document.body.style.overflow = "unset";
+    if (type === "success") {
+      await queryClient.invalidateQueries({
+        queryKey: ["film", film?.id],
+      });
+    }
   };
 
   return (

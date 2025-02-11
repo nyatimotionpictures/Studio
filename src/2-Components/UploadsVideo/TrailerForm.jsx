@@ -195,6 +195,9 @@ const TrailerForm = ({
       const exists = await checkChunkExists(start);
       if (exists) {
         console.log(`Chunk ${i} already exists, skipping...`);
+        localUploadedChunks.push(i);
+        setUploadedChunks([...localUploadedChunks]);
+        localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
         continue;
       }
 
@@ -205,7 +208,11 @@ const TrailerForm = ({
         localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
       } catch (error) {
         // alert("Error uploading chunk. Pausing upload.");
+        setErrorUpload(
+          "Error uploading chunk. Try again"
+        );
         handlePauseUpload();
+        localStorage.removeItem(file.name);
         break;
       }
     }
@@ -283,11 +290,9 @@ const TrailerForm = ({
     );
 
       if (response.data) {
-        setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
+       
         localStorage.removeItem(file.name);
-        await queryClient.invalidateQueries({
-          queryKey: ["film", params?.id],
-        });
+        setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
         // alert("Upload to DigitalOcean Spaces completed successfully!");
         //   setUploadProgress(100);
       }
@@ -619,8 +624,8 @@ const TrailerForm = ({
                       <div className="flex flex-row gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            setErrorUpload(null);
-                            setSucessUpload(null);
+                            // setErrorUpload(null);
+                            // setSucessUpload(null);
                             handleModalClose();
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
@@ -658,9 +663,10 @@ const TrailerForm = ({
                       <div className="flex flex-col gap-2 items-center justify-center">
                         <Button
                           onClick={() => {
-                            setErrorUpload(null);
-                            setSucessUpload(null);
-                            handleModalClose();
+                            // setErrorUpload(null);
+                            // setSucessUpload(null);
+                            handleModalClose("success");
+                            
                           }}
                           className="w-full bg-transparent border border-primary-500 min-w-full md:min-w-[150px] px-5 rounded-lg text-sm"
                         >
