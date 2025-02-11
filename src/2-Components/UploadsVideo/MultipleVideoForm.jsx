@@ -33,19 +33,19 @@ const MultipleVideoForm = ({
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
-  const [chunkSize, setChunkSize] = useState(10 * 1024 * 1024); // Default to 1 MB
+  const [chunkSize, setChunkSize] = useState(50 * 1024 * 1024); // Default to 1 MB
 
   const abortController = React.useRef(null);
   const MAX_RETRIES = 3;
 
-  React.useEffect(() => {
-    const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    if (connection?.downlink) {
-      const speedMbps = connection.downlink;
-      const calculatedChunkSize = Math.min(Math.max(speedMbps * 1024 * 1024, 5 * 1024 * 1024), 50 * 1024 * 1024);
-      setChunkSize(calculatedChunkSize);
-    }
-  }, []);
+  // React.useEffect(() => {
+  //   const connection = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+  //   if (connection?.downlink) {
+  //     const speedMbps = connection.downlink;
+  //     const calculatedChunkSize = Math.min(Math.max(speedMbps * 1024 * 1024, 5 * 1024 * 1024), 50 * 1024 * 1024);
+  //     setChunkSize(calculatedChunkSize);
+  //   }
+  // }, []);
 
   const validationSchema =
     type !== "episode"
@@ -291,8 +291,8 @@ const MultipleVideoForm = ({
 
     let axiosurl =
     type === "episode"
-      ? `${BaseUrl}/v1/studio/complete-uploads`
-      : `${BaseUrl}/v1/studio/complete-uploads`;
+      ? `${BaseUrl}/v1/studio/complete-upload`
+      : `${BaseUrl}/v1/studio/complete-upload`;
     try {
       // "http://localhost:5000/api/complete-upload",
       const response = await axios.post(
