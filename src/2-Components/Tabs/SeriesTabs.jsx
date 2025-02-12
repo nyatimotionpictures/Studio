@@ -63,7 +63,7 @@ const SeriesTabs = ({ film, handleNewSeason, type }) => {
       case "Audience, Visibility":
         return <AudienceTab film={film} />;
       case "Thumbnails & Backdrops":
-        return <ThumbnailTab film={film} />;
+        return <ThumbnailTab film={film} type={type ? type : "film"} />;
       case "Trailer":
         return <TrailerTab film={film} type={type} />;
       default:
