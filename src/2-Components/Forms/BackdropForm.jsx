@@ -66,7 +66,9 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
                formData.append("type", filmtypes);
        
            //  updateFilmMutation.mutate(formData);
-           let axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+          //  let axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+
+          let axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/posterupload/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
 
             const response = await axios.post(axiosurl, formData, {  
              headers: {
