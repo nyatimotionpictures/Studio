@@ -33,7 +33,7 @@ const MultipleVideoForm = ({
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
-  const [chunkSize, setChunkSize] = useState(50 * 1024 * 1024); // Default to 1 MB
+  const [chunkSize, setChunkSize] = useState(100 * 1024 * 1024); // Default to 1 MB
 
   const abortController = React.useRef(null);
   const MAX_RETRIES = 3;
@@ -578,7 +578,7 @@ const MultipleVideoForm = ({
                         {/** stepper control */}
 
                         <div className="relative flex flex-col  gap-5 mb-2 ">
-                          {file && !isUploading && !isPaused && (
+                          {file && !isUploading  && (
                             <Button
                               onClick={handleUpload}
                               className="px-4 py-2 bg-primary-500 font-[Inter-Medium] text-white rounded hover:bg-blue-700"
@@ -587,23 +587,23 @@ const MultipleVideoForm = ({
                             </Button>
                           )}
 
-                          {!isUploading && isPaused && (
+                          {/* {!isUploading && isPaused && (
                             <Button
                               onClick={handleResumeUpload}
                               className="px-4 py-2 bg-[#43A047] text-white rounded hover:bg-green-700"
                             >
                               Resume Upload
                             </Button>
-                          )}
+                          )} */}
 
-                          {isUploading && (
+                          {/* {isUploading && (
                             <button
                               onClick={handlePauseUpload}
                               className="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700"
                             >
                               Pause Upload
                             </button>
-                          )}
+                          )} */}
 
                           {(isUploading || isPaused) && (
                             <Button

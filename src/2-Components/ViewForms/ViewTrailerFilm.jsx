@@ -232,7 +232,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
           {type !== "episode" && (
             <TrailerUploadVideo
               videoType={"Trailer"}
-           
               film={film}
               type={type}
               setErrorUpload={setErrorUpload}
@@ -252,7 +251,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             <>
               <MultipleUploadVideo
                 videoType={"all"}
-                
                 film={film}
                 type={type}
                 setErrorUpload={setErrorUpload}
@@ -263,9 +261,40 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             </>
           ) : (
             <>
-            <div className="w-[500px] flex flex-col items-start">
-              <Button onClick={() => deleteAllVideos([ videoSD?.id, videoHD?.id, videoUHD?.id, videoFHD?.id])}>Delete Videos</Button>
-            </div>
+              <div className=" flex flex-col gap-10 items-start w-full">
+                <Button
+                  onClick={() =>
+                    deleteAllVideos([
+                      videoSD?.id,
+                      videoHD?.id,
+                      videoUHD?.id,
+                      videoFHD?.id,
+                    ])
+                  }
+                >
+                  Delete Videos
+                </Button>
+
+                {!videoSD || !videoHD || !videoUHD || !videoFHD ? (
+                  <div className="flex flex-col gap-4 items-start w-full">
+                    <div>
+                      <Typography className="text-base capitalize text-[#EF4444]  font-[Inter-SemiBold]">
+                        Missing Some Versions Please re-upload Videos
+                      </Typography>
+                    </div>
+                    
+                    <MultipleUploadVideo
+                      videoType={"all"}
+                      film={film}
+                      type={type}
+                      setErrorUpload={setErrorUpload}
+                      setSucessUpload={setSucessUpload}
+                      errorUpload={errorUpload}
+                      sucessUpload={sucessUpload}
+                    />
+                  </div>
+                ) : null}
+              </div>
               {/** SD */}
               {film?.type !== "series" && type !== "series" && (
                 <>
@@ -316,8 +345,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                             HD (720P)
                           </h1>
                         </div>
-
-                       
                       </div>
 
                       <div className="flex flex-col gap-5">
@@ -344,7 +371,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                         </div> */}
                       </div>
                     </div>
-                  ) }
+                  )}
                 </>
               )}
 
@@ -362,7 +389,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                       </div>
 
                       <div className="flex flex-col gap-5">
-                  
                         {/** FILM */}
                         <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
                           <Player
@@ -372,10 +398,9 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                             style={{ width: "100%", height: "100%" }}
                           />
                         </div>
-                       
                       </div>
                     </div>
-                  ) }
+                  )}
                 </>
               )}
 
@@ -390,7 +415,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                             Ultra HD (2160p)
                           </h1>
                         </div>
-                   
                       </div>
 
                       <div className="flex flex-col gap-5">
@@ -417,16 +441,13 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                         </div> */}
                       </div>
                     </div>
-                  ) }
+                  )}
                 </>
               )}
             </>
           )}
         </>
       )}
-
-
-     
 
       {/** error & sucess message */}
 
@@ -473,9 +494,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
         </CustomStack>
       )}
 
-
-        {/** Modal for deleting All Videos */}
-        {videoIds?.videoIds?.length > 0 && (
+      {/** Modal for deleting All Videos */}
+      {videoIds?.videoIds?.length > 0 && (
         <CustomStack
           className="relative z-50"
           aria-labelledby="modal-title"
@@ -516,7 +536,6 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
           </div>
         </CustomStack>
       )}
-    
 
       {/** snackbar */}
       <Snackbar
