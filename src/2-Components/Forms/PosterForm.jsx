@@ -77,8 +77,8 @@ const PosterForm = ({ handleModalClose, film, type }) => {
         let url =
           type === "episode"
             ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}`
-            // : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
-            : `${BaseUrl}/v1/studio/uploadposter/${film?.id}`;
+            : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+            // : `${BaseUrl}/v1/studio/uploadposter/${film?.id}`;
         const response = await axios.post(url, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
