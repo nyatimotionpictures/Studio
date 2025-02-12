@@ -14,9 +14,44 @@ import * as XLSX from "xlsx";
 import SearchInput from "./SearchInput";
 
 import moment from "moment-timezone";
+import { useMutation } from "@tanstack/react-query";
+import { checkFilmPurchase } from "../../5-Store/TanstackStore/services/api";
+import { queryClient } from "../../lib/tanstack";
 
 const SubscriptionTable = ({ transactions }) => {
+  console.log(transactions)
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
+
+
+  let checkFunc = (details) => {
+    // console.log(details)
+    let newValues = {
+      orderId: details.orderTrackingId,
+      type: details.paymentMethodType,
+    }
+    checkPurchaseMutation.mutate(newValues)
+    
+  }
+
+  let checkPurchaseMutation = useMutation(
+    {
+      mutationFn: checkFilmPurchase,
+      onSuccess: async (data, variables, context) => {
+        setSnackbarMessage({ message: data.message, severity: "success" });
+        await queryClient.invalidateQueries({ queryKey: ["purchases"] });
+        // handleEditing();
+      },
+      onError: (error) => {
+       
+        setSnackbarMessage({
+          message: error?.message,
+          severity: "error",
+        });
+      },
+    }
+  )
+
+
   const data = useMemo(() => transactions ?? [], [transactions]);
 
   const columnHelper = createColumnHelper();
@@ -25,19 +60,23 @@ const SubscriptionTable = ({ transactions }) => {
   const columns = [
     columnHelper.accessor("firstname", {
       cell: (info) => (
-        <p>{info.getValue() + " " + info.row.original.lastname}</p>
+        <div className="flex flex-col gap-1">
+          <p>{info.row.original.user.firstname + " " + info.row.original.user.lastname}</p>
+          <p className="text-secondary-500">{info.row.original.user.email}</p>
+        </div>
+      
       ),
       header: "Name",
     }),
 
-    {
-      header: "Email",
-      accessorKey: "email",
-      footer: "Phone number",
-    },
+    // {
+    //   header: "Email",
+    //   accessorKey: "user.email",
+    //   footer: "Phone number",
+    // },
 
     columnHelper.accessor("content", {
-      cell: (info) => <p>{info.getValue()}</p>,
+      cell: (info) => <p>{info.row.original.purchase?.filmId ? info.row.original.purchase?.film?.title : info.row.original.purchase?.season?.title}</p>,
       header: "Content",
     }),
 
@@ -61,13 +100,13 @@ const SubscriptionTable = ({ transactions }) => {
           {
             <div
               className={`w-max h-max  px-2 py-1 border  rounded-lg ${
-                info.row.original.status.includes("success") &&
+                info.row.original.status?.toLowerCase()?.includes("success") &&
                 "border-[#18AC55] text-[#18AC55]"
               } ${
-                info.row.original.status.includes("failed") &&
+                info.row.original.status?.toLowerCase()?.includes("failed") &&
                 "border-[#DB3B22] text-[#DB3B22]"
               } ${
-                info.row.original.status.includes("pending") &&
+                info.row.original.status?.toLowerCase()?.includes("pending") &&
                 "border-[#FC9405] text-[#FC9405]"
               }`}
             >
@@ -78,13 +117,35 @@ const SubscriptionTable = ({ transactions }) => {
       ),
       header: "Status",
     }),
-    columnHelper.accessor("paymentType", {
+    columnHelper.accessor("paymentMethodType", {
       cell: (info) => (
         <div className=" w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">
           {info.getValue()}
         </div>
       ),
-      header: "Payment Gateway",
+      header: "Method",
+    }),
+    columnHelper.accessor("status", {
+      cell: (info) => (
+        <div className=" w-max h-max px-2 py-1  ">
+          {
+            info.row.original.status?.toLowerCase()?.includes("pending") &&  (
+            <div className="flex flex-row gap-2 items-center">
+             <Button disabled={checkPurchaseMutation.isPending} onClick={() => checkFunc(info.row.original)} className="w-max h-max text-secondary-900 hover:bg-transparent hover:text-whites-40 px-2 py-1 bg-whites-40 border border-whites-40 rounded-lg  ">
+              {
+                checkPurchaseMutation.isPending ? "Checking..." : "Check"
+              }
+              
+              
+              </Button>
+             {/* <Button  className="w-max h-max text-secondary-900 hover:bg-transparent hover:text-whites-40 px-2 py-1 bg-whites-40 border border-whites-40 rounded-lg  ">Give Access</Button> */}
+            </div>
+           )
+          }
+         
+        </div>
+      ),
+      header: "Verify",
     }),
   ];
 
