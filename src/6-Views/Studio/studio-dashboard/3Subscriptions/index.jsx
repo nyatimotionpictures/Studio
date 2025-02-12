@@ -30,11 +30,13 @@ const Subscriptions = () => {
   let getallpurchases = useGetPurchases();
 
 
+  console.log(getallpurchases.data)
+
   useEffect(() => {
     if(getallpurchases.data) {
       let successPurchases = [];
      
-      const filterPurchases =   getallpurchases.data?.appDonations?.filter((data) =>{
+      const filterPurchases =   getallpurchases.data?.transactions?.filter((data) =>{
 
         if (data.status.includes("success")){
           successPurchases.push(parseFloat(data.amount))
@@ -137,7 +139,7 @@ const Subscriptions = () => {
           <div className="pt-7 pb-11 ">
             {/* <VideoListTable /> */}
 
-            <SubscriptionTable transactions={getallpurchases?.data} />
+            <SubscriptionTable transactions={getallpurchases?.data?.transactions} />
           </div>
         </div>
       </div>

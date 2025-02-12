@@ -333,6 +333,22 @@ export const deleteEpisode = async (
         }
       };
 
+      export const checkFilmPurchase = async (purchaseData: any) => {
+        try {
+          let { orderId, type } = purchaseData
+
+          let path = type?.toLowerCase()?.includes('pesapal') ? `v1/film/pesapal/checkpaymentstatus?OrderTrackingId=${orderId}` : `v1/film/checkpaymentstatus/${orderId}`
+          const response = await apiRequest.get(
+            path
+          );
+      
+          return response.data;
+        } catch (error) {
+          const axiosError = error as AxiosError<ErrorResponse>;
+          throw axiosError.response?.data ?? { message: "An unknown error occurred" };
+        }
+      }
+
    
 
 
