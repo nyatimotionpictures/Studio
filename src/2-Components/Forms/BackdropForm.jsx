@@ -57,12 +57,13 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
         helpers.setSubmitting(true);
            
             const token = user !== null && user.token ? user.token : null;
+            let filmtypes = type?.includes("film") ? "film" : type?.includes("series") ? "film" : type === "episode" ? "episode" : type?.includes("season") ? "season" : "";
              let formData = new FormData();
              formData.append("files", values.files);
              //formData.append("filmId", values.filmId);
              formData.append("poster", values.files[0]);
                formData.append("isCover", values.isCover);
-               formData.append("type", type);
+               formData.append("type", filmtypes);
        
            //  updateFilmMutation.mutate(formData);
            let axiosurl = type === "episode" ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}` : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;

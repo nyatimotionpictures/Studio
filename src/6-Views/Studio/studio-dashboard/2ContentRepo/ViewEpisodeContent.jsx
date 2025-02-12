@@ -27,6 +27,8 @@ const ViewEpisodeContent = () => {
 
       const filterEpisode = sdata?.episodes?.filter((data) => data.id === params?.episodeId);
 
+      console.log("filterEpisode", filterEpisode)
+
     //  console.log("filterEpisode", filterEpisode)
       setEpisodeData(() => filterEpisode?.length > 0 ? filterEpisode[0] : null)
 
