@@ -81,10 +81,10 @@ const PricingTab = ({film, type}) => {
       };
 
       React.useEffect(() => {
-        console.log("film", film)
+        
         if(type !== "season"){
-            if (film?.pricing?.length > 0) {
-              let data = film?.pricing[0]
+            if (film?.pricing) {
+              let data = film?.pricing
               data?.priceList?.filter((data) => {
                 if(data.resolution === "SD"){
                  setPricingSD(() => data)
@@ -102,8 +102,10 @@ const PricingTab = ({film, type}) => {
               setPricingData(() => null)
             }
         }else {
-          if (film?.pricing?.length > 0) {
-            let data = film?.pricing[0]
+
+      
+          if (film?.pricing) {
+            let data = film?.pricing
             data?.priceList?.filter((data) => {
               if(data.resolution === "SD"){
                setPricingSD(() => data)
