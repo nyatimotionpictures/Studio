@@ -41,6 +41,7 @@ const PosterForm = ({ handleModalClose, film, type }) => {
   });
 
   const handleImagePreview = (file) => {
+    console.log("film", type)
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
@@ -48,6 +49,7 @@ const PosterForm = ({ handleModalClose, film, type }) => {
 
   //console.log(`http://localhost:4500/api/v1/studio/posterupload/${film?.id}`)
 
+  
   const formik = useFormik({
     initialValues: {
       files: [],
@@ -63,18 +65,20 @@ const PosterForm = ({ handleModalClose, film, type }) => {
         helpers.setSubmitting(true);
 
         const token = user !== null && user.token ? user.token : null;
+        let filmtypes = type?.includes("film") ? "film" : type?.includes("series") ? "film" : type === "episode" ? "episode" : type?.includes("season") ? "season" : "";
         let formData = new FormData();
         formData.append("files", values.files);
-        formData.append("filmId", values.filmId);
+        formData.append("resourceId", values.filmId);
         formData.append("poster", values.files[0]);
         formData.append("isCover", values.isCover);
-        formData.append("type", type);
+        formData.append("type", filmtypes);
 
         //  updateFilmMutation.mutate(formData);
         let url =
           type === "episode"
             ? `${BaseUrl}/v1/studio/uploadposter/${film?.id}`
-            : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+            // : `${BaseUrl}/v1/studio/posterupload/${film?.id}`;
+            : `${BaseUrl}/v1/studio/uploadposter/${film?.id}`;
         const response = await axios.post(url, formData, {
           headers: {
             Authorization: `Bearer ${token}`,
