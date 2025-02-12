@@ -16,6 +16,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import moment from "moment-timezone";
 import { useMutation } from "@tanstack/react-query";
 import { deleteEpisode } from "../../5-Store/TanstackStore/services/api";
+import { queryClient } from "../../lib/tanstack";
 
 
 const EpisodesListTable = ({ handleNewEpisode, season }) => {
