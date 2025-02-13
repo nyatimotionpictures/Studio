@@ -61,7 +61,7 @@ const SubscriptionTable = ({ transactions }) => {
     columnHelper.accessor("firstname", {
       cell: (info) => (
         <div className="flex flex-col gap-1">
-          <p>{info.row.original.user.firstname + " " + info.row.original.user.lastname}</p>
+          <p>{info.row.original?.user?.firstname + " " + info.row.original?.user?.lastname}</p>
           <p className="text-secondary-500">{info.row.original.user.email}</p>
         </div>
       
