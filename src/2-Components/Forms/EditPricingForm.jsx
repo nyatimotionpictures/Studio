@@ -30,6 +30,8 @@ const EditPricingForm = ({ innerref, handleStepNext, editdata, film, season, pri
               HD:  1000,
               FHD: 1000,
               UHD:  1000,
+              currency:  "UGX",
+              type: type === "season" ? "season" : "movie",
               resourceId: type === "season" ? season?.id : film?.id ?? "",
             };
   return (
