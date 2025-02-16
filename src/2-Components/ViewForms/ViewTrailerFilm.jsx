@@ -14,6 +14,7 @@ import "video-react/dist/video-react.css";
 import CustomLoader from "../Loader/CustomLoader";
 import TrailerUploadVideo from "../UploadsVideo/TrailerUploadVideo";
 import MultipleUploadVideo from "../UploadsVideo/MultipleUploadVideo";
+import VideoProcessingStatus from "../TrackProgress/VideoProcessingStatus";
 
 const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   let params = useParams();
@@ -161,7 +162,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     //cancelDeleteFun()
   };
 
-  console.log(isLoading)
+  
 
   if (isLoading) {
     return (
@@ -247,8 +248,10 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
       {film?.type !== "series" && type !== "season" && (
         <>
+           <VideoProcessingStatus clientId={film?.id} />
           {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
             <>
+            
               <MultipleUploadVideo
                 videoType={"all"}
                 film={film}
@@ -276,6 +279,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                 </Button>
 
                 {!videoSD || !videoHD || !videoUHD || !videoFHD ? (
+                  <>
+               
                   <div className="flex flex-col gap-4 items-start w-full">
                     <div>
                       <Typography className="text-base capitalize text-[#EF4444]  font-[Inter-SemiBold]">
@@ -293,6 +298,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                       sucessUpload={sucessUpload}
                     />
                   </div>
+                  </>
+                 
                 ) : null}
               </div>
               {/** SD */}
@@ -536,6 +543,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
           </div>
         </CustomStack>
       )}
+      
 
       {/** snackbar */}
       <Snackbar
