@@ -154,7 +154,7 @@ const VideoProcessingStatus = ({ clientId }) => {
           <p className="mb-2 font-semibold text-secondary-100">Resolution Upload Progress:</p>
           {Object.entries(uploadProgress).map(([resolution, progress]) => (
             <div key={resolution} className="mb-2">
-              <p className="text-sm font-medium">{resolution.toUpperCase()}</p>
+              <p className="text-sm font-medium text-whites-40">{resolution.toUpperCase()}</p>
               <div className="w-full bg-[gray] rounded-full h-4">
                 <div
                   className="bg-[green] h-4 rounded-full flex items-center justify-center"
