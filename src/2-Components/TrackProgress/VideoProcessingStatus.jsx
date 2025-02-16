@@ -100,7 +100,7 @@ const VideoProcessingStatus = ({ clientId }) => {
 
       {Object.keys(splitProgress).length > 0 && (
         <div className="w-full max-w-md mt-4">
-          <p className="mb-2 font-semibold">File Splitting Progress:</p>
+          <p className="mb-2 font-semibold text-secondary-100">File Splitting Progress:</p>
           {Object.entries(splitProgress).map(([stage, progress]) => (
             <div key={stage} className="mb-2">
               <p className="text-sm font-medium">{stage.toUpperCase()}</p>
@@ -119,7 +119,7 @@ const VideoProcessingStatus = ({ clientId }) => {
 
       {Object.keys(transcodeProgress).length > 0 && (
         <div className="w-full max-w-md mt-4">
-          <p className="mb-2 font-semibold">Conversion Progress:</p>
+          <p className="mb-2 font-semibold text-secondary-100">Conversion Progress:</p>
           {Object.entries(transcodeProgress).map(([resolution, progress]) => (
             <div key={resolution} className="mb-2">
               <p className="text-sm font-medium text-whites-40">{resolution.toUpperCase()}- {segmentLengths[resolution]}</p>
@@ -138,7 +138,7 @@ const VideoProcessingStatus = ({ clientId }) => {
 
       {Object.keys(combineProgress).length > 0 && (
         <div className="w-full max-w-md mt-4">
-          <p className="mb-2 font-semibold">Combine Segment Progress:</p>
+          <p className="mb-2 font-semibold text-secondary-100">Combine Segment Progress:</p>
           {Object.entries(combineProgress).map(([resolution, stage]) => (
             <div key={resolution} className="mb-2">
               <p className="text-sm font-medium text-whites-40 uppercase">{resolution.toUpperCase()}- {stage}</p>
@@ -151,7 +151,7 @@ const VideoProcessingStatus = ({ clientId }) => {
       {/** resolution upload progress */}
       {Object.keys(uploadProgress).length > 0 && (
         <div className="w-full max-w-md mt-4">
-          <p className="mb-2 font-semibold">Resolution Upload Progress:</p>
+          <p className="mb-2 font-semibold text-secondary-100">Resolution Upload Progress:</p>
           {Object.entries(uploadProgress).map(([resolution, progress]) => (
             <div key={resolution} className="mb-2">
               <p className="text-sm font-medium">{resolution.toUpperCase()}</p>
