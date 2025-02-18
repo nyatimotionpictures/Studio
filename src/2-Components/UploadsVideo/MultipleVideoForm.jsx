@@ -301,7 +301,7 @@ const MultipleVideoForm = ({
           type: type?.includes("episode") ? "episode" : type.includes("film") ? "film" : type?.includes("series") ? "film" : type?.includes("season") ? "season" : "",
           resourceId: film?.id,
           fileName: file.name,
-          clientId: socket.id,
+          clientId: film?.id,
         },
         {
           headers: {
@@ -312,7 +312,7 @@ const MultipleVideoForm = ({
       );
 
       if (response.data) {
-        setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
+        setSucessUpload(response?.data?.message);
         localStorage.removeItem(file.name);
        
        
@@ -370,31 +370,31 @@ const MultipleVideoForm = ({
     setSucessUpload(null);
   };
 
-  useEffect(() => {
-    // socketRef.current = io("ws://localhost:5000");
-    socket.connect();
+  // useEffect(() => {
+  //   // socketRef.current = io("ws://localhost:5000");
+  //   socket.connect();
 
-    socket.on("uploadProgress", ({ content, progress }) => {
-      setUploadProgress((prev) => ({
-        ...prev,
-        [content?.resolution]: progress,
-      }));
-    });
+  //   socket.on("uploadProgress", ({ content, progress }) => {
+  //     setUploadProgress((prev) => ({
+  //       ...prev,
+  //       [content?.resolution]: progress,
+  //     }));
+  //   });
 
-    socket.on("TranscodeProgress", ({ label, customProgress }) => {
-      setTranscodeProgress((prev) => ({
-        ...prev,
-        [label]: customProgress,
-      }));
-    });
+  //   socket.on("TranscodeProgress", ({ label, customProgress }) => {
+  //     setTranscodeProgress((prev) => ({
+  //       ...prev,
+  //       [label]: customProgress,
+  //     }));
+  //   });
 
-    return () => {
-      socket.off("uploadProgress");
-      socket.off("TranscodeProgress");
-      setTranscodeProgress(0)
-      socket.disconnect();
-    };
-  }, []);
+  //   return () => {
+  //     socket.off("uploadProgress");
+  //     socket.off("TranscodeProgress");
+  //     setTranscodeProgress(0)
+  //     socket.disconnect();
+  //   };
+  // }, []);
   return (
     <CustomStack
       className="relative z-50"
