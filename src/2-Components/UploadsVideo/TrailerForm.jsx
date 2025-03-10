@@ -181,8 +181,9 @@ const TrailerForm = ({
     setIsUploading(true);
     setIsPaused(false);
     abortController.current = new AbortController();
-    const localUploadedChunks =
-      JSON.parse(localStorage.getItem(file.name)) || [];
+    // const localUploadedChunks =
+    //   JSON.parse(localStorage.getItem(file.name)) || [];
+    const localUploadedChunks = [];
     setUploadedChunks(localUploadedChunks);
 
     for (let i = localUploadedChunks.length; i < totalChunks; i++) {
@@ -197,7 +198,7 @@ const TrailerForm = ({
         console.log(`Chunk ${i} already exists, skipping...`);
         localUploadedChunks.push(i);
         setUploadedChunks([...localUploadedChunks]);
-        localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
+        // localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
         continue;
       }
 
@@ -205,7 +206,7 @@ const TrailerForm = ({
         await uploadChunk(chunk, start);
         localUploadedChunks.push(i);
         setUploadedChunks([...localUploadedChunks]);
-        localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
+        // localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
       } catch (error) {
         // alert("Error uploading chunk. Pausing upload.");
         setErrorUpload(

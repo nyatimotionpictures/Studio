@@ -195,9 +195,11 @@ const MultipleVideoForm = ({
     setIsUploading(true);
     setIsPaused(false);
     abortController.current = new AbortController();
-    const localUploadedChunks =
-      JSON.parse(localStorage.getItem(file.name)) || [];
+    // const localUploadedChunks =
+    //   JSON.parse(localStorage.getItem(file.name)) || [];
+    const localUploadedChunks = []
     setUploadedChunks(localUploadedChunks);
+   
 
     for (let i = localUploadedChunks.length; i < totalChunks; i++) {
       if (isPaused) break;
@@ -211,7 +213,7 @@ const MultipleVideoForm = ({
         console.log(`Chunk ${i} already exists, skipping...`);
         localUploadedChunks.push(i);
         setUploadedChunks([...localUploadedChunks]);
-        localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
+        // localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
         continue;
       }
 
@@ -219,7 +221,7 @@ const MultipleVideoForm = ({
         await uploadChunk(chunk, start);
         localUploadedChunks.push(i);
         setUploadedChunks([...localUploadedChunks]);
-        localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
+        // localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
       } catch (error) {
         setErrorUpload(
           "Error uploading chunk. Try again"
