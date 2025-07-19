@@ -15,12 +15,15 @@ import CustomLoader from "../Loader/CustomLoader";
 import TrailerUploadVideo from "../UploadsVideo/TrailerUploadVideo";
 import MultipleUploadVideo from "../UploadsVideo/MultipleUploadVideo";
 import VideoProcessingStatus from "../TrackProgress/VideoProcessingStatus";
+import apiRequest from "../../3-Middleware/apiRequest";
 
 const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   let params = useParams();
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   const [videoDeleteId, setVideoDeleteId] = React.useState(null);
   const [videoIds, setVideoIds] = React.useState(null);
+  const [existingJob, setExistingJob] = React.useState(null);
+  const [checkingJob, setCheckingJob] = React.useState(false);
 
   const [videoTrailer, setVideoTrailer] = React.useState(null);
 
@@ -32,6 +35,46 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   const [sucessUpload, setSucessUpload] = React.useState(null);
 
   const formRef = React.useRef();
+
+  const checkExistingJob = async () => {
+    if (!film?.id) return;
+    
+    setCheckingJob(true);
+    try {
+      const response = await apiRequest.get('/v1/studio/processing-jobs/check-existing', {
+        params: {
+          resourceId: film.id,
+          type: type === 'episode' ? 'episode' : 'film'
+        }
+      });
+      
+      if (response.data.hasExistingJob) {
+        setExistingJob(response.data.existingJob);
+      } else {
+        setExistingJob(null);
+      }
+    } catch (error) {
+      console.error('Error checking existing job:', error);
+      setExistingJob(null);
+    } finally {
+      setCheckingJob(false);
+    }
+  };
+
+  // Re-check for existing jobs when film data changes
+  useEffect(() => {
+    checkExistingJob();
+  }, [film?.id, type]);
+
+  // Re-check for existing jobs after successful uploads
+  useEffect(() => {
+    if (sucessUpload) {
+      // Wait a bit for the job to be created, then re-check
+      setTimeout(() => {
+        checkExistingJob();
+      }, 2000);
+    }
+  }, [sucessUpload]);
 
   const handleFormSubmit = () => {
     if (formRef.current) {
@@ -248,206 +291,244 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
       {film?.type !== "series" && type !== "season" && (
         <>
-           <VideoProcessingStatus clientId={film?.id} />
-          {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
-            <>
-            
-              <MultipleUploadVideo
-                videoType={"all"}
-                film={film}
-                type={type}
-                setErrorUpload={setErrorUpload}
-                setSucessUpload={setSucessUpload}
-                errorUpload={errorUpload}
-                sucessUpload={sucessUpload}
-              />
-            </>
-          ) : (
-            <>
-              <div className=" flex flex-col gap-10 items-start w-full">
+          {/* Show processing status if there's an existing job */}
+          {existingJob && (
+            <div className="flex flex-col gap-6">
+              <div className="flex items-center gap-8 max-w-[80%]">
+                <div className="flex flex-col gap-[7px] min-w-[150px]">
+                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                    Video Processing
+                  </h1>
+                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                    A video is currently being processed for this resource
+                  </p>
+                </div>
                 <Button
-                  onClick={() =>
-                    deleteAllVideos([
-                      videoSD?.id,
-                      videoHD?.id,
-                      videoUHD?.id,
-                      videoFHD?.id,
-                    ])
-                  }
+                  onClick={checkExistingJob}
+                  disabled={checkingJob}
+                  className="w-max min-w-[100px]"
                 >
-                  Delete Videos
+                  {checkingJob ? 'Checking...' : 'Refresh'}
                 </Button>
-
-                {!videoSD || !videoHD || !videoUHD || !videoFHD ? (
-                  <>
-               
-                  <div className="flex flex-col gap-4 items-start w-full">
-                    <div>
-                      <Typography className="text-base capitalize text-[#EF4444]  font-[Inter-SemiBold]">
-                        Missing Some Versions Please re-upload Videos
-                      </Typography>
-                    </div>
-                    
-                    <MultipleUploadVideo
-                      videoType={"all"}
-                      film={film}
-                      type={type}
-                      setErrorUpload={setErrorUpload}
-                      setSucessUpload={setSucessUpload}
-                      errorUpload={errorUpload}
-                      sucessUpload={sucessUpload}
-                    />
-                  </div>
-                  </>
-                 
-                ) : null}
               </div>
-              {/** SD */}
-              {film?.type !== "series" && type !== "series" && (
+              
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <Typography variant="body2">
+                  <strong>Processing Job:</strong> {existingJob.fileName}
+                  <br />
+                  <strong>Status:</strong> {existingJob.status} | <strong>Progress:</strong> {existingJob.progress}%
+                  <br />
+                  <strong>Created:</strong> {new Date(existingJob.createdAt).toLocaleString()}
+                </Typography>
+              </Alert>
+              
+              <VideoProcessingStatus clientId={film?.id} />
+            </div>
+          )}
+          
+          {/* Show upload components only if no existing job */}
+          {!existingJob && (
+            <>
+              {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
                 <>
-                  {videoSD && (
-                    <div className="flex flex-col  gap-6">
-                      <div className="flex items-center gap-8 max-w-[80%]">
-                        <div className="flex flex-col gap-[7px] min-w-[150px]">
-                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                            SD (480P)
-                          </h1>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-col gap-5">
-                        {/** price */}
-                        {/** FILM */}
-                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                          <Player
-                            src={videoSD?.url}
-                            controls
-                            className="w-full object-cover "
-                            style={{ width: "100%", height: "100%" }}
-                          />
-                        </div>
-                        {/** delete video */}
-                        {/* <div className="flex flex-row gap-10 mt-10">
-                          <Button
-                            onClick={() => deleteFun(videoSD?.id)}
-                            className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                          >
-                            Delete Video
-                          </Button>
-                        </div> */}
-                      </div>
-                    </div>
-                  )}
+                  <MultipleUploadVideo
+                    videoType={"all"}
+                    film={film}
+                    type={type}
+                    setErrorUpload={setErrorUpload}
+                    setSucessUpload={setSucessUpload}
+                    errorUpload={errorUpload}
+                    sucessUpload={sucessUpload}
+                  />
                 </>
-              )}
-
-              {/** hd */}
-              {film?.type !== "series" && type !== "series" && (
+              ) : (
                 <>
-                  {videoHD && (
-                    <div className="flex flex-col  gap-6">
-                      <div className="flex items-center gap-8 max-w-[80%]">
-                        <div className="flex flex-col gap-[7px] min-w-[150px]">
-                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                            HD (720P)
-                          </h1>
+                  <div className=" flex flex-col gap-10 items-start w-full">
+                    <Button
+                      onClick={() =>
+                        deleteAllVideos([
+                          videoSD?.id,
+                          videoHD?.id,
+                          videoUHD?.id,
+                          videoFHD?.id,
+                        ])
+                      }
+                    >
+                      Delete Videos
+                    </Button>
+
+                    {!videoSD || !videoHD || !videoUHD || !videoFHD ? (
+                      <>
+                   
+                      <div className="flex flex-col gap-4 items-start w-full">
+                        <div>
+                          <Typography className="text-base capitalize text-[#EF4444]  font-[Inter-SemiBold]">
+                            Missing Some Versions Please re-upload Videos
+                          </Typography>
                         </div>
+                        
+                        <MultipleUploadVideo
+                          videoType={"all"}
+                          film={film}
+                          type={type}
+                          setErrorUpload={setErrorUpload}
+                          setSucessUpload={setSucessUpload}
+                          errorUpload={errorUpload}
+                          sucessUpload={sucessUpload}
+                        />
                       </div>
+                      </>
+                     
+                    ) : null}
+                  </div>
+                  {/** SD */}
+                  {film?.type !== "series" && type !== "series" && (
+                    <>
+                      {videoSD && (
+                        <div className="flex flex-col  gap-6">
+                          <div className="flex items-center gap-8 max-w-[80%]">
+                            <div className="flex flex-col gap-[7px] min-w-[150px]">
+                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                SD (480P)
+                              </h1>
+                            </div>
+                          </div>
 
-                      <div className="flex flex-col gap-5">
-                        {/** price */}
-
-                        {/** FILM */}
-                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                          <Player
-                            src={videoHD?.url}
-                            controls
-                            className="w-full object-cover "
-                            style={{ width: "100%", height: "100%" }}
-                          />
+                          <div className="flex flex-col gap-5">
+                            {/** price */}
+                            {/** FILM */}
+                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                              <Player
+                                src={videoSD?.url}
+                                controls
+                                className="w-full object-cover "
+                                style={{ width: "100%", height: "100%" }}
+                              />
+                            </div>
+                            {/** delete video */}
+                            {/* <div className="flex flex-row gap-10 mt-10">
+                              <Button
+                                onClick={() => deleteFun(videoSD?.id)}
+                                className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                              >
+                                Delete Video
+                              </Button>
+                            </div> */}
+                          </div>
                         </div>
-
-                        {/** delete video */}
-                        {/* <div className="flex flex-row gap-10 mt-10">
-                          <Button
-                            onClick={() => deleteFun(videoHD?.id)}
-                            className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                          >
-                            Delete Video
-                          </Button>
-                        </div> */}
-                      </div>
-                    </div>
+                      )}
+                    </>
                   )}
-                </>
-              )}
 
-              {/** fullhd */}
-              {film?.type !== "series" && type !== "series" && (
-                <>
-                  {videoFHD && (
-                    <div className="flex flex-col  gap-6">
-                      <div className="flex items-center gap-8 max-w-[80%]">
-                        <div className="flex flex-col gap-[7px] min-w-[150px]">
-                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                            Full HD (1080P)
-                          </h1>
-                        </div>
-                      </div>
+                  {/** hd */}
+                  {film?.type !== "series" && type !== "series" && (
+                    <>
+                      {videoHD && (
+                        <div className="flex flex-col  gap-6">
+                          <div className="flex items-center gap-8 max-w-[80%]">
+                            <div className="flex flex-col gap-[7px] min-w-[150px]">
+                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                HD (720P)
+                              </h1>
+                            </div>
+                          </div>
 
-                      <div className="flex flex-col gap-5">
-                        {/** FILM */}
-                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                          <Player
-                            src={videoFHD?.url}
-                            controls
-                            className="w-full object-cover "
-                            style={{ width: "100%", height: "100%" }}
-                          />
+                          <div className="flex flex-col gap-5">
+                            {/** price */}
+
+                            {/** FILM */}
+                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                              <Player
+                                src={videoHD?.url}
+                                controls
+                                className="w-full object-cover "
+                                style={{ width: "100%", height: "100%" }}
+                              />
+                            </div>
+
+                            {/** delete video */}
+                            {/* <div className="flex flex-row gap-10 mt-10">
+                              <Button
+                                onClick={() => deleteFun(videoHD?.id)}
+                                className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                              >
+                                Delete Video
+                              </Button>
+                            </div> */}
+                          </div>
                         </div>
-                      </div>
-                    </div>
+                      )}
+                    </>
                   )}
-                </>
-              )}
 
-              {/** ultrahd */}
-              {film?.type !== "series" && type !== "series" && (
-                <>
-                  {videoUHD && (
-                    <div className="flex flex-col  gap-6">
-                      <div className="flex items-center gap-8 max-w-[80%]">
-                        <div className="flex flex-col gap-[7px] min-w-[150px]">
-                          <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                            Ultra HD (2160p)
-                          </h1>
+                  {/** fullhd */}
+                  {film?.type !== "series" && type !== "series" && (
+                    <>
+                      {videoFHD && (
+                        <div className="flex flex-col  gap-6">
+                          <div className="flex items-center gap-8 max-w-[80%]">
+                            <div className="flex flex-col gap-[7px] min-w-[150px]">
+                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                Full HD (1080P)
+                              </h1>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col gap-5">
+                            {/** FILM */}
+                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                              <Player
+                                src={videoFHD?.url}
+                                controls
+                                className="w-full object-cover "
+                                style={{ width: "100%", height: "100%" }}
+                              />
+                            </div>
+                          </div>
                         </div>
-                      </div>
+                      )}
+                    </>
+                  )}
 
-                      <div className="flex flex-col gap-5">
-                        {/** price */}
+                  {/** ultrahd */}
+                  {film?.type !== "series" && type !== "series" && (
+                    <>
+                      {videoUHD && (
+                        <div className="flex flex-col  gap-6">
+                          <div className="flex items-center gap-8 max-w-[80%]">
+                            <div className="flex flex-col gap-[7px] min-w-[150px]">
+                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                Ultra HD (2160p)
+                              </h1>
+                            </div>
+                          </div>
 
-                        {/** FILM */}
-                        <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                          <Player
-                            src={videoUHD?.url}
-                            controls
-                            className="w-full object-cover "
-                            style={{ width: "100%", height: "100%" }}
-                          />
+                          <div className="flex flex-col gap-5">
+                            {/** price */}
+
+                            {/** FILM */}
+                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                              <Player
+                                src={videoUHD?.url}
+                                controls
+                                className="w-full object-cover "
+                                style={{ width: "100%", height: "100%" }}
+                              />
+                            </div>
+
+                            {/** delete video */}
+                            {/* <div className="flex flex-row gap-10 mt-10">
+                              <Button
+                                onClick={() => deleteFun(videoUHD?.id)}
+                                className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                              >
+                                Delete Video
+                              </Button>
+                            </div> */}
+                          </div>
                         </div>
-
-                        {/** delete video */}
-                        {/* <div className="flex flex-row gap-10 mt-10">
-                          <Button
-                            onClick={() => deleteFun(videoUHD?.id)}
-                            className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                          >
-                            Delete Video
-                          </Button>
-                        </div> */}
-                      </div>
-                    </div>
+                      )}
+                    </>
                   )}
                 </>
               )}

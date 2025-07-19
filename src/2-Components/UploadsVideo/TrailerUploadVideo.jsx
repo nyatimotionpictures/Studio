@@ -2,7 +2,8 @@ import React from "react";
 import Button from "../Buttons/Button";
 import TrailerForm from "./TrailerForm";
 import { queryClient } from "../../lib/tanstack";
-
+import apiRequest from "../../3-Middleware/apiRequest";
+import { Alert, Typography } from "@mui/material";
 
 const TrailerUploadVideo = ({
   videoType,
@@ -15,12 +16,50 @@ const TrailerUploadVideo = ({
 }) => {
   
   const [openVideoModal, setOpenVideoModal] = React.useState(false);
+  const [existingJob, setExistingJob] = React.useState(null);
+  const [checkingJob, setCheckingJob] = React.useState(false);
+
+  const checkExistingJob = async () => {
+    if (!film?.id) return;
+    
+    setCheckingJob(true);
+    try {
+      const response = await apiRequest.get('/v1/studio/processing-jobs/check-existing', {
+        params: {
+          resourceId: film.id,
+          type: type === 'episode' ? 'episode' : 'film'
+        }
+      });
+      
+      if (response.data.hasExistingJob) {
+        setExistingJob(response.data.existingJob);
+      } else {
+        setExistingJob(null);
+      }
+    } catch (error) {
+      console.error('Error checking existing job:', error);
+      setExistingJob(null);
+    } finally {
+      setCheckingJob(false);
+    }
+  };
+
+  React.useEffect(() => {
+    checkExistingJob();
+  }, [film?.id, type]);
+
   const handleVideoModalOpen = () => {
+    if (existingJob) {
+      setErrorUpload(`Cannot upload: There's already a ${existingJob.status} job for this resource (${existingJob.fileName})`);
+      return;
+    }
+    
     setOpenVideoModal(() => true);
     if (typeof window != "undefined" && window.document) {
       document.body.style.overflow = "hidden";
     }
   };
+  
   const handleVideoModalClose = async (type) => {
     setErrorUpload(() => null);
     setSucessUpload(() => null);
@@ -32,6 +71,8 @@ const TrailerUploadVideo = ({
       await queryClient.invalidateQueries({
         queryKey: ["film", film?.id],
       });
+      // Re-check for existing jobs after successful upload
+      await checkExistingJob();
     }
   };
 
@@ -54,11 +95,25 @@ const TrailerUploadVideo = ({
               handleVideoModalOpen();
             }}
             className="w-max min-w-[150px]"
+            disabled={checkingJob || !!existingJob}
           >
-            Upload File
+            {checkingJob ? 'Checking...' : existingJob ? 'Upload Blocked' : 'Upload File'}
           </Button>
         </div>
       </div>
+
+      {/* Show existing job warning */}
+      {existingJob && (
+        <Alert severity="warning" sx={{ mb: 2 }}>
+          <Typography variant="body2">
+            <strong>Upload Blocked:</strong> There's already a {existingJob.status} processing job for this resource.
+            <br />
+            <strong>File:</strong> {existingJob.fileName} | <strong>Progress:</strong> {existingJob.progress}%
+            <br />
+            <strong>Created:</strong> {new Date(existingJob.createdAt).toLocaleString()}
+          </Typography>
+        </Alert>
+      )}
 
       <div className="flex flex-wrap gap-3">
         <div className="flex flex-col gap-[20px]">
