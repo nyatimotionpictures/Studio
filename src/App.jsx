@@ -21,6 +21,7 @@ import ViewEpisodeContent from './6-Views/Studio/studio-dashboard/2ContentRepo/V
 import Register from './6-Views/Studio/studio-auth/Register.jsx';
 import StreamSetting from './6-Views/Studio/studio-dashboard/7StreamSettings/StreamSetting.jsx';
 import ViewCategory from './6-Views/Studio/studio-dashboard/7StreamSettings/ViewCategory.jsx';
+import VideoJobsManager from './6-Views/Studio/studio-dashboard/8VideoJobs/VideoJobsManager.jsx';
 
 function App() {
 let theme = useMemo(()=>createTheme(themeSettings), []);
@@ -46,12 +47,8 @@ let theme = useMemo(()=>createTheme(themeSettings), []);
               <Route path="/setting" element={<Setting />} />
               <Route path="/streamsettings" element={<StreamSetting />} />
               <Route path="/category/:id" element={<ViewCategory />} />
-             
-
-             
+              <Route path="/video-jobs" element={<VideoJobsManager />} />
             </Route>
-
-           
 
             <Route
               element={<OrdinaryRoutes />}
