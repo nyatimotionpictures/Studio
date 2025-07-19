@@ -183,6 +183,11 @@ const Sidebar = () => {
           title="People"
           url="/people"
         />
+        <SmallSidebarItem
+          Icon={"icon-[carbon--video]"}
+          title="Video Jobs"
+          url="/video-jobs"
+        />
          <SmallSidebarItem
             Icon={"icon-[carbon--cloud-service-management]"}
             title="Stream Settings"
@@ -236,6 +241,11 @@ const Sidebar = () => {
             Icon={"icon-[carbon--user-multiple]"}
             title="People"
             url="/people"
+          />
+          <LargeSidebarItem
+            Icon={"icon-[carbon--video]"}
+            title="Video Processing Jobs"
+            url="/video-jobs"
           />
            <LargeSidebarItem
             Icon={"icon-[carbon--cloud-service-management]"}
