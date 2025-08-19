@@ -107,25 +107,25 @@ const MultipleVideoForm = ({
     }
   };
 
-  const checkChunkExists = async (start) => {
-    const user = JSON.parse(localStorage.getItem("user"));
-    const token = user !== null && user.token ? user.token : null;
-    try {
-      const response = await axios.get(
-        `${BaseUrl}/v1/studio/check-upload-chunk`,
-        {
-          params: { fileName: file.name, start },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      return response.data.exists;
-    } catch (error) {
-      console.error("Error checking chunk:", error);
-      return false;
-    }
-  };
+  // const checkChunkExists = async (start) => {
+  //   const user = JSON.parse(localStorage.getItem("user"));
+  //   const token = user !== null && user.token ? user.token : null;
+  //   try {
+  //     const response = await axios.get(
+  //       `${BaseUrl}/v1/studio/check-upload-chunk`,
+  //       {
+  //         params: { fileName: file.name, start },
+  //         headers: {
+  //           Authorization: `Bearer ${token}`,
+  //         },
+  //       }
+  //     );
+  //     return response.data.exists;
+  //   } catch (error) {
+  //     console.error("Error checking chunk:", error);
+  //     return false;
+  //   }
+  // };
 
   const uploadChunk = async (chunk, start, retries = 0) => {
     const user = JSON.parse(localStorage.getItem("user"));
@@ -208,14 +208,14 @@ const MultipleVideoForm = ({
       const end = Math.min(start + chunkSize, file.size);
       const chunk = file.slice(start, end);
 
-      const exists = await checkChunkExists(start);
-      if (exists) {
-        console.log(`Chunk ${i} already exists, skipping...`);
-        localUploadedChunks.push(i);
-        setUploadedChunks([...localUploadedChunks]);
-        // localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
-        continue;
-      }
+      // const exists = await checkChunkExists(start);
+      // if (exists) {
+      //   console.log(`Chunk ${i} already exists, skipping...`);
+      //   localUploadedChunks.push(i);
+      //   setUploadedChunks([...localUploadedChunks]);
+      //   // localStorage.setItem(file.name, JSON.stringify(localUploadedChunks));
+      //   continue;
+      // }
 
       try {
         await uploadChunk(chunk, start);
