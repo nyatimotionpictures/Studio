@@ -20,9 +20,7 @@ type SmallSidebarItemProps = {
   url: string;
 };
 
-[
-  /** items - smallbarItems */
-];
+// items - smallbarItems
 const SmallSidebarItem = ({ Icon, title, url }: SmallSidebarItemProps) => {
   return (
     <NavLink
@@ -51,9 +49,7 @@ type LargeSidebarSectionProps = {
   visibleItemCount?: number;
 };
 
-[
-  /** items - smallbarItems */
-];
+// items - smallbarItems
 
 const LargeSidebarSection = ({
   children,
@@ -89,9 +85,7 @@ const LargeSidebarSection = ({
   );
 };
 
-[
-  /** items - LargebarItems */
-];
+// items - LargebarItems
 type LargeSidebarItemProps = {
   Icon: ElementType | string;
   title: string;
@@ -126,7 +120,7 @@ const Sidebar = () => {
   let navigate = useNavigate();
   const { isLargeOpen, isSmallOpen, close } = useSidebarContext();
   const userData = useContext(AuthContext);
-  const [currentUserData, setCurrentUserData] = React.useState(null);
+  const [currentUserData, setCurrentUserData] = React.useState<any | null>(null);
   const queryClient = new QueryClient();
   React.useEffect(() => {
     if (userData.currentUser !== null) {
@@ -207,7 +201,7 @@ const Sidebar = () => {
         />
       )}
       <aside
-        className={`w-56 lg:sticky absolute  top-0  overflow-x-hidden overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2 bg-secondary-800 h-full  ${
+        className={`w-56 sticky  top-0  overflow-x-hidden overflow-y-auto scrollbar-hidden pb-4 flex-col gap-2 px-2 bg-secondary-800 h-[100vh]  ${
           isLargeOpen ? "lg:flex" : "lg:hidden"
         } ${isSmallOpen ? "flex z-[999] bg-white max-h-screen" : "hidden"}`}
       >
@@ -216,7 +210,8 @@ const Sidebar = () => {
 
           <img src={Logo} alt="" />
         </div>
-        <LargeSidebarSection>
+        <div className="flex-1  overflow-y-auto scrollbar-hidden px-0">
+          <LargeSidebarSection>
           <LargeSidebarItem
             Icon={"icon-[carbon--home]"}
             title={"Dashboard"}
@@ -257,9 +252,12 @@ const Sidebar = () => {
             title="Account Settings"
             url="/setting"
           />
-        </LargeSidebarSection>
+          </LargeSidebarSection>
+        </div>
 
-        <div className="flex w-fit overflow-hidden">
+        {/** user info & logout - fixed at bottom */}
+        <div className="mt-auto sticky bottom-0 bg-secondary-800 pt-2 pb-2 z-10">
+          <div className="flex w-fit overflow-hidden">
           <CustomStack className="border-t-2 border-whites-700 pt-3 pb-3 flex-col  items-center gap-4">
             <CustomStack className="gap-2 w-full">
               <Avatar
@@ -308,6 +306,7 @@ const Sidebar = () => {
               </Button>
             </div>
           </CustomStack>
+          </div>
         </div>
       </aside>
     </>

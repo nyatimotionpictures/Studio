@@ -27,7 +27,8 @@ const TrailerUploadVideo = ({
       const response = await apiRequest.get('/v1/studio/processing-jobs/check-existing', {
         params: {
           resourceId: film.id,
-          type: type === 'episode' ? 'episode' : 'film'
+          type: type === 'episode' ? 'episode' : 'film',
+          jobType: 'trailer_processing' // Specifically check for trailer processing jobs
         }
       });
       
@@ -37,7 +38,7 @@ const TrailerUploadVideo = ({
         setExistingJob(null);
       }
     } catch (error) {
-      console.error('Error checking existing job:', error);
+      console.error('Error checking existing trailer job:', error);
       setExistingJob(null);
     } finally {
       setCheckingJob(false);
@@ -49,8 +50,8 @@ const TrailerUploadVideo = ({
   }, [film?.id, type]);
 
   const handleVideoModalOpen = () => {
-    if (existingJob) {
-      setErrorUpload(`Cannot upload: There's already a ${existingJob.status} job for this resource (${existingJob.fileName})`);
+    if (existingJob && existingJob.jobType === 'trailer_processing') {
+      setErrorUpload(`Cannot upload: There's already a ${existingJob.status} trailer processing job for this resource (${existingJob.fileName})`);
       return;
     }
     
@@ -95,22 +96,30 @@ const TrailerUploadVideo = ({
               handleVideoModalOpen();
             }}
             className="w-max min-w-[150px]"
-            disabled={checkingJob || !!existingJob}
+            disabled={checkingJob || (existingJob && existingJob.jobType === 'trailer_processing')}
           >
-            {checkingJob ? 'Checking...' : existingJob ? 'Upload Blocked' : 'Upload File'}
+            {checkingJob ? 'Checking...' : (existingJob && existingJob.jobType === 'trailer_processing') ? 'Upload Blocked' : 'Upload File'}
           </Button>
         </div>
       </div>
 
-      {/* Show existing job warning */}
-      {existingJob && (
+      {/* Show existing trailer job warning */}
+      {existingJob && existingJob.jobType === 'trailer_processing' && (
         <Alert severity="warning" sx={{ mb: 2 }}>
           <Typography variant="body2">
-            <strong>Upload Blocked:</strong> There's already a {existingJob.status} processing job for this resource.
+            <strong>Upload Blocked:</strong> There's already a {existingJob.status} trailer processing job for this resource.
             <br />
             <strong>File:</strong> {existingJob.fileName} | <strong>Progress:</strong> {existingJob.progress}%
             <br />
+            <strong>Job Type:</strong> {existingJob.jobType}
+            <br />
             <strong>Created:</strong> {new Date(existingJob.createdAt).toLocaleString()}
+            {existingJob.jobId && (
+              <>
+                <br />
+                <strong>Job ID:</strong> {existingJob.jobId}
+              </>
+            )}
           </Typography>
         </Alert>
       )}

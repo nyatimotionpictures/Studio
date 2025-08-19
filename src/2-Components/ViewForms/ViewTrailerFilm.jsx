@@ -9,13 +9,15 @@ import {
 } from "../../5-Store/TanstackStore/services/mutations";
 import { Alert, Snackbar, Typography } from "@mui/material";
 import { useParams } from "react-router-dom";
-import { Player } from "video-react";
-import "video-react/dist/video-react.css";
 import CustomLoader from "../Loader/CustomLoader";
 import TrailerUploadVideo from "../UploadsVideo/TrailerUploadVideo";
 import MultipleUploadVideo from "../UploadsVideo/MultipleUploadVideo";
 import VideoProcessingStatus from "../TrackProgress/VideoProcessingStatus";
 import apiRequest from "../../3-Middleware/apiRequest";
+import ServerStreamingPlayer from "../VideoPlayer/ServerStreamingPlayer";
+import axios from "axios";
+import { BaseUrl } from "../../3-Middleware/apiRequest";
+import socket from "../../lib/socket"; // Add socket import
 
 const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   let params = useParams();
@@ -34,7 +36,319 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   const [errorUpload, setErrorUpload] = React.useState(null);
   const [sucessUpload, setSucessUpload] = React.useState(null);
 
+  // Subtitle management states
+  const [subtitleFile, setSubtitleFile] = React.useState(null);
+  const [uploadingSubtitle, setUploadingSubtitle] = React.useState(false);
+  const [existingSubtitles, setExistingSubtitles] = React.useState([]);
+  const [loadingSubtitles, setLoadingSubtitles] = React.useState(false);
+  const [selectedLanguage, setSelectedLanguage] = React.useState('eng'); // Default to English
+  const [customLanguage, setCustomLanguage] = React.useState(''); // For custom language input
+  const [showCustomLanguageInput, setShowCustomLanguageInput] = React.useState(false); // Toggle custom input
+  const [subtitleLabel, setSubtitleLabel] = React.useState(''); // For subtitle label input
+  const [editingSubtitleId, setEditingSubtitleId] = React.useState(null); // Track which subtitle is being edited
+  const [editingLabel, setEditingLabel] = React.useState(''); // Track the label being edited
+
+  // Language options for subtitle upload
+  const languageOptions = [
+    { code: 'eng', name: 'English' },
+    { code: 'spa', name: 'Spanish' },
+    { code: 'fra', name: 'French' },
+    { code: 'deu', name: 'German' },
+    { code: 'ita', name: 'Italian' },
+    { code: 'por', name: 'Portuguese' },
+    { code: 'rus', name: 'Russian' },
+    { code: 'jpn', name: 'Japanese' },
+    { code: 'kor', name: 'Korean' },
+    { code: 'chi', name: 'Chinese' },
+    { code: 'ara', name: 'Arabic' },
+    { code: 'hin', name: 'Hindi' },
+    { code: 'ben', name: 'Bengali' },
+    { code: 'tel', name: 'Telugu' },
+    { code: 'tam', name: 'Tamil' },
+    { code: 'mar', name: 'Marathi' },
+    { code: 'guj', name: 'Gujarati' },
+    { code: 'kan', name: 'Kannada' },
+    { code: 'mal', name: 'Malayalam' },
+    { code: 'urd', name: 'Urdu' },
+    { code: 'swa', name: 'Swahili' },
+    { code: 'zul', name: 'Zulu' },
+    { code: 'xho', name: 'Xhosa' },
+    { code: 'afr', name: 'Afrikaans' },
+    { code: 'nld', name: 'Dutch' },
+    { code: 'swe', name: 'Swedish' },
+    { code: 'nor', name: 'Norwegian' },
+    { code: 'dan', name: 'Danish' },
+    { code: 'fin', name: 'Finnish' },
+    { code: 'pol', name: 'Polish' },
+    { code: 'cze', name: 'Czech' },
+    { code: 'slk', name: 'Slovak' },
+    { code: 'hun', name: 'Hungarian' },
+    { code: 'rom', name: 'Romanian' },
+    { code: 'bul', name: 'Bulgarian' },
+    { code: 'hrv', name: 'Croatian' },
+    { code: 'srp', name: 'Serbian' },
+    { code: 'slv', name: 'Slovenian' },
+    { code: 'est', name: 'Estonian' },
+    { code: 'lav', name: 'Latvian' },
+    { code: 'lit', name: 'Lithuanian' },
+    { code: 'tur', name: 'Turkish' },
+    { code: 'ell', name: 'Greek' },
+    { code: 'heb', name: 'Hebrew' },
+    { code: 'fas', name: 'Persian' },
+    { code: 'tha', name: 'Thai' },
+    { code: 'vie', name: 'Vietnamese' },
+    { code: 'ind', name: 'Indonesian' },
+    { code: 'msa', name: 'Malay' },
+    { code: 'fil', name: 'Filipino' },
+    { code: 'tgl', name: 'Tagalog' }
+  ];
+
   const formRef = React.useRef();
+
+  // Load existing subtitles
+  const loadExistingSubtitles = async () => {
+    if (!film?.id) return;
+    
+    setLoadingSubtitles(true);
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = user !== null && user.token ? user.token : null;
+
+      const response = await axios.get(`${BaseUrl}/v1/streaming/subtitles/${film.id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.data.subtitles) {
+        setExistingSubtitles(response.data.subtitles);
+      }
+    } catch (error) {
+      console.error('Error loading subtitles:', error);
+      setExistingSubtitles([]);
+    } finally {
+      setLoadingSubtitles(false);
+    }
+  };
+
+  // Handle subtitle file selection
+  const handleSubtitleFileChange = (event) => {
+    const file = event.target.files[0];
+    if (file && file.type === 'text/vtt') {
+      setSubtitleFile(file);
+      
+      // Auto-detect language from filename
+      const filename = file.name.toLowerCase();
+      let detectedLanguage = 'eng'; // Default fallback
+      
+      // Check for language patterns in filename
+      for (const lang of languageOptions) {
+        if (filename.includes(lang.code.toLowerCase()) || 
+            filename.includes(lang.name.toLowerCase())) {
+          detectedLanguage = lang.code;
+          break;
+        }
+      }
+      
+      // Set the detected language
+      setSelectedLanguage(detectedLanguage);
+      console.log(`🌍 Auto-detected language from filename: ${detectedLanguage}`);
+      
+    } else {
+      setSnackbarMessage({ 
+        message: "Please select a valid .vtt subtitle file", 
+        severity: "error" 
+      });
+    }
+  };
+
+  // Helper function to get language name from code
+  const getLanguageName = (code) => {
+    if (code === 'custom' && customLanguage) {
+      return `Custom (${customLanguage})`;
+    }
+    const language = languageOptions.find(lang => lang.code === code);
+    return language ? language.name : code;
+  };
+
+  // Get the final language code to send to backend
+  const getFinalLanguageCode = () => {
+    if (selectedLanguage === 'custom' && customLanguage.trim()) {
+      return customLanguage.trim().toLowerCase();
+    }
+    return selectedLanguage;
+  };
+
+  // Handle language selection change
+  const handleLanguageChange = (e) => {
+    const value = e.target.value;
+    setSelectedLanguage(value);
+    if (value === 'custom') {
+      setShowCustomLanguageInput(true);
+    } else {
+      setShowCustomLanguageInput(false);
+      setCustomLanguage('');
+    }
+  };
+
+  // Upload subtitle file
+  const uploadSubtitle = async () => {
+    if (!subtitleFile || !film?.id) return;
+
+    setUploadingSubtitle(true);
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = user !== null && user.token ? user.token : null;
+
+      const formData = new FormData();
+      formData.append('subtitleFile', subtitleFile);
+      formData.append('resourceId', film.id);
+      formData.append('type', type === 'episode' ? 'episode' : 'film');
+      formData.append('language', getFinalLanguageCode()); // Add selected language
+      formData.append('label', subtitleLabel); // Add subtitle label
+
+      console.log("subtitle formdata", subtitleFile);
+      console.log("selected language", selectedLanguage);
+      console.log("subtitle label", subtitleLabel);
+
+      const response = await axios.post(`${BaseUrl}/v1/studio/upload-subtitle`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      setSnackbarMessage({ 
+        message: `Subtitle uploaded successfully in ${getLanguageName(getFinalLanguageCode())}`, 
+        severity: "success" 
+      });
+      
+      // Reload subtitles
+      await loadExistingSubtitles();
+      setSubtitleFile(null);
+      setSubtitleLabel(''); // Clear label input
+      
+      // Clear file input
+      const fileInput = document.getElementById('subtitle-file-input');
+      if (fileInput) fileInput.value = '';
+      
+    } catch (error) {
+      console.error('Error uploading subtitle:', error);
+      if (error?.response) {
+        setSnackbarMessage({ 
+          message: `Error ${error.response.status}: ${error.response.data?.message || error.response.statusText}`, 
+          severity: "error" 
+        });
+      } else if (error.request) {
+        setSnackbarMessage({ 
+          message: "No response from server. Please check your network connection.", 
+          severity: "error" 
+        });
+      } else {
+        setSnackbarMessage({ 
+          message: `Request failed: ${error.message}`, 
+          severity: "error" 
+        });
+      }
+    } finally {
+      setUploadingSubtitle(false);
+    }
+  };
+
+  // Delete subtitle
+  const deleteSubtitle = async (subtitleId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = user !== null && user.token ? user.token : null;
+
+      await axios.delete(`${BaseUrl}/v1/studio/delete-subtitle/${subtitleId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setSnackbarMessage({ 
+        message: "Subtitle deleted successfully", 
+        severity: "success" 
+      });
+      await loadExistingSubtitles();
+    } catch (error) {
+      console.error('Error deleting subtitle:', error);
+      if (error?.response) {
+        setSnackbarMessage({ 
+          message: `Error ${error.response.status}: ${error.response.data?.message || error.response.statusText}`, 
+          severity: "error" 
+        });
+      } else if (error.request) {
+        setSnackbarMessage({ 
+          message: "No response from server. Please check your network connection.", 
+          severity: "error" 
+        });
+      } else {
+        setSnackbarMessage({ 
+          message: `Request failed: ${error.message}`, 
+          severity: "error" 
+        });
+      }
+    }
+  };
+
+  // Start editing subtitle label
+  const startEditSubtitle = (subtitle) => {
+    setEditingSubtitleId(subtitle.id);
+    setEditingLabel(subtitle.label || '');
+  };
+
+  // Cancel editing subtitle label
+  const cancelEditSubtitle = () => {
+    setEditingSubtitleId(null);
+    setEditingLabel('');
+  };
+
+  // Save edited subtitle label
+  const saveEditSubtitle = async (subtitleId) => {
+    try {
+      const user = JSON.parse(localStorage.getItem("user"));
+      const token = user !== null && user.token ? user.token : null;
+
+      await axios.put(`${BaseUrl}/v1/studio/update-subtitle/${subtitleId}`, {
+        label: editingLabel
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      setSnackbarMessage({ 
+        message: "Subtitle label updated successfully", 
+        severity: "success" 
+      });
+      
+      // Reload subtitles
+      await loadExistingSubtitles();
+      setEditingSubtitleId(null);
+      setEditingLabel('');
+    } catch (error) {
+      console.error('Error updating subtitle:', error);
+      if (error?.response) {
+        setSnackbarMessage({ 
+          message: `Error ${error.response.status}: ${error.response.data?.message || error.response.statusText}`, 
+          severity: "error" 
+        });
+      } else if (error.request) {
+        setSnackbarMessage({ 
+          message: "No response from server. Please check your network connection.", 
+          severity: "error" 
+        });
+      } else {
+        setSnackbarMessage({ 
+          message: `Request failed: ${error.message}`, 
+          severity: "error" 
+        });
+      }
+    }
+  };
 
   const checkExistingJob = async () => {
     if (!film?.id) return;
@@ -45,11 +359,13 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
         params: {
           resourceId: film.id,
           type: type === 'episode' ? 'episode' : 'film'
+          // Remove jobType filter to check for all processing jobs (both video and trailer)
         }
       });
       
       if (response.data.hasExistingJob) {
         setExistingJob(response.data.existingJob);
+        console.log('🎬 Found existing job:', response.data.existingJob);
       } else {
         setExistingJob(null);
       }
@@ -76,6 +392,63 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     }
   }, [sucessUpload]);
 
+  // Socket listeners for trailer processing job completion
+  useEffect(() => {
+    if (!film?.id) return;
+
+    socket.connect();
+
+    // Listen for trailer processing job completion
+    socket.on("JobCompleted", ({ message, jobId, hlsUrl }) => {
+      console.log('✅ Job completed in ViewTrailerFilm:', { message, jobId, hlsUrl });
+      
+      if (message.includes("Trailer processing finished")) {
+        setSnackbarMessage({ 
+          message: "Trailer processing completed successfully!", 
+          severity: "success" 
+        });
+        
+        // Refresh film data to show the new trailer
+        setTimeout(() => {
+          if (refetch) refetch();
+          queryClient.invalidateQueries({ queryKey: ["film", film.id] });
+          checkExistingJob(); // Re-check job status
+        }, 1000);
+      }
+    });
+
+    // Listen for trailer processing job failure
+    socket.on("JobFailed", ({ message, jobId, error }) => {
+      console.error('❌ Job failed in ViewTrailerFilm:', { message, jobId, error });
+      
+      if (message.includes("Trailer processing failed")) {
+        setSnackbarMessage({ 
+          message: `Trailer processing failed: ${error || 'Unknown error'}`, 
+          severity: "error" 
+        });
+        
+        // Re-check job status
+        setTimeout(() => {
+          checkExistingJob();
+        }, 1000);
+      }
+    });
+
+    return () => {
+      socket.off("JobCompleted");
+      socket.off("JobFailed");
+      socket.disconnect();
+    };
+  }, [film?.id, refetch]);
+
+  // Load subtitles when videos are available
+  useEffect(() => {
+    const hasVideos = videoSD || videoHD || videoFHD || videoUHD || videoTrailer;
+    if (hasVideos && film?.id) {
+      loadExistingSubtitles();
+    }
+  }, [videoSD, videoHD, videoFHD, videoUHD, videoTrailer, film?.id]);
+
   const handleFormSubmit = () => {
     if (formRef.current) {
       formRef.current.handleSubmit();
@@ -88,22 +461,27 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
     if (type !== "season"){
       if (film?.video?.length > 0) {
         film?.video?.filter((data) => {
-          console.log("data", data)
+          console.log("🎬 Video data:", data);
           if (data.isTrailer === true && data.resolution === "HD") {
             setVideoTrailer(data);
+            console.log("🎬 Trailer video set:", data);
           }
   
           if (data?.resolution?.toLowerCase() === "sd") {
             setVideoSD(data);
+            console.log("🎬 SD video set:", data);
           }
           if (data?.resolution?.toLowerCase() === "hd" && data.isTrailer === false) {
             setVideoHD(data);
+            console.log("🎬 HD video set:", data);
           }
           if (data?.resolution?.toLowerCase() === "fhd") {
             setVideoFHD(data);
+            console.log("🎬 FHD video set:", data);
           }
           if (data?.resolution?.toLowerCase() === "uhd") {
             setVideoUHD(data);
+            console.log("🎬 UHD video set:", data);
           }
         });
       } else {
@@ -117,6 +495,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
       if (film?.trailers?.length > 0) {
        
         setVideoTrailer(film?.trailers[0]);
+        console.log("🎬 Season trailer video set:", film?.trailers[0]);
       }else {
         setVideoTrailer(null);
       }
@@ -231,11 +610,17 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
           <div className="flex flex-wrap gap-3">
             <div className="flex flex-col gap-[20px]">
               <div className="bg-[#36323E] w-[470px] h-[266px]  flex ">
-                <Player
-                  src={videoTrailer?.url}
-                  controls
-                  className="w-full object-cover "
-                  style={{ width: "100%", height: "100%" }}
+                {console.log("🎬 Rendering trailer player with:", { url: videoTrailer?.url, hlsUrl: videoTrailer?.hlsUrl })}
+                <ServerStreamingPlayer
+                  resourceId={film?.id}
+                  videoUrl={videoTrailer?.url}
+                  hlsUrl={videoTrailer?.hlsUrl}
+                  type="hd" // Trailers are always HD
+                  isTrailer={true} // Explicitly mark this as a trailer
+                  controls={false}
+                  width="100%"
+                  height="100%"
+                  aspectRatio="16/9"
                 />
               </div>
 
@@ -257,6 +642,15 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                     {videoTrailer?.size}
                   </p>
                 </div>
+
+                <div className="flex flex-col gap-1">
+                  <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                    Format
+                  </h1>
+                  <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                    HLS Streaming
+                  </p>
+                </div>
               </div>
 
               {/** delete video */}
@@ -274,15 +668,63 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
       ) : (
         <>
           {type !== "episode" && (
-            <TrailerUploadVideo
-              videoType={"Trailer"}
-              film={film}
-              type={type}
-              setErrorUpload={setErrorUpload}
-              setSucessUpload={setSucessUpload}
-              errorUpload={errorUpload}
-              sucessUpload={sucessUpload}
-            />
+            <>
+              {/* Show trailer processing status if there's an existing trailer job */}
+              {existingJob && existingJob.jobType === 'trailer_processing' && (
+                <div className="flex flex-col gap-6">
+                  <div className="flex items-center gap-8 max-w-[80%]">
+                    <div className="flex flex-col gap-[7px] min-w-[150px]">
+                      <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                        Trailer Processing
+                      </h1>
+                      <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                        Your trailer is currently being processed
+                      </p>
+                    </div>
+                    <Button
+                      onClick={checkExistingJob}
+                      disabled={checkingJob}
+                      className="w-max min-w-[100px]"
+                    >
+                      {checkingJob ? 'Checking...' : 'Refresh'}
+                    </Button>
+                  </div>
+                  
+                  <Alert severity="info" sx={{ mb: 2 }}>
+                    <Typography variant="body2">
+                      <strong>Trailer Processing Job:</strong> {existingJob.fileName}
+                      <br />
+                      <strong>Status:</strong> {existingJob.status} | <strong>Progress:</strong> {existingJob.progress}%
+                      <br />
+                      <strong>Job Type:</strong> {existingJob.jobType || 'Trailer Processing'}
+                      <br />
+                      <strong>Created:</strong> {new Date(existingJob.createdAt).toLocaleString()}
+                      {existingJob.jobId && (
+                        <>
+                          <br />
+                          <strong>Job ID:</strong> {existingJob.jobId}
+                        </>
+                      )}
+                    </Typography>
+                  </Alert>
+                  
+                  <VideoProcessingStatus clientId={film?.id} />
+                </div>
+              )}
+              
+              {/* Show trailer upload component only if no existing trailer job */}
+              {(!existingJob || existingJob.jobType !== 'trailer_processing') && (
+                <TrailerUploadVideo
+                  videoType={"Trailer"}
+                  film={film}
+                  type={type}
+                  setErrorUpload={setErrorUpload}
+                  setSucessUpload={setSucessUpload}
+                  errorUpload={errorUpload}
+                  sucessUpload={sucessUpload}
+                />
+              )}
+            </>
           )}
         </>
       )}
@@ -292,7 +734,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
       {film?.type !== "series" && type !== "season" && (
         <>
           {/* Show processing status if there's an existing job */}
-          {existingJob && (
+          {existingJob && existingJob.jobType !== 'trailer_processing' && (
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-8 max-w-[80%]">
                 <div className="flex flex-col gap-[7px] min-w-[150px]">
@@ -326,8 +768,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             </div>
           )}
           
-          {/* Show upload components only if no existing job */}
-          {!existingJob && (
+          {/* Show upload components only if no existing regular video processing job */}
+          {(!existingJob || existingJob.jobType === 'trailer_processing') && (
             <>
               {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
                 <>
@@ -398,12 +840,28 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                             {/** price */}
                             {/** FILM */}
                             <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <Player
-                                src={videoSD?.url}
-                                controls
-                                className="w-full object-cover "
-                                style={{ width: "100%", height: "100%" }}
+                              {console.log("🎬 Rendering SD player with:", { url: videoSD?.url, hlsUrl: videoSD?.hlsUrl })}
+                              <ServerStreamingPlayer
+                                resourceId={film?.id}
+                                videoUrl={videoSD?.url}
+                                hlsUrl={videoSD?.hlsUrl}
+                                type="sd"
+                                controls={false}
+                                width="100%"
+                                height="100%"
+                                aspectRatio="16/9"
                               />
+                            </div>
+
+                            <div className="flex flex-row gap-10 mt-4">
+                              <div className="flex flex-col gap-1">
+                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                                  Format
+                                </h1>
+                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                  HLS Streaming
+                                </p>
+                              </div>
                             </div>
                             {/** delete video */}
                             {/* <div className="flex flex-row gap-10 mt-10">
@@ -438,12 +896,27 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
                             {/** FILM */}
                             <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <Player
-                                src={videoHD?.url}
-                                controls
-                                className="w-full object-cover "
-                                style={{ width: "100%", height: "100%" }}
+                              <ServerStreamingPlayer
+                                resourceId={film?.id}
+                                videoUrl={videoHD?.url}
+                                hlsUrl={videoHD?.hlsUrl}
+                                type="hd"
+                                controls={false}
+                                width="100%"
+                                height="100%"
+                                aspectRatio="16/9"
                               />
+                            </div>
+
+                            <div className="flex flex-row gap-10 mt-4">
+                              <div className="flex flex-col gap-1">
+                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                                  Format
+                                </h1>
+                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                  HLS Streaming
+                                </p>
+                              </div>
                             </div>
 
                             {/** delete video */}
@@ -477,12 +950,27 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                           <div className="flex flex-col gap-5">
                             {/** FILM */}
                             <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <Player
-                                src={videoFHD?.url}
-                                controls
-                                className="w-full object-cover "
-                                style={{ width: "100%", height: "100%" }}
+                              <ServerStreamingPlayer
+                                resourceId={film?.id}
+                                videoUrl={videoFHD?.url}
+                                hlsUrl={videoFHD?.hlsUrl}
+                                type="fhd"
+                                controls={false}
+                                width="100%"
+                                height="100%"
+                                aspectRatio="16/9"
                               />
+                            </div>
+
+                            <div className="flex flex-row gap-10 mt-4">
+                              <div className="flex flex-col gap-1">
+                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                                  Format
+                                </h1>
+                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                  HLS Streaming
+                                </p>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -508,12 +996,27 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
                             {/** FILM */}
                             <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <Player
-                                src={videoUHD?.url}
-                                controls
-                                className="w-full object-cover "
-                                style={{ width: "100%", height: "100%" }}
+                              <ServerStreamingPlayer
+                                resourceId={film?.id}
+                                videoUrl={videoUHD?.url}
+                                hlsUrl={videoUHD?.hlsUrl}
+                                type="uhd"
+                                controls={false}
+                                width="100%"
+                                height="100%"
+                                aspectRatio="16/9"
                               />
+                            </div>
+
+                            <div className="flex flex-row gap-10 mt-4">
+                              <div className="flex flex-col gap-1">
+                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
+                                  Format
+                                </h1>
+                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                                  HLS Streaming
+                                </p>
+                              </div>
                             </div>
 
                             {/** delete video */}
@@ -535,6 +1038,178 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             </>
           )}
         </>
+      )}
+
+      {/** Subtitle Management Section */}
+      {((videoSD || videoHD || videoFHD || videoUHD) && !existingJob) && (
+        <div className="flex flex-col gap-6">
+          <div className="flex items-center gap-8 max-w-[80%]">
+            <div className="flex flex-col gap-[7px] min-w-[150px]">
+              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                Subtitles
+              </h1>
+              <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                Manage subtitle files for this content
+              </p>
+            </div>
+          </div>
+
+          {/* Upload New Subtitle */}
+          <div className="flex flex-col gap-4 p-6 bg-[#36323E] rounded-lg">
+            <h2 className="font-[Inter-SemiBold] text-base text-whites-40">
+              Upload New Subtitle
+            </h2>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <input
+                  id="subtitle-file-input"
+                  type="file"
+                  accept=".vtt"
+                  onChange={handleSubtitleFileChange}
+                  className="block w-full text-sm text-whites-40 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary-500 file:text-whites-40 hover:file:bg-primary-700"
+                />
+                <select
+                  value={selectedLanguage}
+                  onChange={handleLanguageChange}
+                  className="px-3 py-2 bg-[#2A2630] border border-[#706E72] rounded-lg text-whites-40 text-sm focus:outline-none focus:border-primary-500 min-w-[150px]"
+                >
+                  {languageOptions.map((lang) => (
+                    <option key={lang.code} value={lang.code}>
+                      {lang.name}
+                    </option>
+                  ))}
+                  <option value="custom">Custom Language</option>
+                </select>
+                {showCustomLanguageInput && (
+                  <input
+                    type="text"
+                    placeholder="Enter custom language code (e.g., spa, fra, deu)"
+                    value={customLanguage}
+                    onChange={(e) => setCustomLanguage(e.target.value)}
+                    className="px-3 py-2 bg-[#2A2630] border border-[#706E72] rounded-lg text-whites-40 text-sm focus:outline-none focus:border-primary-500"
+                  />
+                )}
+                <input
+                  type="text"
+                  placeholder="Subtitle label (e.g., English, Spanish, English CC)"
+                  value={subtitleLabel}
+                  onChange={(e) => setSubtitleLabel(e.target.value)}
+                  className="px-3 py-2 bg-[#2A2630] border border-[#706E72] rounded-lg text-whites-40 text-sm focus:outline-none focus:border-primary-500 min-w-[200px]"
+                />
+                <Button
+                  onClick={uploadSubtitle}
+                  disabled={!subtitleFile || uploadingSubtitle || (selectedLanguage === 'custom' && !customLanguage.trim())}
+                  className="min-w-[120px]"
+                >
+                  {uploadingSubtitle ? 'Uploading...' : 'Upload'}
+                </Button>
+              </div>
+              {subtitleFile && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm text-[#706E72]">
+                    Selected file: {subtitleFile.name}
+                  </p>
+                  <p className="text-sm text-[#706E72]">
+                    Language: {getLanguageName(getFinalLanguageCode())}
+                  </p>
+                  {subtitleLabel && (
+                    <p className="text-sm text-[#706E72]">
+                      Label: {subtitleLabel}
+                    </p>
+                  )}
+                  {showCustomLanguageInput && !customLanguage.trim() && (
+                    <p className="text-sm text-red-400">
+                      Please enter a custom language code
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Existing Subtitles */}
+          <div className="flex flex-col gap-4 p-6 bg-[#36323E] rounded-lg">
+            <h2 className="font-[Inter-SemiBold] text-base text-whites-40">
+              Existing Subtitles
+            </h2>
+            
+            {loadingSubtitles ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                <span className="ml-2 text-whites-40">Loading subtitles...</span>
+              </div>
+            ) : existingSubtitles.length > 0 ? (
+              <div className="grid gap-4">
+                {existingSubtitles.map((subtitle, index) => (
+                  <div key={index} className="flex items-center justify-between p-4 bg-[#2A2630] rounded-lg">
+                    <div className="flex flex-col gap-1 flex-1">
+                      <h3 className="font-[Inter-SemiBold] text-sm text-whites-40">
+                        {getLanguageName(subtitle.language) || 'Unknown Language'}
+                      </h3>
+                      {editingSubtitleId === subtitle.id ? (
+                        <div className="flex items-center gap-2 mt-2">
+                          <input
+                            type="text"
+                            value={editingLabel}
+                            onChange={(e) => setEditingLabel(e.target.value)}
+                            className="px-2 py-1 bg-[#36323E] border border-[#706E72] rounded text-whites-40 text-sm focus:outline-none focus:border-primary-500 flex-1"
+                            placeholder="Enter subtitle label"
+                          />
+                          <Button
+                            onClick={() => saveEditSubtitle(subtitle.id)}
+                            className="bg-primary-500 hover:bg-primary-700 text-whites-40 px-2 py-1 rounded text-xs"
+                          >
+                            Save
+                          </Button>
+                          <Button
+                            onClick={cancelEditSubtitle}
+                            className="bg-transparent border border-[#706E72] text-[#706E72] px-2 py-1 rounded text-xs hover:border-whites-40 hover:text-whites-40"
+                          >
+                            Cancel
+                          </Button>
+                        </div>
+                      ) : (
+                        <div className="flex flex-col gap-1">
+                          <p className="text-xs text-[#706E72]">
+                            <strong>Label:</strong> {subtitle.label || 'No label set'}
+                          </p>
+                          <p className="text-xs text-[#706E72]">
+                            <strong>File:</strong> {subtitle.filename || 'Subtitle file'}
+                          </p>
+                          <p className="text-xs text-[#706E72]">
+                            <strong>Language code:</strong> {subtitle.language || 'N/A'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2">
+                      {editingSubtitleId !== subtitle.id && (
+                        <Button
+                          onClick={() => startEditSubtitle(subtitle)}
+                          className="bg-transparent border border-primary-500 rounded-full px-3 py-1 text-primary-500 font-[Inter-Regular] text-sm hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                        >
+                          Edit
+                        </Button>
+                      )}
+                      <Button
+                        onClick={() => deleteSubtitle(subtitle.id)}
+                        className="bg-transparent border border-red-500 rounded-full px-3 py-1 text-red-500 font-[Inter-Regular] text-sm hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="flex items-center justify-center py-8">
+                <p className="text-[#706E72] text-center">
+                  No subtitles uploaded yet. Upload a .vtt file to get started.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
       )}
 
       {/** error & sucess message */}

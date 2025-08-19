@@ -2,16 +2,17 @@
 import React from "react";
 import Sidebar from "../../../../2-Components/Navigation/Sidebar.tsx";
 import CustomStack from "../../../../2-Components/Stacks/CustomStack.jsx";
-import {  Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import { useNavigate, useParams } from "react-router-dom";
 import FilmDetailTab from "../../../../2-Components/Tabs/FilmDetailTab.jsx";
 import { useGetFilm } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import NoImage from "../../../../1-Assets/no-image.svg"
 import CustomLoader from "../../../../2-Components/Loader/CustomLoader.jsx";
+import Button from '../../../../2-Components/Buttons/Button.tsx'
 
 const ViewFilmContent = () => {
-    let navigate = useNavigate(); 
-  
+    let navigate = useNavigate();
+
     let params = useParams();
     const [isImgBroken, setIsImgBroken] = React.useState(false);
     const [filmId, setFilmId] = React.useState(null);
@@ -19,37 +20,37 @@ const ViewFilmContent = () => {
     React.useEffect(() => {
         //setFilmId()
         //console.log("filmId", filmsQuery.data)
-        setFilmId(()=> params?.id)
+        setFilmId(() => params?.id)
     }, [params?.id]);
 
-   // console.log("filmsQuery", filmsQuery.data)
-    
+    // console.log("filmsQuery", filmsQuery.data)
+
     const handleImgError = (e) => {
         setIsImgBroken(true)
     }
-    if(filmsQuery.isLoading) {
+    if (filmsQuery.isLoading) {
         return <div className="flex flex-col justify-center items-center h-screen bg-[#24222a]">
             <div className="flex flex-col relative gap-8">
                 <div className="w-full h-full relative flex items-center justify-center bg-secondary-800  top-0 left-0 bg-opacity-70 text-red-500">
-                 <CustomLoader />
+                    <CustomLoader />
 
                 </div>
-           
-            <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">Loading...</p>
+
+                <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">Loading...</p>
 
             </div>
-        
-        </div>
-    }
-    if(filmsQuery.isError) {
-        return <div className="flex flex-col justify-center items-center h-screen bg-[#24222a]">
-        <div className="flex relative gap-8">
-        
-        <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">Error</p>
 
         </div>
-    
-    </div>
+    }
+    if (filmsQuery.isError) {
+        return <div className="flex flex-col justify-center items-center h-screen bg-[#24222a]">
+            <div className="flex relative gap-8">
+
+                <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">Error</p>
+
+            </div>
+
+        </div>
     }
     return (
         <div className="max-h-screen h-[100vh] w-full flex flex-col bg-whites-900 relative">
@@ -63,18 +64,29 @@ const ViewFilmContent = () => {
                     {/** title */}
                     <CustomStack className="bg-[#24222a] z-50 w-full justify-between items-start py-6 sticky top-0 flex-col">
                         <div className="flex flex-row items-center gap-9">
-                            <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                               {filmsQuery.data?.film?.title}
-                            </Typography>
+                            {/* Back Button */}
+                            <Button
+                                className="px-4 py-2 rounded-lg font-[Inter-Medium] bg-primary-700 text-[#fafafa]"
+                                onClick={() => window.history.back()}
+                            >
+                                ← Back
+                            </Button>
+                            <div className="flex flex-col gap-1">
+                                <div className="flex flex-row items-center gap-9">
+                                    <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
+                                        {filmsQuery.data?.film?.title}
+                                    </Typography>
 
-                            <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 "> {filmsQuery.data?.film?.type}</div>
-                        </div>
+                                    <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 "> {filmsQuery.data?.film?.type}</div>
+                                </div>
 
-                        <div className="">
-                            <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
-                                <li className="w-max list-none">{filmsQuery.data?.film?.type} </li>
-                                <li className="w-max">{filmsQuery.data?.film?.yearOfProduction}</li>
-                            </ul>
+                                <div className="">
+                                    <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
+                                        <li className="w-max list-none">{filmsQuery.data?.film?.type} </li>
+                                        <li className="w-max">{filmsQuery.data?.film?.yearOfProduction}</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
                     </CustomStack>
 
@@ -84,7 +96,7 @@ const ViewFilmContent = () => {
                         <div className="flex flex-row gap-4">
                             {/** image */}
 
-                            <img onError={handleImgError} src={ isImgBroken ? NoImage : filmsQuery.data?.film?.posters[0]?.url} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
+                            <img onError={handleImgError} src={isImgBroken ? NoImage : filmsQuery.data?.film?.posters[0]?.url} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
 
                             <div className="flex flex-col max-w-[640px] gap-6">
                                 <h1 className="font-[Inter-Regular] text-sm text-[#FFFAF6] text-opacity-70">{filmsQuery.data?.film?.overview}</h1>
@@ -104,7 +116,7 @@ const ViewFilmContent = () => {
                         </div>
                     </div>
 
-                   
+
                 </div>
             </div>
         </div>

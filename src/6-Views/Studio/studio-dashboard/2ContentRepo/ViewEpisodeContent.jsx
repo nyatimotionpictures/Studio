@@ -6,6 +6,7 @@ import FilmDetailTab from "../../../../2-Components/Tabs/FilmDetailTab.jsx";
 import { useParams } from "react-router-dom";
 import { useGetFilm } from "../../../../5-Store/TanstackStore/services/queries.ts";
 import NoImage from "../../../../1-Assets/no-image.svg"
+import Button from '../../../../2-Components/Buttons/Button.tsx'
 
 const ViewEpisodeContent = () => {
   const [filmId, setFilmId] = React.useState(null);
@@ -20,7 +21,7 @@ const ViewEpisodeContent = () => {
 
   React.useEffect(() => {
     //setFilmId()
-    setFilmId(()=> params?.id)
+    setFilmId(() => params?.id)
     if (params?.seasonId) {
       const filterSeason = filmsQuery.data?.film?.season?.filter((data) => data.id === params?.seasonId);
       let sdata = filterSeason?.length > 0 ? filterSeason[0] : null
@@ -29,24 +30,24 @@ const ViewEpisodeContent = () => {
 
       console.log("filterEpisode", filterEpisode)
 
-    //  console.log("filterEpisode", filterEpisode)
+      //  console.log("filterEpisode", filterEpisode)
       setEpisodeData(() => filterEpisode?.length > 0 ? filterEpisode[0] : null)
 
       setSeasonData(() => filterSeason?.length > 0 ? filterSeason[0] : null)
-     // console.log("seasonData", seasonData)
+      // console.log("seasonData", seasonData)
     } else {
       setSeasonData(() => null)
       setEpisodeData(() => null)
     }
-}, [filmsQuery.data?.film?.id,filmsQuery.data?.film?.season, params?.seasonId,]);
+  }, [filmsQuery.data?.film?.id, filmsQuery.data?.film?.season, params?.seasonId,]);
 
 
 
 
 
-const handleImgError = (e) => {
-  setIsImgBroken(true)
-}
+  const handleImgError = (e) => {
+    setIsImgBroken(true)
+  }
   //console.log("params", params)
   return (
     <div className="max-h-screen h-[100vh] w-full flex flex-col bg-whites-900 relative">
@@ -59,19 +60,31 @@ const handleImgError = (e) => {
         <div className="bg-[#24222a] min-h-[100vh] flex-1 px-10 overflow-auto">
           {/** title */}
           <CustomStack className="bg-[#24222a] z-50 w-full justify-between items-start py-6 sticky top-0 flex-col">
+
             <div className="flex flex-row items-center gap-9">
-              <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-               {episodeData?.title}
-              </Typography>
+              {/* Back Button */}
+              <Button
+                className="px-4 py-2 rounded-lg font-[Inter-Medium] bg-primary-700 text-[#fafafa]"
+                onClick={() => window.history.back()}
+              >
+                ← Back
+              </Button>
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-row items-center gap-9">
+                  <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
+                    {episodeData?.title}
+                  </Typography>
 
-              <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">Episode</div>
-            </div>
+                  <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">Episode</div>
+                </div>
 
-            <div className="">
-              <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
-                {/* <li className="w-max list-none">Episode </li> */}
-                <li className="w-max list-none">{episodeData?.yearOfProduction}</li>
-              </ul>
+                <div className="">
+                  <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
+                    {/* <li className="w-max list-none">Episode </li> */}
+                    <li className="w-max list-none">{episodeData?.yearOfProduction}</li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </CustomStack>
 
@@ -81,7 +94,7 @@ const handleImgError = (e) => {
             <div className="flex flex-row gap-4">
               {/** image */}
 
-              <img onError={handleImgError} src={ isImgBroken ? NoImage : episodeData?.posters[0]?.url} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
+              <img onError={handleImgError} src={isImgBroken ? NoImage : episodeData?.posters[0]?.url} alt="" className="w-[210.15px] object-cover h-[272.5px]" />
 
               <div className="flex flex-col max-w-[640px] gap-6">
                 <h1 className="font-[Inter-Regular] text-sm text-[#FFFAF6] text-opacity-70">{episodeData?.overview} </h1>
@@ -104,7 +117,7 @@ const handleImgError = (e) => {
 
         </div>
       </div>
- 
+
 
     </div>
   )

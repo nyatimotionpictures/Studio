@@ -30,13 +30,15 @@ const TrailerForm = ({
   const [chunkProgress, setChunkProgress] = useState(0);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [transcodeProgress, setTranscodeProgress] = useState(0);
+  const [trailerProgress, setTrailerProgress] = useState(0); // New state for trailer processing
   const [isUploading, setIsUploading] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [uploadedChunks, setUploadedChunks] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
   const [chunkSize, setChunkSize] = useState(1 * 1024 * 1024); // Default to 1 MB
+  const [jobId, setJobId] = useState(null); // Track the processing job ID
+  const [processingStage, setProcessingStage] = useState(''); // Track processing stage
   //const [eventStreamMessages, setEventStreamMessages] = useState([]);
-
 
   const abortController = React.useRef(null);
   const MAX_RETRIES = 3;
@@ -292,9 +294,20 @@ const TrailerForm = ({
     );
 
       if (response.data) {
-       
+        console.log('🎬 Trailer upload response:', response.data);
+        
         localStorage.removeItem(file.name);
-        setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
+        
+        // Handle queue-based response
+        if (response.data.jobId) {
+          setJobId(response.data.jobId);
+          setProcessingStage('queued');
+          setSucessUpload(`Trailer processing job queued successfully (Job ID: ${response.data.jobId})`);
+          console.log(`🎬 Trailer processing job queued: ${response.data.jobId}`);
+        } else {
+          // Fallback for direct upload (if still supported)
+          setSucessUpload("Successfully Uploaded Trailer to DigitalOcean Spaces");
+        }
         // alert("Upload to DigitalOcean Spaces completed successfully!");
         //   setUploadProgress(100);
       }
@@ -302,7 +315,9 @@ const TrailerForm = ({
       localStorage.removeItem(file.name);
       if (error?.response) {
         setErrorUpload(
-          `Error ${error.response.status}: ${error.response.statusText}`
+          `Error ${error.response.status}: ${
+            error.response.data?.message || error.response.statusText
+          }`
         );
       } else if (error.request) {
         setErrorUpload(
@@ -357,10 +372,19 @@ const TrailerForm = ({
     socket.connect();
 
     socket.on("uploadProgress", ({ content, progress }) => {
-      setUploadProgress((prev) => ({
-        ...prev,
-        [content?.type]: progress,
-      }));
+      console.log('📊 Upload progress received:', { content, progress });
+      
+      // Handle different types of progress
+      if (content?.type === 'trailer_processing' || content?.type === 'trailer_hls_generation' || content?.type === 'trailer_hls_upload') {
+        setTrailerProgress(progress);
+        setProcessingStage(content?.stage || content?.type || 'processing');
+        console.log(`🎬 Trailer progress: ${progress}% - Stage: ${content?.stage || content?.type}`);
+      } else {
+        setUploadProgress((prev) => ({
+          ...prev,
+          [content?.type]: progress,
+        }));
+      }
     });
 
     socket.on("TranscodeProgress", ({ label, customProgress }) => {
@@ -368,15 +392,42 @@ const TrailerForm = ({
         ...prev,
         [label]: customProgress,
       }));
+    });
+
+    // Handle job completion
+    socket.on("JobCompleted", ({ message, jobId: completedJobId, hlsUrl }) => {
+      console.log('✅ Job completed:', { message, completedJobId, hlsUrl });
       
+      if (completedJobId === jobId || message.includes("Trailer processing finished")) {
+        setTrailerProgress(100);
+        setProcessingStage('completed');
+        setSucessUpload(`Trailer processing completed successfully! ${hlsUrl ? `HLS URL: ${hlsUrl}` : ''}`);
+        
+        // Refresh the film data to show the new trailer
+        setTimeout(() => {
+          queryClient.invalidateQueries({ queryKey: ["film", film?.id] });
+        }, 1000);
+      }
+    });
+
+    // Handle job failure
+    socket.on("JobFailed", ({ message, jobId: failedJobId, error }) => {
+      console.error('❌ Job failed:', { message, failedJobId, error });
+      
+      if (failedJobId === jobId || message.includes("Trailer processing failed")) {
+        setProcessingStage('failed');
+        setErrorUpload(`Trailer processing failed: ${error || message}`);
+      }
     });
 
     return () => {
       socket.off("uploadProgress");
       socket.off("TranscodeProgress");
+      socket.off("JobCompleted");
+      socket.off("JobFailed");
       socket.disconnect();
     };
-  }, []);
+  }, [jobId, film?.id]); // Add jobId and film?.id as dependencies
   return (
     <CustomStack
       className="relative z-50"
@@ -448,12 +499,12 @@ const TrailerForm = ({
                                   <p className="text-sm font-medium">
                                     {resolution.toUpperCase()}
                                   </p>
-                                  <div className="w-full bg-[gray] rounded-full h-4">
+                                  <div className="w-full bg-[#E5E7EB] rounded-full h-3 overflow-hidden">
                                     <div
-                                      className="bg-[green] h-4 rounded-full flex items-center justify-center"
+                                      className="bg-[#10B981] h-3 rounded-full flex items-center justify-center "
                                       style={{ width: `${progress}%` }}
                                     >
-                                      <p className="text-sm text-whites-40">
+                                      <p className="text-xs font-[Inter-Regular] text-whites-40">
                                         {progress}%
                                       </p>
                                     </div>
@@ -461,6 +512,35 @@ const TrailerForm = ({
                                 </div>
                               )
                             )}
+                          </div>
+                        )}
+
+                        {/** trailer processing progress */}
+                        {trailerProgress > 0 && (
+                          <div className="w-full max-w-md mt-4">
+                            <p className="mb-2 font-semibold">
+                              Trailer Processing Progress:
+                            </p>
+                            <div className="mb-2">
+                              <p className="text-sm font-medium">
+                                {processingStage.toUpperCase()} - {jobId && `Job ID: ${jobId}`}
+                              </p>
+                              <div className="w-full bg-[#E5E7EB] rounded-full h-4 overflow-hidden">
+                                <div
+                                  className="bg-[#EF4444] h-4 rounded-full flex items-center justify-center transition-all duration-500"
+                                  style={{ width: `${trailerProgress}%` }}
+                                >
+                                  <p className="text-xs font-[Inter-Regular] text-whites-40">
+                                    {trailerProgress}%
+                                  </p>
+                                </div>
+                              </div>
+                              {processingStage && (
+                                <p className="text-xs text-[#6B7280] mt-1">
+                                  Stage: {processingStage}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         )}
 

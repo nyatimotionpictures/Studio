@@ -52,6 +52,7 @@ import socket from '../../../../lib/socket.js';
 
 const VideoJobsManager = () => {
   const [jobs, setJobs] = useState([]);
+  const [uploadJobs, setUploadJobs] = useState([]);
   const [stats, setStats] = useState({
     total: 0,
     waiting: 0,
@@ -60,9 +61,19 @@ const VideoJobsManager = () => {
     failed: 0,
     cancelled: 0,
   });
+  const [uploadStats, setUploadStats] = useState({
+    total: 0,
+    waiting: 0,
+    active: 0,
+    completed: 0,
+    failed: 0,
+    cancelled: 0,
+  });
   const [loading, setLoading] = useState(true);
+  const [uploadLoading, setUploadLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('');
   const [typeFilter, setTypeFilter] = useState('');
+  const [jobTypeFilter, setJobTypeFilter] = useState('transcoding'); // 'transcoding' or 'upload'
   const [confirmDialog, setConfirmDialog] = useState({
     open: false,
     action: null,
@@ -76,24 +87,36 @@ const VideoJobsManager = () => {
     severity: 'success',
   });
   const [expandedJob, setExpandedJob] = useState(null);
-  
+  const [expandedUploadJob, setExpandedUploadJob] = useState(null);
+
   // Real-time progress tracking
   const [jobProgress, setJobProgress] = useState({});
+  const [uploadProgress, setUploadProgress] = useState({});
   const [socketConnected, setSocketConnected] = useState(false);
 
   useEffect(() => {
-    fetchJobs();
+    if (jobTypeFilter === 'transcoding') {
+      fetchJobs();
+    } else {
+      fetchUploadJobs();
+    }
     setupSocketListeners();
-    
+
     // Auto-refresh every 30 seconds
-    const interval = setInterval(fetchJobs, 30000);
+    const interval = setInterval(() => {
+      if (jobTypeFilter === 'transcoding') {
+        fetchJobs();
+      } else {
+        fetchUploadJobs();
+      }
+    }, 30000);
     return () => {
       clearInterval(interval);
       if (socket) {
         socket.disconnect();
       }
     };
-  }, [statusFilter, typeFilter]);
+  }, [statusFilter, typeFilter, jobTypeFilter]);
 
   const setupSocketListeners = () => {
     if (!socket) {
@@ -167,6 +190,8 @@ const VideoJobsManager = () => {
       // Listen for upload progress
       socket.on("uploadProgress", ({ content, progress, clientId }) => {
         console.log('uploadProgress received:', { content, progress, clientId });
+
+        // Update transcoding job progress
         setJobProgress(prev => ({
           ...prev,
           [clientId]: {
@@ -175,6 +200,16 @@ const VideoJobsManager = () => {
               ...prev[clientId]?.uploading,
               [content?.resolution]: progress
             }
+          }
+        }));
+
+        // Update upload job progress
+        setUploadProgress(prev => ({
+          ...prev,
+          [clientId]: {
+            ...prev[clientId],
+            progress: progress,
+            content: content
           }
         }));
       });
@@ -229,12 +264,12 @@ const VideoJobsManager = () => {
       const response = await apiRequest.get(`/v1/studio/processing-jobs?${params}`);
       setJobs(response.data.jobs);
       setStats(response.data.stats);
-      
+
       // Join socket rooms for active jobs
       if (socket && socketConnected) {
         const activeJobs = response.data.jobs.filter(job => job.status === 'active');
         console.log('Active jobs found:', activeJobs.length);
-        
+
         activeJobs.forEach(job => {
           const clientId = job.resourceId; // Use resourceId as clientId
           console.log('Joining socket room for job:', { jobId: job.id, clientId, resourceId: job.resourceId });
@@ -248,6 +283,36 @@ const VideoJobsManager = () => {
       showSnackbar('Failed to load jobs', 'error');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchUploadJobs = async () => {
+    try {
+      setUploadLoading(true);
+      const params = new URLSearchParams();
+      if (statusFilter) params.append('status', statusFilter);
+      if (typeFilter) params.append('type', typeFilter);
+
+      const response = await apiRequest.get(`/v1/studio/upload-jobs?${params}`);
+      setUploadJobs(response.data.jobs);
+      setUploadStats(response.data.stats);
+
+      // Join socket rooms for active upload jobs
+      if (socket && socketConnected) {
+        const activeUploadJobs = response.data.jobs.filter(job => job.status === 'active');
+        console.log('Active upload jobs found:', activeUploadJobs.length);
+
+        activeUploadJobs.forEach(job => {
+          const clientId = job.resourceId;
+          console.log('Joining socket room for upload job:', { jobId: job.id, clientId, resourceId: job.resourceId });
+          socket.emit("joinRoom", clientId);
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching upload jobs:', error);
+      showSnackbar('Failed to load upload jobs', 'error');
+    } finally {
+      setUploadLoading(false);
     }
   };
 
@@ -281,49 +346,77 @@ const VideoJobsManager = () => {
 
   const executeAction = async () => {
     const { action, jobId } = confirmDialog;
-    
+
     try {
       let response;
-      
+
       switch (action) {
         case 'cancel':
         case 'stop':
           response = await apiRequest.post(`/v1/studio/processing-jobs/${jobId}/cancel`);
           break;
-          
+
         case 'retry':
-          response = await apiRequest.post(`/v1/studio/processing-jobs/${jobId}/retry`);
+          if (jobTypeFilter === 'transcoding') {
+            response = await apiRequest.post(`/v1/studio/processing-jobs/${jobId}/retry`);
+          } else {
+            response = await apiRequest.post(`/v1/studio/upload-jobs/${jobId}/retry`);
+          }
           break;
-          
+
         case 'cleanup':
-          response = await apiRequest.post(`/v1/studio/processing-jobs/${jobId}/cleanup`);
+          if (jobTypeFilter === 'transcoding') {
+            response = await apiRequest.post(`/v1/studio/processing-jobs/${jobId}/cleanup`);
+          } else {
+            response = await apiRequest.post(`/v1/studio/upload-jobs/${jobId}/cleanup`);
+          }
           break;
-          
+
         case 'delete':
-          response = await apiRequest.delete(`/v1/studio/processing-jobs/${jobId}`);
+          if (jobTypeFilter === 'transcoding') {
+            response = await apiRequest.delete(`/v1/studio/processing-jobs/${jobId}`);
+          } else {
+            response = await apiRequest.delete(`/v1/studio/upload-jobs/${jobId}`);
+          }
           break;
-          
+
         case 'clearCompleted':
-          response = await apiRequest.post('/v1/studio/processing-jobs/clear', { status: 'completed' });
+          if (jobTypeFilter === 'transcoding') {
+            response = await apiRequest.post('/v1/studio/processing-jobs/clear', { status: 'completed' });
+          } else {
+            response = await apiRequest.post('/v1/studio/upload-jobs/clear', { status: 'completed' });
+          }
           break;
-          
+
         case 'clearFailed':
-          response = await apiRequest.post('/v1/studio/processing-jobs/clear', { status: 'failed' });
+          if (jobTypeFilter === 'transcoding') {
+            response = await apiRequest.post('/v1/studio/processing-jobs/clear', { status: 'failed' });
+          } else {
+            response = await apiRequest.post('/v1/studio/upload-jobs/clear', { status: 'failed' });
+          }
           break;
-          
+
         case 'clearAll':
-          response = await apiRequest.post('/v1/studio/processing-jobs/clear', { status: 'all' });
+          if (jobTypeFilter === 'transcoding') {
+            response = await apiRequest.post('/v1/studio/processing-jobs/clear', { status: 'all' });
+          } else {
+            response = await apiRequest.post('/v1/studio/upload-jobs/clear', { status: 'all' });
+          }
           break;
       }
 
       showSnackbar(response.data.message, 'success');
-      fetchJobs();
-      
+      if (jobTypeFilter === 'transcoding') {
+        fetchJobs();
+      } else {
+        fetchUploadJobs();
+      }
+
     } catch (error) {
       console.error(`Error ${action} job:`, error);
       showSnackbar(error.response?.data?.message || `Failed to ${action} job`, 'error');
     }
-    
+
     closeConfirmDialog();
   };
 
@@ -358,6 +451,8 @@ const VideoJobsManager = () => {
       case 'cancelled':
         // Use "default" for color, but we will override the style for lighter look
         return 'default';
+      case 'retried':
+        return 'secondary';
       default:
         return 'default';
     }
@@ -370,23 +465,23 @@ const VideoJobsManager = () => {
   const getResourceDisplayName = (job) => {
     const resource = job.film || job.episode;
     if (!resource) return job.resourceName;
-    
+
     if (job.type === 'episode' && job.episode) {
       return `${job.episode.season.film.title} - S${job.episode.season.season}E${job.episode.episode}: ${resource.title}`;
     }
-    
+
     return resource.title;
   };
 
   const renderDetailedProgress = (job) => {
     const clientId = job.resourceId;
     const progress = jobProgress[clientId];
-    
+
     if (!progress) {
       return (
         <Box sx={{ mt: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            {job.status === 'active' 
+            {job.status === 'active'
               ? 'Real-time progress data not available. The job may be processing but progress updates are not being received.'
               : 'No detailed progress available for this job status.'
             }
@@ -408,9 +503,9 @@ const VideoJobsManager = () => {
             <Typography variant="subtitle2" sx={{ mb: 1 }}>
               File Splitting Progress:
             </Typography>
-            <LinearProgress 
-              variant="determinate" 
-              value={progress.splitting.progress} 
+            <LinearProgress
+              variant="determinate"
+              value={progress.splitting.progress}
               sx={{ mb: 0.5 }}
             />
             <Typography variant="caption">
@@ -430,9 +525,9 @@ const VideoJobsManager = () => {
                 <Typography variant="caption">
                   {resolution.toUpperCase()} - {data.segmentLength}
                 </Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={data.progress} 
+                <LinearProgress
+                  variant="determinate"
+                  value={data.progress}
                   sx={{ mb: 0.5 }}
                 />
                 <Typography variant="caption">
@@ -468,9 +563,9 @@ const VideoJobsManager = () => {
                 <Typography variant="caption">
                   {resolution.toUpperCase()}
                 </Typography>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={uploadProgress} 
+                <LinearProgress
+                  variant="determinate"
+                  value={uploadProgress}
                   sx={{ mb: 0.5 }}
                 />
                 <Typography variant="caption">
@@ -491,8 +586,81 @@ const VideoJobsManager = () => {
     );
   };
 
+  const renderUploadProgress = (job) => {
+    const clientId = job.resourceId;
+    const progress = uploadProgress[clientId];
+
+    if (!progress) {
+      return (
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            {job.status === 'active'
+              ? 'Real-time upload progress data not available. The upload may be processing but progress updates are not being received.'
+              : 'No detailed upload progress available for this job status.'
+            }
+          </Typography>
+          {job.status === 'active' && (
+            <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+              Try refreshing the page or check your socket connection.
+            </Typography>
+          )}
+        </Box>
+      );
+    }
+
+    return (
+      <Box sx={{ mt: 2 }}>
+        {/* Upload Progress */}
+        {progress.content && (
+          <Box sx={{ mb: 2 }}>
+            <Typography variant="subtitle2" sx={{ mb: 1 }}>
+              Upload Progress:
+            </Typography>
+            <LinearProgress
+              variant="determinate"
+              value={progress.progress || 0}
+              sx={{ mb: 0.5 }}
+            />
+            <Typography variant="caption">
+              {progress.progress || 0}%
+            </Typography>
+
+            {/* Upload Content Details */}
+            <Box sx={{ mt: 1, p: 1, bgcolor: 'rgba(255,255,255,0.05)', borderRadius: 1 }}>
+              <Typography variant="caption" display="block" sx={{ color: 'whites.200' }}>
+                <strong>Content Type:</strong> {progress.content.type || 'Unknown'}
+              </Typography>
+              {progress.content.resolution && (
+                <Typography variant="caption" display="block" sx={{ color: 'whites.200' }}>
+                  <strong>Resolution:</strong> {progress.content.resolution}
+                </Typography>
+              )}
+              {progress.content.fileType && (
+                <Typography variant="caption" display="block" sx={{ color: 'whites.200' }}>
+                  <strong>File Type:</strong> {progress.content.fileType}
+                </Typography>
+              )}
+              {progress.content.subtitle && (
+                <Typography variant="caption" display="block" sx={{ color: 'whites.200' }}>
+                  <strong>Subtitle:</strong> {progress.content.subtitle}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+        )}
+
+        {/* Show message if no progress data is available */}
+        {!progress.content && (
+          <Typography variant="body2" color="text.secondary">
+            No detailed upload progress data available yet. Progress updates will appear here once uploading begins.
+          </Typography>
+        )}
+      </Box>
+    );
+  };
+
   const StatCard = ({ title, value, icon }) => (
-    <Card sx={{ 
+    <Card sx={{
       bgcolor: 'secondary.800',
       color: 'whites.40',
       '& .MuiCardContent-root': {
@@ -517,12 +685,13 @@ const VideoJobsManager = () => {
   return (
     <CustomStack>
       <Sidebar />
-      <Box sx={{ 
-        flex: 1, 
-        p: 3, 
+      <Box sx={{
+        flex: 1,
+        p: 3,
         bgcolor: 'secondary.800',
         minHeight: '100vh',
-        fontFamily: 'Inter, sans-serif'
+        fontFamily: 'Inter, sans-serif',
+        overflowY: 'auto'
       }}>
         <Typography variant="h4" gutterBottom sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif' }}>
           Video Processing Jobs
@@ -530,7 +699,7 @@ const VideoJobsManager = () => {
         <Typography variant="body1" sx={{ color: 'whites.200', fontFamily: 'Inter, sans-serif' }} gutterBottom>
           Monitor and manage your video transcoding jobs
         </Typography>
-        
+
         {!socketConnected && (
           <Alert severity="warning" sx={{ mb: 2, bgcolor: 'warning.dark', color: 'warning.contrastText' }}>
             Real-time updates unavailable - Socket disconnected
@@ -541,33 +710,81 @@ const VideoJobsManager = () => {
         {process.env.NODE_ENV === 'development' && (
           <Alert severity="info" sx={{ mb: 2, bgcolor: 'info.dark', color: 'info.contrastText' }}>
             <Typography variant="body2" sx={{ fontFamily: 'Inter, sans-serif' }}>
-              Debug Info: Socket Connected: {socketConnected ? 'Yes' : 'No'} | 
-              Progress Data Keys: {Object.keys(jobProgress).join(', ') || 'None'} | 
+              Debug Info: Socket Connected: {socketConnected ? 'Yes' : 'No'} |
+              Progress Data Keys: {Object.keys(jobProgress).join(', ') || 'None'} |
               Active Jobs: {jobs.filter(j => j.status === 'active').length}
             </Typography>
           </Alert>
         )}
 
+        {/* Job Type Toggle */}
+        <Card sx={{ mb: 3, bgcolor: 'secondary.700' }}>
+          <CardContent sx={{ bgcolor: 'secondary.700' }}>
+            <Box sx={{ display: 'flex', gap: 2, alignItems: 'center' }}>
+              <Typography variant="h6" sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif' }}>
+                Job Type:
+              </Typography>
+              <Button
+                variant={jobTypeFilter === 'transcoding' ? 'contained' : 'outlined'}
+                onClick={() => setJobTypeFilter('transcoding')}
+                sx={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                Transcoding Jobs
+              </Button>
+              <Button
+                variant={jobTypeFilter === 'upload' ? 'contained' : 'outlined'}
+                onClick={() => setJobTypeFilter('upload')}
+                sx={{ fontFamily: 'Inter, sans-serif' }}
+              >
+                Upload Jobs
+              </Button>
+            </Box>
+          </CardContent>
+        </Card>
+
         {/* Stats Cards */}
         <Grid container spacing={3} sx={{ mb: 3 }}>
           <Grid item xs={12} sm={6} md={2}>
-            <StatCard title="Total Jobs" value={stats.total} icon={<Schedule color="primary" />} />
+            <StatCard
+              title={jobTypeFilter === 'transcoding' ? "Total Transcoding Jobs" : "Total Upload Jobs"}
+              value={jobTypeFilter === 'transcoding' ? stats.total : uploadStats.total}
+              icon={<Schedule color="primary" />}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <StatCard title="Waiting" value={stats.waiting} icon={<Schedule color="warning" />} />
+            <StatCard
+              title="Waiting"
+              value={jobTypeFilter === 'transcoding' ? stats.waiting : uploadStats.waiting}
+              icon={<Schedule color="warning" />}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <StatCard title="Active" value={stats.active} icon={<PlayArrow color="info" />} />
+            <StatCard
+              title="Active"
+              value={jobTypeFilter === 'transcoding' ? stats.active : uploadStats.active}
+              icon={<PlayArrow color="info" />}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <StatCard title="Completed" value={stats.completed} icon={<CheckCircle color="success" />} />
+            <StatCard
+              title="Completed"
+              value={jobTypeFilter === 'transcoding' ? stats.completed : uploadStats.completed}
+              icon={<CheckCircle color="success" />}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            <StatCard title="Failed" value={stats.failed} icon={<Error color="error" />} />
+            <StatCard
+              title="Failed"
+              value={jobTypeFilter === 'transcoding' ? stats.failed : uploadStats.failed}
+              icon={<Error color="error" />}
+            />
           </Grid>
           <Grid item xs={12} sm={6} md={2}>
-            {/* Make Cancelled lighter: use Stop icon with a very light gray color */}
-            <StatCard title="Cancelled" value={stats.cancelled} icon={<Stop sx={{ color: '#e0e0e0' }} />} />
+            <StatCard
+              title="Cancelled"
+              value={jobTypeFilter === 'transcoding' ? stats.cancelled : uploadStats.cancelled}
+              icon={<Stop sx={{ color: '#e0e0e0' }} />}
+            />
           </Grid>
         </Grid>
 
@@ -609,7 +826,7 @@ const VideoJobsManager = () => {
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value)}
                   label="Status"
-                  sx={{ 
+                  sx={{
                     color: 'whites.40',
                     fontFamily: 'Inter, sans-serif',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -635,7 +852,7 @@ const VideoJobsManager = () => {
                   value={typeFilter}
                   onChange={(e) => setTypeFilter(e.target.value)}
                   label="Type"
-                  sx={{ 
+                  sx={{
                     color: 'whites.40',
                     fontFamily: 'Inter, sans-serif',
                     '& .MuiOutlinedInput-notchedOutline': {
@@ -682,37 +899,65 @@ const VideoJobsManager = () => {
                 Clear All Finished
               </Button>
 
-              <Button
-                variant="outlined"
-                color="info"
-                startIcon={<Refresh />}
-                onClick={async () => {
-                  try {
-                    const response = await apiRequest.post('/v1/studio/processing-jobs/fix-stuck');
-                    showSnackbar(response.data.message, 'success');
-                    fetchJobs();
-                  } catch (error) {
-                    console.error('Error fixing stuck jobs:', error);
-                    showSnackbar(error.response?.data?.message || 'Failed to fix stuck jobs', 'error');
-                  }
-                }}
-                disabled={loading}
-                sx={{ fontFamily: 'Inter, sans-serif' }}
-              >
-                Fix Stuck Jobs
-              </Button>
+              {jobTypeFilter === 'transcoding' && (
+                <Button
+                  variant="outlined"
+                  color="info"
+                  startIcon={<Refresh />}
+                  onClick={async () => {
+                    try {
+                      const response = await apiRequest.post('/v1/studio/processing-jobs/fix-stuck');
+                      showSnackbar(response.data.message, 'success');
+                      fetchJobs();
+                    } catch (error) {
+                      console.error('Error fixing stuck jobs:', error);
+                      showSnackbar(error.response?.data?.message || 'Failed to fix stuck jobs', 'error');
+                    }
+                  }}
+                  disabled={loading}
+                  sx={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  Fix Stuck Jobs
+                </Button>
+              )}
+
+              {jobTypeFilter === 'upload' && (
+                <Button
+                  variant="outlined"
+                  color="info"
+                  startIcon={<Refresh />}
+                  onClick={async () => {
+                    try {
+                      const response = await apiRequest.post('/v1/studio/upload-jobs/fix-stuck');
+                      showSnackbar(response.data.message, 'success');
+                      fetchUploadJobs();
+                    } catch (error) {
+                      console.error('Error fixing stuck upload jobs:', error);
+                      showSnackbar(error.response?.data?.message || 'Failed to fix stuck upload jobs', 'error');
+                    }
+                  }}
+                  disabled={uploadLoading}
+                  sx={{ fontFamily: 'Inter, sans-serif' }}
+                >
+                  Fix Stuck Upload Jobs
+                </Button>
+              )}
             </Box>
           </CardContent>
         </Card>
 
         {/* Jobs Table */}
         <Card sx={{ bgcolor: 'secondary.700' }}>
-          <TableContainer sx={{ maxHeight: '70vh', overflow: 'auto' }}>
+          <TableContainer >
             <Table stickyHeader>
               <TableHead>
                 <TableRow sx={{ bgcolor: 'secondary.600' }}>
-                  <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>Resource</TableCell>
-                  <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>Type</TableCell>
+                  <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                    {jobTypeFilter === 'transcoding' ? 'Resource' : 'Upload Type'}
+                  </TableCell>
+                  <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>
+                    {jobTypeFilter === 'transcoding' ? 'Type' : 'Content Type'}
+                  </TableCell>
                   <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>File Name</TableCell>
                   <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>Status</TableCell>
                   <TableCell sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif', fontWeight: 600 }}>Progress</TableCell>
@@ -721,43 +966,55 @@ const VideoJobsManager = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {loading ? (
+                {((jobTypeFilter === 'transcoding' && loading) || (jobTypeFilter === 'upload' && uploadLoading)) ? (
                   <TableRow>
                     <TableCell colSpan={7} align="center" sx={{ bgcolor: 'secondary.700' }}>
                       <LinearProgress />
                       <Typography variant="body2" sx={{ mt: 1, color: 'whites.200', fontFamily: 'Inter, sans-serif' }}>
-                        Loading jobs...
+                        Loading {jobTypeFilter === 'transcoding' ? 'transcoding' : 'upload'} jobs...
                       </Typography>
                     </TableCell>
                   </TableRow>
-                ) : jobs.length === 0 ? (
+                ) : ((jobTypeFilter === 'transcoding' && jobs.length === 0) || (jobTypeFilter === 'upload' && uploadJobs.length === 0)) ? (
                   <TableRow>
                     <TableCell colSpan={7} align="center" sx={{ bgcolor: 'secondary.700' }}>
                       <Typography variant="body2" sx={{ color: 'whites.200', fontFamily: 'Inter, sans-serif' }}>
-                        No jobs found matching your filters
+                        No {jobTypeFilter === 'transcoding' ? 'transcoding' : 'upload'} jobs found matching your filters
                       </Typography>
                     </TableCell>
                   </TableRow>
                 ) : (
-                  jobs.map((job) => (
+                  (jobTypeFilter === 'transcoding' ? jobs : uploadJobs).map((job) => (
                     <React.Fragment key={job.id}>
                       <TableRow sx={{ bgcolor: 'secondary.700' }}>
                         <TableCell sx={{ bgcolor: 'secondary.700' }}>
                           <Typography variant="body2" fontWeight="bold" sx={{ color: '#fff', fontFamily: 'Inter, sans-serif' }}>
-                            {getResourceDisplayName(job)}
+                            {jobTypeFilter === 'transcoding'
+                              ? getResourceDisplayName(job)
+                              : (job.uploadType || 'Unknown Upload')
+                            }
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ bgcolor: 'secondary.700' }}>
-                          <Chip
-                            label={job.type === 'film' ? 'Movie' : 'Episode'}
-                            size="small"
-                            variant="outlined"
-                            sx={{ fontFamily: 'Inter, sans-serif', color: '#fff', borderColor: '#fff' }}
-                          />
+                          {jobTypeFilter === 'transcoding' ? (
+                            <Chip
+                              label={job.type === 'film' ? 'Movie' : 'Episode'}
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontFamily: 'Inter, sans-serif', color: '#fff', borderColor: '#fff' }}
+                            />
+                          ) : (
+                            <Chip
+                              label={job.contentType || 'Unknown'}
+                              size="small"
+                              variant="outlined"
+                              sx={{ fontFamily: 'Inter, sans-serif', color: '#fff', borderColor: '#fff' }}
+                            />
+                          )}
                         </TableCell>
                         <TableCell sx={{ bgcolor: 'secondary.700' }}>
                           <Typography variant="body2" fontFamily="monospace" sx={{ color: 'whites.200' }}>
-                            {job.fileName}
+                            {job.fileName || job.filename || 'N/A'}
                           </Typography>
                         </TableCell>
                         <TableCell sx={{ bgcolor: 'secondary.700' }}>
@@ -770,11 +1027,11 @@ const VideoJobsManager = () => {
                               fontFamily: 'Inter, sans-serif',
                               ...(job.status === 'cancelled'
                                 ? {
-                                    bgcolor: '#f5f5f5',
-                                    color: '#888',
-                                    border: '1px solid #e0e0e0',
-                                    fontWeight: 500,
-                                  }
+                                  bgcolor: '#f5f5f5',
+                                  color: '#888',
+                                  border: '1px solid #e0e0e0',
+                                  fontWeight: 500,
+                                }
                                 : {}),
                             }}
                           />
@@ -783,11 +1040,11 @@ const VideoJobsManager = () => {
                           <Box sx={{ width: '100px' }}>
                             <LinearProgress
                               variant="determinate"
-                              value={job.progress}
+                              value={job.progress || 0}
                               sx={{ mb: 0.5 }}
                             />
                             <Typography variant="caption" sx={{ color: 'whites.200', fontFamily: 'Inter, sans-serif' }}>
-                              {job.progress}%
+                              {job.progress || 0}%
                             </Typography>
                           </Box>
                         </TableCell>
@@ -798,19 +1055,25 @@ const VideoJobsManager = () => {
                         </TableCell>
                         <TableCell sx={{ bgcolor: 'secondary.700' }}>
                           <Box sx={{ display: 'flex', gap: 1 }}>
-                            {/* Show detailed progress button for active jobs or if we have progress data */}
+                            {/* Show detailed progress button for active jobs */}
                             {job.status === 'active' && (
                               <Tooltip title="View Detailed Progress">
                                 <IconButton
                                   size="small"
                                   color="info"
-                                  onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}
+                                  onClick={() => {
+                                    if (jobTypeFilter === 'transcoding') {
+                                      setExpandedJob(expandedJob === job.id ? null : job.id);
+                                    } else {
+                                      setExpandedUploadJob(expandedUploadJob === job.id ? null : job.id);
+                                    }
+                                  }}
                                 >
                                   <Visibility />
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
+
                             {job.status === 'active' && (
                               <Tooltip title="Stop Processing">
                                 <IconButton
@@ -822,7 +1085,7 @@ const VideoJobsManager = () => {
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
+
                             {job.canCancel && job.status === 'waiting' && (
                               <Tooltip title="Cancel Job">
                                 <IconButton
@@ -834,7 +1097,7 @@ const VideoJobsManager = () => {
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
+
                             {job.status === 'failed' && (
                               <Tooltip title="Retry Job">
                                 <IconButton
@@ -846,8 +1109,8 @@ const VideoJobsManager = () => {
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
-                            {job.status === 'failed' && (
+
+                            {job.status === 'failed' && jobTypeFilter === 'transcoding' && (
                               <Tooltip title="Clean Up Folders">
                                 <IconButton
                                   size="small"
@@ -858,7 +1121,7 @@ const VideoJobsManager = () => {
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
+
                             {/* Sync button for stuck jobs */}
                             {job.status === 'waiting' && (
                               <Tooltip title="Sync Job Status">
@@ -867,9 +1130,16 @@ const VideoJobsManager = () => {
                                   color="info"
                                   onClick={async () => {
                                     try {
-                                      const response = await apiRequest.post(`/v1/studio/processing-jobs/${job.id}/sync`);
+                                      const endpoint = jobTypeFilter === 'transcoding'
+                                        ? `/v1/studio/processing-jobs/${job.id}/sync`
+                                        : `/v1/studio/upload-jobs/${job.id}/sync`;
+                                      const response = await apiRequest.post(endpoint);
                                       showSnackbar(response.data.message, 'success');
-                                      fetchJobs();
+                                      if (jobTypeFilter === 'transcoding') {
+                                        fetchJobs();
+                                      } else {
+                                        fetchUploadJobs();
+                                      }
                                     } catch (error) {
                                       console.error('Error syncing job:', error);
                                       showSnackbar(error.response?.data?.message || 'Failed to sync job status', 'error');
@@ -880,8 +1150,8 @@ const VideoJobsManager = () => {
                                 </IconButton>
                               </Tooltip>
                             )}
-                            
-                            {['completed', 'failed', 'cancelled'].includes(job.status) && (
+
+                            {['completed', 'failed', 'cancelled', 'retried'].includes(job.status) && (
                               <Tooltip title="Delete Job Record">
                                 <IconButton
                                   size="small"
@@ -895,29 +1165,36 @@ const VideoJobsManager = () => {
                           </Box>
                         </TableCell>
                       </TableRow>
-                      
+
                       {/* Detailed Progress Row */}
-                      {expandedJob === job.id && (
-                        <TableRow>
-                          <TableCell colSpan={7} sx={{ p: 0, bgcolor: 'secondary.700' }}>
-                            <Collapse in={expandedJob === job.id} timeout="auto" unmountOnExit>
-                              <Box sx={{ 
-                                p: 2, 
-                                bgcolor: 'secondary.600',
-                                borderTop: '1px solid',
-                                borderColor: 'secondary.500',
-                                maxHeight: '400px',
-                                overflow: 'auto'
-                              }}>
-                                <Typography variant="h6" gutterBottom sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif' }}>
-                                  Detailed Progress - {getResourceDisplayName(job)}
-                                </Typography>
-                                {renderDetailedProgress(job)}
-                              </Box>
-                            </Collapse>
-                          </TableCell>
-                        </TableRow>
-                      )}
+                      {((jobTypeFilter === 'transcoding' && expandedJob === job.id) ||
+                        (jobTypeFilter === 'upload' && expandedUploadJob === job.id)) && (
+                          <TableRow>
+                            <TableCell colSpan={7} sx={{ p: 0, bgcolor: 'secondary.700' }}>
+                              <Collapse in={true} timeout="auto" unmountOnExit>
+                                <Box sx={{
+                                  p: 2,
+                                  bgcolor: 'secondary.600',
+                                  borderTop: '1px solid',
+                                  borderColor: 'secondary.500',
+                                  maxHeight: '400px',
+                                  
+                                }}>
+                                  <Typography variant="h6" gutterBottom sx={{ color: 'whites.40', fontFamily: 'Inter, sans-serif' }}>
+                                    Detailed Progress - {jobTypeFilter === 'transcoding'
+                                      ? getResourceDisplayName(job)
+                                      : (job.uploadType || 'Upload Job')
+                                    }
+                                  </Typography>
+                                  {jobTypeFilter === 'transcoding'
+                                    ? renderDetailedProgress(job)
+                                    : renderUploadProgress(job)
+                                  }
+                                </Box>
+                              </Collapse>
+                            </TableCell>
+                          </TableRow>
+                        )}
                     </React.Fragment>
                   ))
                 )}

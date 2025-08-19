@@ -103,7 +103,7 @@ const ViewSeriesContent = () => {
             <div className="flex flex-col relative gap-8">
 
               <p className="text-center text-xs text-primary-500 font-[Inter-Regular]">
-                Error: Check your Internet Connectivity <br/>
+                Error: Check your Internet Connectivity <br />
                 Or: Contact Support to Check for Issue.
               </p>
             </div>
@@ -125,25 +125,39 @@ const ViewSeriesContent = () => {
         <div className="bg-[#24222a] min-h-[100vh] flex-1 px-10 overflow-auto">
           {/** title */}
           <CustomStack className="bg-[#24222a] z-50 w-full justify-between items-start py-6 sticky gap-1 top-0 flex-col ">
+
             <div className="flex flex-row items-center gap-9">
-              <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-                {filmsQuery.data?.film?.title}
-              </Typography>
+              {/* Back Button */}
+              <Button
+                className="px-4 py-2 rounded-lg font-[Inter-Medium] bg-primary-700 text-[#fafafa]"
+                onClick={() => window.history.back()}
+              >
+                ← Back
+              </Button>
 
-              <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">
-                {filmsQuery.data?.film?.type}
+              <div className="flex flex-col gap-1">
+
+                <div className="flex flex-row items-center gap-9">
+                  <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
+                    {filmsQuery.data?.film?.title}
+                  </Typography>
+
+                  <div className=" font-[Inter-Medium] select-none  text-xs flex w-max h-max text-primary-500 px-2 py-1 border border-primary-500 rounded-lg bg-secondary-800 ">
+                    {filmsQuery.data?.film?.type}
+                  </div>
+                </div>
+
+                <div className="">
+                  <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
+                    <li className="w-max list-none">
+                      {filmsQuery.data?.film?.type}{" "}
+                    </li>
+                    <li className="w-max">
+                      {filmsQuery.data?.film?.yearOfProduction}
+                    </li>
+                  </ul>
+                </div>
               </div>
-            </div>
-
-            <div className="">
-              <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
-                <li className="w-max list-none">
-                  {filmsQuery.data?.film?.type}{" "}
-                </li>
-                <li className="w-max">
-                  {filmsQuery.data?.film?.yearOfProduction}
-                </li>
-              </ul>
             </div>
 
             {/* <div className="absolute right-0">

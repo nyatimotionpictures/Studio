@@ -22,30 +22,30 @@ const ViewSeasonContent = () => {
 
   React.useEffect(() => {
     //setFilmId()
-    setFilmId(()=> params?.id)
+    setFilmId(() => params?.id)
     if (params?.seasonId) {
       const filterSeason = filmsQuery.data?.film?.season?.filter((data) => data.id === params?.seasonId);
       setSeasonData(() => filterSeason?.length > 0 ? filterSeason[0] : null)
     } else {
       setSeasonData(() => null)
     }
-}, [filmsQuery.data?.film?.id,filmsQuery.data?.film?.season, params?.seasonId]);
+  }, [filmsQuery.data?.film?.id, filmsQuery.data?.film?.season, params?.seasonId]);
 
 
 
-const newEpisodeMutation = useMutation(
+  const newEpisodeMutation = useMutation(
     {
-        mutationFn: createNewEpisode,
-        onSuccess: async (data)=> {
-            setSnackbarMessage({message: data.message, severity: "success"});
-            await queryClient.invalidateQueries({ queryKey: ["film", filmsQuery?.data?.film?.id] });
-            handleNewEpisode()
-        },
-        onError: (error) => {
-            setSnackbarMessage({message: error.message, severity: "error"});
-        }
+      mutationFn: createNewEpisode,
+      onSuccess: async (data) => {
+        setSnackbarMessage({ message: data.message, severity: "success" });
+        await queryClient.invalidateQueries({ queryKey: ["film", filmsQuery?.data?.film?.id] });
+        handleNewEpisode()
+      },
+      onError: (error) => {
+        setSnackbarMessage({ message: error.message, severity: "error" });
+      }
     }
-)
+  )
 
 
   const handleNewEpisode = () => {
@@ -62,14 +62,14 @@ const newEpisodeMutation = useMutation(
   };
 
   const handleNewAPISubmission = (editInfo) => {
-   let values = {
-    ...editInfo,
-    seasonId: seasonData.id,
-   }
+    let values = {
+      ...editInfo,
+      seasonId: seasonData.id,
+    }
     newEpisodeMutation.mutate(values)
   }
 
- 
+
   return (
     <div className="max-h-screen h-[100vh] w-full flex flex-col bg-whites-900 relative">
       <div className="grid grid-cols-[auto,1fr] flex-grow-1 relative overflow-auto">
@@ -81,29 +81,44 @@ const newEpisodeMutation = useMutation(
           <CustomStack className="bg-[#24222a] z-50 w-full justify-between items-start py-6 sticky gap-1 top-0 flex-col ">
 
             <div className="flex flex-row items-center gap-9">
-              <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
-               Season/Segment: {seasonData?.title}
-              </Typography>
+              {/* Back Button */}
+              <Button
+                className="px-4 py-2 rounded-lg font-[Inter-Medium] bg-primary-700 text-[#fafafa]"
+                onClick={() => window.history.back()}
+              >
+                ← Back
+              </Button>
 
-            
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-row items-center gap-9">
+
+                  <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
+                    Season/Segment: {seasonData?.title}
+                  </Typography>
+                </div>
+                <div className="">
+                  <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
+                    <li className="w-max list-none">{filmsQuery.data?.film?.title} </li>
+                    <li className="w-max">{filmsQuery.data?.film?.yearOfProduction} </li>
+                  </ul>
+                </div>
+
+              </div>
+
             </div>
 
-            <div className="">
-              <ul className="font-[Inter-Regular] text-[#FFFAF6] flex list-disc w-full space-x-8 text-base flex-wrap gap-y-3 items-start justify-start">
-                <li className="w-max list-none">{filmsQuery.data?.film?.title} </li>
-                <li className="w-max">{filmsQuery.data?.film?.yearOfProduction} </li>
-                
-              </ul>
-            </div>
+
+
+
           </CustomStack>
 
           {/** Movie Details & Tabs  */}
           <div className="pt-7 pb-11 ">
-          
+
 
             <div className="mt-0">
               {/* <EpisodesListTable handleNewEpisode={handleNewEpisode} /> */}
-              <SeasonTabs type={"season"} handleNewEpisode={handleNewEpisode} film={filmsQuery.data?.film} season={seasonData}   />
+              <SeasonTabs type={"season"} handleNewEpisode={handleNewEpisode} film={filmsQuery.data?.film} season={seasonData} />
             </div>
           </div>
         </div>
@@ -153,17 +168,17 @@ const newEpisodeMutation = useMutation(
                       <div className="container flex items-center justify-end mx-0  mt-4 mb-8 ">
                         {
                           newEpisodeMutation.isPending ? (
-                        <Button
-                          disabled
-                          className="w-max min-w-[150px] px-5 rounded-lg"
-                        >
-                          Submitting...
-                        </Button>
-                        ) : (
-                          <Button onClick={handleNewSubmit} className="w-max min-w-[150px] px-5 rounded-lg">Save & Close form</Button>     
-                        )
-                    }
-                       </div>
+                            <Button
+                              disabled
+                              className="w-max min-w-[150px] px-5 rounded-lg"
+                            >
+                              Submitting...
+                            </Button>
+                          ) : (
+                            <Button onClick={handleNewSubmit} className="w-max min-w-[150px] px-5 rounded-lg">Save & Close form</Button>
+                          )
+                        }
+                      </div>
                     </div>
                   </div>
                 </div>
