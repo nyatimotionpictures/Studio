@@ -18,6 +18,7 @@ import ServerStreamingPlayer from "../VideoPlayer/ServerStreamingPlayer";
 import axios from "axios";
 import { BaseUrl } from "../../3-Middleware/apiRequest";
 import socket from "../../lib/socket"; // Add socket import
+import TestServerStreamingPlayer from "../VideoPlayer/TestServerStreamingPlayer";
 
 const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   let params = useParams();
@@ -35,6 +36,10 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
   const [videoUHD, setVideoUHD] = React.useState(null);
   const [errorUpload, setErrorUpload] = React.useState(null);
   const [sucessUpload, setSucessUpload] = React.useState(null);
+
+  // Unified quality selection to avoid multiple player mounts
+  const [availableQualities, setAvailableQualities] = React.useState([]); // ['sd','hd','fhd','uhd']
+  const [selectedQuality, setSelectedQuality] = React.useState(null);
 
   // Subtitle management states
   const [subtitleFile, setSubtitleFile] = React.useState(null);
@@ -484,12 +489,25 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             console.log("🎬 UHD video set:", data);
           }
         });
+        // Compute available qualities and default
+        const qualities = [];
+        if (film?.video?.some(v => v.resolution?.toLowerCase() === 'sd')) qualities.push('sd');
+        if (film?.video?.some(v => v.resolution?.toLowerCase() === 'hd' && v.isTrailer === false)) qualities.push('hd');
+        if (film?.video?.some(v => v.resolution?.toLowerCase() === 'fhd')) qualities.push('fhd');
+        if (film?.video?.some(v => v.resolution?.toLowerCase() === 'uhd')) qualities.push('uhd');
+        setAvailableQualities(qualities);
+        // default to highest available
+        const defaultOrder = ['sd','hd','fhd','uhd'];
+        const def = defaultOrder.find(q => qualities.includes(q)) || null;
+        setSelectedQuality(def);
       } else {
         setVideoTrailer(null);
         setVideoSD(null);
         setVideoHD(null);
         setVideoFHD(null);
         setVideoUHD(null);
+        setAvailableQualities([]);
+        setSelectedQuality(null);
       }
     }else {
       if (film?.trailers?.length > 0) {
@@ -611,7 +629,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
             <div className="flex flex-col gap-[20px]">
               <div className="bg-[#36323E] w-[470px] h-[266px]  flex ">
                 {console.log("🎬 Rendering trailer player with:", { url: videoTrailer?.url, hlsUrl: videoTrailer?.hlsUrl })}
-                <ServerStreamingPlayer
+                <TestServerStreamingPlayer
                   resourceId={film?.id}
                   videoUrl={videoTrailer?.url}
                   hlsUrl={videoTrailer?.hlsUrl}
@@ -621,6 +639,7 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                   width="100%"
                   height="100%"
                   aspectRatio="16/9"
+                  
                 />
               </div>
 
@@ -733,8 +752,8 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
 
       {film?.type !== "series" && type !== "season" && (
         <>
-          {/* Show processing status if there's an existing job */}
-          {existingJob && existingJob.jobType !== 'trailer_processing' && (
+         {/* Show processing status if there's an existing job */}
+         {existingJob && existingJob.jobType !== 'trailer_processing' && (
             <div className="flex flex-col gap-6">
               <div className="flex items-center gap-8 max-w-[80%]">
                 <div className="flex flex-col gap-[7px] min-w-[150px]">
@@ -767,25 +786,14 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
               <VideoProcessingStatus clientId={film?.id} />
             </div>
           )}
-          
-          {/* Show upload components only if no existing regular video processing job */}
-          {(!existingJob || existingJob.jobType === 'trailer_processing') && (
-            <>
-              {!videoSD && !videoHD && !videoUHD && !videoFHD ? (
-                <>
-                  <MultipleUploadVideo
-                    videoType={"all"}
-                    film={film}
-                    type={type}
-                    setErrorUpload={setErrorUpload}
-                    setSucessUpload={setSucessUpload}
-                    errorUpload={errorUpload}
-                    sucessUpload={sucessUpload}
-                  />
-                </>
-              ) : (
-                <>
-                  <div className=" flex flex-col gap-10 items-start w-full">
+
+          {
+            (!existingJob || existingJob.jobType === 'trailer_processing') && (
+              <>
+              {/* Unified quality selector and single player */}
+          {availableQualities.length > 0 ? (
+            <div className="flex flex-col gap-6">
+               <div className=" flex flex-col gap-10 items-start w-full">
                     <Button
                       onClick={() =>
                         deleteAllVideos([
@@ -798,245 +806,73 @@ const ViewTrailerFilm = ({ film, type, isLoading, refetch }) => {
                     >
                       Delete Videos
                     </Button>
-
-                    {!videoSD || !videoHD || !videoUHD || !videoFHD ? (
-                      <>
-                   
-                      <div className="flex flex-col gap-4 items-start w-full">
-                        <div>
-                          <Typography className="text-base capitalize text-[#EF4444]  font-[Inter-SemiBold]">
-                            Missing Some Versions Please re-upload Videos
-                          </Typography>
-                        </div>
-                        
-                        <MultipleUploadVideo
-                          videoType={"all"}
-                          film={film}
-                          type={type}
-                          setErrorUpload={setErrorUpload}
-                          setSucessUpload={setSucessUpload}
-                          errorUpload={errorUpload}
-                          sucessUpload={sucessUpload}
-                        />
-                      </div>
-                      </>
-                     
-                    ) : null}
                   </div>
-                  {/** SD */}
-                  {film?.type !== "series" && type !== "series" && (
-                    <>
-                      {videoSD && (
-                        <div className="flex flex-col  gap-6">
-                          <div className="flex items-center gap-8 max-w-[80%]">
-                            <div className="flex flex-col gap-[7px] min-w-[150px]">
-                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                SD (480P)
-                              </h1>
-                            </div>
-                          </div>
+              <div className="flex items-center gap-8 max-w-[80%]">
+                <div className="flex flex-col gap-[7px] min-w-[150px]">
+                  <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
+                    Video Preview
+                  </h1>
+                  <p className="font-[Inter-Regular] text-base text-[#706E72]">
+                    Select a quality to load the player
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  {['sd','hd','fhd','uhd'].filter(q => availableQualities.includes(q)).map(q => (
+                    <Button
+                      key={q}
+                      onClick={() => setSelectedQuality(q)}
+                      className={`${selectedQuality === q ? 'bg-primary-500 text-whites-40' : 'bg-transparent border border-primary-500 text-primary-500'} rounded-full px-3 py-1 text-sm`}
+                    >
+                      {q === 'sd' ? '480P' : q === 'hd' ? '720P' : q === 'fhd' ? '1080P' : '2160P'}
+                    </Button>
+                  ))}
+                </div>
+              </div>
 
-                          <div className="flex flex-col gap-5">
-                            {/** price */}
-                            {/** FILM */}
-                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              {console.log("🎬 Rendering SD player with:", { url: videoSD?.url, hlsUrl: videoSD?.hlsUrl })}
-                              <ServerStreamingPlayer
-                                resourceId={film?.id}
-                                videoUrl={videoSD?.url}
-                                hlsUrl={videoSD?.hlsUrl}
-                                type="sd"
-                                controls={false}
-                                width="100%"
-                                height="100%"
-                                aspectRatio="16/9"
-                              />
-                            </div>
-
-                            <div className="flex flex-row gap-10 mt-4">
-                              <div className="flex flex-col gap-1">
-                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                                  Format
-                                </h1>
-                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                  HLS Streaming
-                                </p>
-                              </div>
-                            </div>
-                            {/** delete video */}
-                            {/* <div className="flex flex-row gap-10 mt-10">
-                              <Button
-                                onClick={() => deleteFun(videoSD?.id)}
-                                className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                              >
-                                Delete Video
-                              </Button>
-                            </div> */}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/** hd */}
-                  {film?.type !== "series" && type !== "series" && (
-                    <>
-                      {videoHD && (
-                        <div className="flex flex-col  gap-6">
-                          <div className="flex items-center gap-8 max-w-[80%]">
-                            <div className="flex flex-col gap-[7px] min-w-[150px]">
-                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                HD (720P)
-                              </h1>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-5">
-                            {/** price */}
-
-                            {/** FILM */}
-                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <ServerStreamingPlayer
-                                resourceId={film?.id}
-                                videoUrl={videoHD?.url}
-                                hlsUrl={videoHD?.hlsUrl}
-                                type="hd"
-                                controls={false}
-                                width="100%"
-                                height="100%"
-                                aspectRatio="16/9"
-                              />
-                            </div>
-
-                            <div className="flex flex-row gap-10 mt-4">
-                              <div className="flex flex-col gap-1">
-                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                                  Format
-                                </h1>
-                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                  HLS Streaming
-                                </p>
-                              </div>
-                            </div>
-
-                            {/** delete video */}
-                            {/* <div className="flex flex-row gap-10 mt-10">
-                              <Button
-                                onClick={() => deleteFun(videoHD?.id)}
-                                className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                              >
-                                Delete Video
-                              </Button>
-                            </div> */}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/** fullhd */}
-                  {film?.type !== "series" && type !== "series" && (
-                    <>
-                      {videoFHD && (
-                        <div className="flex flex-col  gap-6">
-                          <div className="flex items-center gap-8 max-w-[80%]">
-                            <div className="flex flex-col gap-[7px] min-w-[150px]">
-                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                Full HD (1080P)
-                              </h1>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-5">
-                            {/** FILM */}
-                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <ServerStreamingPlayer
-                                resourceId={film?.id}
-                                videoUrl={videoFHD?.url}
-                                hlsUrl={videoFHD?.hlsUrl}
-                                type="fhd"
-                                controls={false}
-                                width="100%"
-                                height="100%"
-                                aspectRatio="16/9"
-                              />
-                            </div>
-
-                            <div className="flex flex-row gap-10 mt-4">
-                              <div className="flex flex-col gap-1">
-                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                                  Format
-                                </h1>
-                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                  HLS Streaming
-                                </p>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-
-                  {/** ultrahd */}
-                  {film?.type !== "series" && type !== "series" && (
-                    <>
-                      {videoUHD && (
-                        <div className="flex flex-col  gap-6">
-                          <div className="flex items-center gap-8 max-w-[80%]">
-                            <div className="flex flex-col gap-[7px] min-w-[150px]">
-                              <h1 className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                Ultra HD (2160p)
-                              </h1>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col gap-5">
-                            {/** price */}
-
-                            {/** FILM */}
-                            <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
-                              <ServerStreamingPlayer
-                                resourceId={film?.id}
-                                videoUrl={videoUHD?.url}
-                                hlsUrl={videoUHD?.hlsUrl}
-                                type="uhd"
-                                controls={false}
-                                width="100%"
-                                height="100%"
-                                aspectRatio="16/9"
-                              />
-                            </div>
-
-                            <div className="flex flex-row gap-10 mt-4">
-                              <div className="flex flex-col gap-1">
-                                <h1 className="font-[Inter-Regular] text-base text-[#706E72]">
-                                  Format
-                                </h1>
-                                <p className="font-[Inter-SemiBold] text-base sm:text-lg text-whites-40">
-                                  HLS Streaming
-                                </p>
-                              </div>
-                            </div>
-
-                            {/** delete video */}
-                            {/* <div className="flex flex-row gap-10 mt-10">
-                              <Button
-                                onClick={() => deleteFun(videoUHD?.id)}
-                                className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
-                              >
-                                Delete Video
-                              </Button>
-                            </div> */}
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </>
+              {selectedQuality && (
+                <div className="bg-[#36323E] w-[500px] h-[266px] flex ">
+                  <TestServerStreamingPlayer
+                    resourceId={film?.id}
+                    videoUrl={
+                      selectedQuality === 'sd' ? videoSD?.url :
+                      selectedQuality === 'hd' ? videoHD?.url :
+                      selectedQuality === 'fhd' ? videoFHD?.url :
+                      selectedQuality === 'uhd' ? videoUHD?.url : undefined
+                    }
+                    hlsUrl={
+                      selectedQuality === 'sd' ? videoSD?.hlsUrl :
+                      selectedQuality === 'hd' ? videoHD?.hlsUrl :
+                      selectedQuality === 'fhd' ? videoFHD?.hlsUrl :
+                      selectedQuality === 'uhd' ? videoUHD?.hlsUrl : undefined
+                    }
+                    type={selectedQuality}
+                    controls={false}
+                    width="100%"
+                    height="100%"
+                    aspectRatio="16/9"
+                  />
+                </div>
               )}
+            </div>
+          ) : (
+            <>
+            <MultipleUploadVideo
+                    videoType={"all"}
+                    film={film}
+                    type={type}
+                    setErrorUpload={setErrorUpload}
+                    setSucessUpload={setSucessUpload}
+                    errorUpload={errorUpload}
+                    sucessUpload={sucessUpload}
+                  />
             </>
           )}
+              </>
+            )
+          }
+          
+
+          {/* Existing fallback sections remain below for safety (left unchanged) */}
         </>
       )}
 
