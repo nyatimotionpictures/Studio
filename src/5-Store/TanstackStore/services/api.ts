@@ -52,7 +52,7 @@ export const postAuthLogin = async (
       "/v1/admin/auth/login",
       adminLoginData
     );
-    console.log("response", response.data);
+   
     return response.data;
   } catch (error) {
     const axiosError = error as AxiosError<ErrorResponse>;
