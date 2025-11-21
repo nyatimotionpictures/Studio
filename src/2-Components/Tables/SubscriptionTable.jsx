@@ -19,7 +19,7 @@ import { checkFilmPurchase } from "../../5-Store/TanstackStore/services/api";
 import { queryClient } from "../../lib/tanstack";
 
 const SubscriptionTable = ({ transactions }) => {
-  console.log(transactions)
+  // console.log(transactions)
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
 
 
@@ -52,7 +52,15 @@ const SubscriptionTable = ({ transactions }) => {
   )
 
 
-  const data = useMemo(() => transactions ?? [], [transactions]);
+  const data = useMemo(() => {
+    if(!transactions) return [];
+    
+    const sortedTransactions = [...transactions].sort((a,b)=> {
+        return moment(b.createdAt) - moment(a.createdAt)
+    })
+
+    return sortedTransactions
+}, [transactions]);
 
   const columnHelper = createColumnHelper();
 
@@ -80,7 +88,7 @@ const SubscriptionTable = ({ transactions }) => {
       header: "Content",
     }),
 
-    columnHelper.accessor("dateCreated", {
+    columnHelper.accessor("createdAt", {
       cell: (info) => (
         <p>{moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}</p>
       ),
