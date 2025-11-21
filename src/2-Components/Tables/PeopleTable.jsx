@@ -18,9 +18,19 @@ import moment from "moment-timezone";
 const PeopleTable = ({users}) => {
     let navigate = useNavigate()
     const [snackbarMessage, setSnackbarMessage] = React.useState(null);
-    const data = useMemo(() => users ?? [], [users]);
+    const data = useMemo(() => {
+      if(!users) return [];
+      // users ?? []
+      const sortedUsers = [...users].sort((a,b)=> {
+        return moment(b.createdAt) - moment(a.createdAt)
+      })
+
+      return sortedUsers
+    }, [users]);
 
     const columnHelper = createColumnHelper();
+
+    
 
       /** @type import('@tanstack/react-table).ColumnDef<any> */
   const columns = [
@@ -48,7 +58,7 @@ const PeopleTable = ({users}) => {
         accessorKey: "phoneNumber",
         footer: "Phone number",
       },
-      columnHelper.accessor("dateCreated", { 
+      columnHelper.accessor("createdAt", { 
         cell: (info) => (
           <p>
            { moment(info.getValue()).format("DD/MMM/YYYY - hh:mm:ss a")}
