@@ -8,6 +8,7 @@ import { Alert, Snackbar, Typography } from "@mui/material";
 import Button from "../Buttons/Button";
 import PosterForm from "./PosterForm";
 import BackdropForm from "./BackdropForm";
+import EpisodeThumbnailForm from "./EpisodeThumbnailForm";
 import { useMutation } from "@tanstack/react-query";
 import { deletePoster } from "../../5-Store/TanstackStore/services/api";
 import { useDeletePoster } from "../../5-Store/TanstackStore/services/mutations";
@@ -18,6 +19,8 @@ const Thumbnails = ({ film, type }) => {
   const [posterDeleteId, setPosterDeleteId] = React.useState(null);
   const [openPosterModal, setOpenPosterModal] = React.useState(false);
   const [openBackdropModal, setOpenBackdropModal] = React.useState(false);
+  const [openEpisodeThumbModal, setOpenEpisodeThumbModal] =
+    React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   let params = useParams();
 
@@ -25,13 +28,17 @@ const Thumbnails = ({ film, type }) => {
 
   const [posterData, setPosterData] = React.useState([]);
   const [backdropData, setBackdropData] = React.useState([]);
+  const [episodeThumbData, setEpisodeThumbData] = React.useState([]);
 
   React.useEffect(() => {
     let posterArray = [];
     let backdropArray = [];
+    let episodeThumbArray = [];
     film?.posters?.filter((data, index) => {
       if (data.isCover === true) {
         posterArray.push(data);
+      } else if (type === "episode" && data.isEpisodeThumbnail === true) {
+        episodeThumbArray.push(data);
       } else {
         backdropArray.push(data);
       }
@@ -40,11 +47,13 @@ const Thumbnails = ({ film, type }) => {
 
     setPosterData(posterArray);
     setBackdropData(backdropArray);
+    setEpisodeThumbData(episodeThumbArray);
   }, [film?.posters]);
 
   const handleModalClose = () => {
     setOpenPosterModal(() => false);
     setOpenBackdropModal(() => false);
+    setOpenEpisodeThumbModal(() => false);
     document.body.style.overflow = "unset";
   };
 
@@ -57,6 +66,13 @@ const Thumbnails = ({ film, type }) => {
 
   const handleOpenBackdropModal = () => {
     setOpenBackdropModal(() => true);
+    if (typeof window != "undefined" && window.document) {
+      document.body.style.overflow = "hidden";
+    }
+  };
+
+  const handleOpenEpisodeThumbModal = () => {
+    setOpenEpisodeThumbModal(() => true);
     if (typeof window != "undefined" && window.document) {
       document.body.style.overflow = "hidden";
     }
@@ -112,6 +128,9 @@ const Thumbnails = ({ film, type }) => {
             <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
               Please upload 3 different posters
             </Typography>
+            <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+              Recommended resolution is 1800 × 2700 px (Vertical 2:3)
+            </Typography>
           </CustomStack>
 
           <CustomStack className="w-full flex-row  gap-6 flex-wrap">
@@ -122,7 +141,7 @@ const Thumbnails = ({ film, type }) => {
                   <img
                     src={data?.url}
                     alt=""
-                    className="w-[250.4px] object-cover h-[286.37px]"
+                    className="w-[200px] object-cover h-[300px]"
                   />
                   <Button
                     onClick={() => deleteFun(data?.id)}
@@ -140,7 +159,7 @@ const Thumbnails = ({ film, type }) => {
                 className="w-max cursor-pointer"
                 onClick={handleOpenPosterModal}
               >
-                <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[286.37px] w-[250.4px] border-2 rounded-xl border-dashed border-secondary-300 gap-6 text-center">
+                  <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[300px] w-[200px] border-2 rounded-xl border-dashed border-secondary-300 gap-6 text-center">
                   <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
                   <CustomStack className="flex-col gap-2 items-center">
                     <Typography className="font-[Inter-SemiBold] text-[#76757A] text-sm">
@@ -156,6 +175,61 @@ const Thumbnails = ({ film, type }) => {
           </CustomStack>
         </FormContainer>
 
+        {type === "episode" && (
+          <FormContainer>
+            <CustomStack className="flex-col pb-2">
+              <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                Upload episode thumbnails
+              </Typography>
+              <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                Upload up to 3 different thumbnails
+              </Typography>
+              <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                Recommended resolution is 1920 × 1080 px (Horizontal 16:9)
+              </Typography>
+            </CustomStack>
+
+            <CustomStack className="w-full flex-row  gap-6 flex-wrap">
+              {episodeThumbData?.map((data, index) => {
+                return (
+                  <div key={index} className="flex flex-col gap-[20px]">
+                    <img
+                      src={data?.url}
+                      alt=""
+                      className="w-[400px] object-cover h-[225px]"
+                    />
+                    <Button
+                      onClick={() => deleteFun(data?.id)}
+                      className="bg-transparent border border-primary-500 rounded-full px-4 text-primary-500 font-[Inter-Regular] text-opacity-50 border-opacity-50 hover:text-opacity-100 hover:border-opacity-100 hover:bg-transparent"
+                    >
+                      Delete Photo
+                    </Button>
+                  </div>
+                );
+              })}
+
+              {episodeThumbData?.length < 3 && (
+                <FormContainer
+                  onClick={handleOpenEpisodeThumbModal}
+                  className="w-max cursor-pointer"
+                >
+                  <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[225px] w-[400px] border-2 rounded-xl border-dashed border-secondary-300 gap-6">
+                    <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
+                    <CustomStack className="flex-col gap-2 items-center">
+                      <Typography className="font-[Inter-SemiBold] text-[#76757A] text-sm">
+                        <span className="text-primary-500">Upload</span>{" "}
+                      </Typography>
+                      <Typography className="font-[Inter-Regular] text-xs text-[#76757A]">
+                        Your images will be private until you publish the film.
+                      </Typography>
+                    </CustomStack>
+                  </CustomStack>
+                </FormContainer>
+              )}
+            </CustomStack>
+          </FormContainer>
+        )}
+
         {/** Upload Backdrop image */}
         <FormContainer>
           <CustomStack className="flex-col pb-2">
@@ -166,6 +240,9 @@ const Thumbnails = ({ film, type }) => {
               Please upload 3 different backdrop images(screenshots from the
               film)
             </Typography>
+            <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+              Recommended resolution is 2560 × 1440 px (Horizontal 16:9)
+            </Typography>
           </CustomStack>
 
           <CustomStack className="w-full flex-row  gap-6 flex-wrap">
@@ -175,7 +252,7 @@ const Thumbnails = ({ film, type }) => {
                   <img
                     src={data?.url}
                     alt=""
-                    className="w-[320px] object-cover h-[286.37px]"
+                    className="w-[400px] object-cover h-[225px]"
                   />
                   <Button
                     onClick={() => deleteFun(data?.id)}
@@ -193,7 +270,7 @@ const Thumbnails = ({ film, type }) => {
                 onClick={handleOpenBackdropModal}
                 className="w-max cursor-pointer"
               >
-                <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[286.37px] w-[350.4px] border-2 rounded-xl border-dashed border-secondary-300 gap-6">
+                <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[225px] w-[400px] border-2 rounded-xl border-dashed border-secondary-300 gap-6">
                   <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
                   <CustomStack className="flex-col gap-2 items-center">
                     <Typography className="font-[Inter-SemiBold] text-[#76757A] text-sm">
@@ -243,6 +320,48 @@ const Thumbnails = ({ film, type }) => {
                   {/** form */}
                   <div className="flex w-full items-center justify-center h-full">
                     <PosterForm
+                      handleModalClose={handleModalClose}
+                      film={film}
+                      type={type}
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </CustomStack>
+      )}
+
+      {openEpisodeThumbModal && (
+        <CustomStack
+          className="relative z-50"
+          aria-labelledby="modal-title"
+          role="dialog"
+          aria-modal="false"
+        >
+          <div className="fixed inset-0 z-50 bg-primary-200 bg-opacity-10 overflow-hidden ">
+            <div className="relative transform overflow-y-auto rounded-lg bg-secondary-400 h-screen text-left shadow-xl transition-all">
+              <div className="bg-secondary-900 px-16 pt-0 min-h-screen h-max">
+                {/** forms with stepper */}
+                <div className="flex flex-col w-full h-full text-whites-40 gap-6 relative">
+                  <CustomStack className="z-50 w-full justify-between items-center py-2 pt-7 sticky top-0 bg-secondary-900">
+                    <Typography className="font-[Inter-Medium] text-[#fafafa] text-xl">
+                      Add Episode Thumbnail
+                    </Typography>
+
+                    <div className="flex gap-5">
+                      <Button
+                        onClick={handleModalClose}
+                        className="px-5 rounded-lg font-[Inter-Medium] bg-primary-700"
+                      >
+                        CANCEL & CLOSE
+                      </Button>
+                    </div>
+                  </CustomStack>
+
+                  {/** form */}
+                  <div className="flex w-full items-center justify-center h-full">
+                    <EpisodeThumbnailForm
                       handleModalClose={handleModalClose}
                       film={film}
                       type={type}

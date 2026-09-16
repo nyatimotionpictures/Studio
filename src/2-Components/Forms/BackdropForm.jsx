@@ -14,11 +14,13 @@ import { BaseUrl } from "../../3-Middleware/apiRequest";
 import { queryClient } from "../../lib/tanstack";
 import { useParams } from "react-router-dom";
 import socket from "../../lib/socket";
+import getImageDimensions from "../../lib/getImageDimensions";
 
 const BackdropForm = ({ handleModalClose, film, type }) => {
   //console.log("film", film, type)
   let params = useParams();
     const [preview, setPreview] = React.useState(null);
+    const [imageInfo, setImageInfo] = React.useState(null);
     const [snackbarMessage, setSnackbarMessage] = React.useState(null);
     const [uploadProgress, setUploadProgress] = React.useState(0);
      const [sendProgress, setSendProgress] = React.useState(0);
@@ -32,14 +34,49 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
             value.type
           );
         }
-      }),
+      })
+      .test(
+        "imageDimensions",
+        "Image must be 2560 × 1440 px (16:9 ratio). Max 2560 × 1440, min 640 × 360",
+        async (value) => {
+          if (!value) return true;
+          try {
+            const { width, height } = await getImageDimensions(value);
+            const ratio = width / height;
+            return (
+              width >= 640 &&
+              width <= 2560 &&
+              height >= 360 &&
+              height <= 1440 &&
+              ratio >= 1.688 &&
+              ratio <= 1.867
+            );
+          } catch {
+            return true;
+          }
+        }
+      ),
       isBackdrop: yup.string().required("required"),
   });
 
-  const handleImagePreview = (file) => {
+  const handleImagePreview = async (file) => {
     const reader = new FileReader();
     reader.onloadend = () => setPreview(reader.result);
     reader.readAsDataURL(file);
+    try {
+      const { width, height } = await getImageDimensions(file);
+      const ratio = width / height;
+      const valid =
+        width >= 640 &&
+        width <= 2560 &&
+        height >= 360 &&
+        height <= 1440 &&
+        ratio >= 1.688 &&
+        ratio <= 1.867;
+      setImageInfo({ width, height, valid });
+    } catch {
+      setImageInfo(null);
+    }
   };
 
   const formik = useFormik({
@@ -174,13 +211,25 @@ const BackdropForm = ({ handleModalClose, film, type }) => {
                 <img
                   src={preview}
                   alt="Preview"
-                  className="w-[320px] object-cover h-[286.37px]"
+                  className="w-[400px] object-cover h-[225px]"
                 />
+                {imageInfo && (
+                  <p
+                    className={`font-[Inter-Regular] text-sm ${
+                      imageInfo.valid ? "text-[#4CAF50]" : "text-[#F44336]"
+                    }`}
+                  >
+                    Detected: {imageInfo.width} × {imageInfo.height} px
+                    {imageInfo.valid
+                      ? ""
+                      : " — exceeds recommended 2560 × 1440 px (16:9)"}
+                  </p>
+                )}
               </div>
             ): (
               <FormContainer className="w-max">
               <div    {...getRootProps()} htmlFor="poster">
-                <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[286.37px] w-[250.4px] border-2 rounded-xl border-dashed border-secondary-300 gap-6 text-center">
+                <CustomStack className="flex flex-col bg-[#36323e] justify-center items-center h-[225px] w-[400px] border-2 rounded-xl border-dashed border-secondary-300 gap-6 text-center">
                   <span className="icon-[solar--upload-minimalistic-linear] w-14 h-14 text-[#76757A]"></span>
                   <CustomStack className="flex-col gap-2 items-center">
                     <Typography className="font-[Inter-SemiBold] text-[#76757A] text-sm">
