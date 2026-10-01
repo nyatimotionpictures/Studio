@@ -16,6 +16,7 @@ export interface CreateNewFilmRequest {
 export interface UpdateFilmRequest {
     id: String;
     title: String;
+    slug?: String;
     type: String;
     audioLanguages: String;
     embeddedSubtitles: String;
@@ -30,6 +31,8 @@ export interface UpdateFilmRequest {
 
 export interface FilmData {
     title: String;
+    slug?: String;
+    slugHistory?: Array<String>;
     type: String;
     audioLanguages: String;
     embeddedSubtitles: String;
@@ -49,6 +52,7 @@ export interface CreateNewFilmResponse {
 /** getfilms */
 export interface GetAllFilms {
     title: String;
+    slug?: String;
     type: String;
     audioLanguages: String;
     embeddedSubtitles: String;

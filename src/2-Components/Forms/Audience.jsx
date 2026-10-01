@@ -14,6 +14,9 @@ import {
 
 import CustomRatingButton from "../RadioButtons/CustomRatingButton";
 import ErrorMessage from "./ErrorMessage";
+import Button from "../Buttons/Button";
+import { buildShareLink } from "../../config";
+import { slugifyTitle } from "../../lib/shareLink";
 
 const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
   /**
@@ -35,6 +38,12 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
           audienceTarget: yup.string().required("required"),
           audienceAgeGroup: yup.string().required("required"),
           visibility: yup.string().required("required"),
+          slug: yup
+            .string()
+            .matches(
+              /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+              "Use lowercase letters, numbers and hyphens only"
+            ),
           // enableDonation: yup.string().required("required"),
           // access: yup.string().required("required"),
         });
@@ -49,6 +58,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
         access: film?.type === "series" ? "free" : film?.access ?? "",
         enableDonation: film?.enableDonation ?? false,
         featured: film?.featured ?? false,
+        slug: film?.slug ?? "",
       }
     : {
         audienceTarget: "",
@@ -57,6 +67,7 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
         access: "",
         enableDonation: false,
         featured: false,
+        slug: "",
       };
 
   return (
@@ -69,7 +80,20 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
         handleStepNext(values);
       }}
     >
-      {({ values, handleChange, errors, touched, setFieldValue }) => (
+      {({ values, handleChange, errors, touched, setFieldValue }) => {
+        const sharePreview = buildShareLink({
+          slug: values?.slug,
+          type: values?.type,
+        });
+
+        const handleSuggestSlug = () => {
+          const suggested = slugifyTitle(film?.title);
+          if (suggested) {
+            setFieldValue("slug", suggested);
+          }
+        };
+
+        return (
         <Form>
           <CustomStack className="h-full w-full flex flex-col gap-5">
             {type !== "season" && (
@@ -233,6 +257,63 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
                 message={errors?.visibility && errors.visibility}
               />
             </FormContainer>
+
+            {type !== "season" && (
+              <>
+                {/** share link */}
+                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+                  <CustomStack className="flex-col ">
+                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                      Share Link
+                    </Typography>
+                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                      The public link for this title
+                    </Typography>
+                  </CustomStack>
+
+                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                    <input
+                      id="filmSlug"
+                      name="slug"
+                      type="text"
+                      placeholder="e.g the-last-lagoon"
+                      value={values?.slug ?? ""}
+                      onChange={handleChange}
+                      readOnly={
+                        values?.visibility !== "published" &&
+                        !values?.slug
+                      }
+                    />
+
+                    <div className="flex items-center gap-2">
+                      <Button
+                        type="button"
+                        onClick={handleSuggestSlug}
+                        disabled={!film?.title}
+                        variant={!film?.title ? "disabled" : "default"}
+                        className="px-3 py-1 text-sm rounded-md"
+                      >
+                        Generate from title
+                      </Button>
+                    </div>
+
+                    {values?.slug && (
+                      <Typography className="text-[#76757A] font-[Inter-Regular] text-xs break-all pt-1">
+                        {sharePreview}
+                      </Typography>
+                    )}
+                  </CustomStack>
+
+                  <ErrorMessage
+                    errors={
+                      touched?.slug && errors?.slug ? true : false
+                    }
+                    name="slug"
+                    message={errors?.slug && errors?.slug}
+                  />
+                </FormContainer>
+              </>
+            )}
 
             {type !== "episode" && values.visibility !== "coming soon" && (
               <>
@@ -462,7 +543,8 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
             )}
           </CustomStack>
         </Form>
-      )}
+        );
+      }}
     </Formik>
   );
 };
