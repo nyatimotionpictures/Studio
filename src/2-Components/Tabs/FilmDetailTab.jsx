@@ -45,7 +45,7 @@ const displayUpcomingFilms = [
   },
 ];
 
-const FilmDetailTab = ({ film, type, isLoading, refetch }) => {
+const FilmDetailTab = ({ film, type, isLoading, refetch, parentSlugs }) => {
   const [currentTabValue, setCurrentTabValue] = React.useState("1");
   const [allDisplayTabs, setAllDisplayTabs] = React.useState([
     {
@@ -131,11 +131,17 @@ const FilmDetailTab = ({ film, type, isLoading, refetch }) => {
   const TabDisplay = (datakey) => {
     switch (datakey) {
       case "Content Details":
-        return <ContentTab film={film} type={type ? type : "film"} />;
+        return (
+          <ContentTab
+            film={film}
+            type={type ? type : "film"}
+            parentSlugs={parentSlugs}
+          />
+        );
       case "Cast & Crew":
         return <CastTab film={film} type={type ? type : "film"} />;
       case "Audience, Visibility":
-        return <AudienceTab film={film} type={type ? type : "film"} />;
+        return <AudienceTab film={film} type={type ? type : "film"} parentSlugs={parentSlugs} />;
       case "Posters":
         return <ThumbnailTab film={film} type={type ? type : "film"} />;
       case "Trailer & Film":

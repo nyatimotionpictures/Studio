@@ -18,7 +18,7 @@ import Button from "../Buttons/Button";
 import { buildShareLink } from "../../config";
 import { slugifyTitle } from "../../lib/shareLink";
 
-const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
+const Audience = ({ innerref, handleStepNext, editdata, film, type, parentSlugs }) => {
   /**
  *    audienceTarget: null,
     audienceAgeGroup: null,
@@ -81,10 +81,17 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
       }}
     >
       {({ values, handleChange, errors, touched, setFieldValue }) => {
-        const sharePreview = buildShareLink({
-          slug: values?.slug,
-          type: values?.type,
-        });
+        const sharePreview = buildShareLink(
+          { slug: values?.slug, type: values?.type ?? type },
+          parentSlugs
+        );
+
+        // an episode url cannot be built until the series and season slugs are
+        // known, so the preview stays hidden rather than showing a broken link
+        const shareUnavailable =
+          String(values?.type ?? type ?? "")
+            .toLowerCase()
+            .includes("episode") && !parentSlugs?.seriesSlug;
 
         const handleSuggestSlug = () => {
           const suggested = slugifyTitle(film?.title);
@@ -258,62 +265,54 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type }) => {
               />
             </FormContainer>
 
-            {type !== "season" && (
-              <>
-                {/** share link */}
-                <FormContainer className="gap-2  border-t-secondary-500 pb-4">
-                  <CustomStack className="flex-col ">
-                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                      Share Link
-                    </Typography>
-                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                      The public link for this title
-                    </Typography>
-                  </CustomStack>
+            {/** share link */}
+            <FormContainer className="gap-2  border-t-secondary-500 pb-4">
+              <CustomStack className="flex-col ">
+                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                  Share Link
+                </Typography>
+                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                  {shareUnavailable
+                    ? "This link needs the series and season slug, which appear once this episode is saved."
+                    : "The public link for this title"}
+                </Typography>
+              </CustomStack>
 
-                  <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
-                    <input
-                      id="filmSlug"
-                      name="slug"
-                      type="text"
-                      placeholder="e.g the-last-lagoon"
-                      value={values?.slug ?? ""}
-                      onChange={handleChange}
-                      readOnly={
-                        values?.visibility !== "published" &&
-                        !values?.slug
-                      }
-                    />
+              <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                <input
+                  id="recordSlug"
+                  name="slug"
+                  type="text"
+                  placeholder="e.g the-last-lagoon"
+                  value={values?.slug ?? ""}
+                  onChange={handleChange}
+                />
 
-                    <div className="flex items-center gap-2">
-                      <Button
-                        type="button"
-                        onClick={handleSuggestSlug}
-                        disabled={!film?.title}
-                        variant={!film?.title ? "disabled" : "default"}
-                        className="px-3 py-1 text-sm rounded-md"
-                      >
-                        Generate from title
-                      </Button>
-                    </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    onClick={handleSuggestSlug}
+                    disabled={!film?.title}
+                    variant={!film?.title ? "disabled" : "default"}
+                    className="px-3 py-1 text-sm rounded-md"
+                  >
+                    Generate from title
+                  </Button>
+                </div>
 
-                    {values?.slug && (
-                      <Typography className="text-[#76757A] font-[Inter-Regular] text-xs break-all pt-1">
-                        {sharePreview}
-                      </Typography>
-                    )}
-                  </CustomStack>
+                {values?.slug && !shareUnavailable && (
+                  <Typography className="text-[#76757A] font-[Inter-Regular] text-xs break-all pt-1">
+                    {sharePreview}
+                  </Typography>
+                )}
+              </CustomStack>
 
-                  <ErrorMessage
-                    errors={
-                      touched?.slug && errors?.slug ? true : false
-                    }
-                    name="slug"
-                    message={errors?.slug && errors?.slug}
-                  />
-                </FormContainer>
-              </>
-            )}
+              <ErrorMessage
+                errors={touched?.slug && errors?.slug ? true : false}
+                name="slug"
+                message={errors?.slug && errors?.slug}
+              />
+            </FormContainer>
 
             {type !== "episode" && values.visibility !== "coming soon" && (
               <>

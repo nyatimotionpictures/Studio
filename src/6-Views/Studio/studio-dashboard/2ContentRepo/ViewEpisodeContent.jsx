@@ -110,7 +110,14 @@ const ViewEpisodeContent = () => {
             </div>
 
             <div className="mt-7">
-              <FilmDetailTab type="episode" film={episodeData} />
+              <FilmDetailTab
+                type="episode"
+                film={episodeData}
+                parentSlugs={{
+                  seriesSlug: filmsQuery?.data?.film?.slug,
+                  seasonSlug: seasonData?.slug,
+                }}
+              />
             </div>
           </div>
 

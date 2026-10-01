@@ -9,7 +9,7 @@ import { updateEpisodeContent, updateFilmContent } from '../../5-Store/TanstackS
 import { queryClient } from '../../lib/tanstack';
 import { useParams } from 'react-router-dom';
 
-const AudienceTab = ({film, type}) => {
+const AudienceTab = ({film, type, parentSlugs}) => {
   const [editing, setEditing] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   const formRef = React.useRef();
@@ -60,10 +60,10 @@ const AudienceTab = ({film, type}) => {
         editing ? (
           <div >
             <Audience innerref={formRef} handleStepNext={handleAPISubmission} type={type}   editdata={true}
-            film={film} />
+            film={film} parentSlugs={parentSlugs} />
           </div>
         ) : (<div>
-          <ViewAudienceDetails film={film} type={type}  />
+          <ViewAudienceDetails film={film} type={type} parentSlugs={parentSlugs}  />
         </div>)
       }
 

@@ -9,11 +9,14 @@ import Button from "../Buttons/Button";
 import { buildShareLink } from "../../config";
 import { copyToClipboard } from "../../lib/shareLink";
 
-const ViewAudienceDetails = ({ film, type }) => {
+const ViewAudienceDetails = ({ film, type, parentSlugs }) => {
   const [ratingData, setRatingData] = React.useState(null);
   const [copied, setCopied] = React.useState(false);
 
-  const shareLink = buildShareLink(film);
+  const shareLink = buildShareLink(
+    { slug: film?.slug, type: film?.type ?? type },
+    parentSlugs
+  );
 
   const handleCopy = async () => {
     const ok = await copyToClipboard(shareLink);
@@ -172,58 +175,56 @@ const ViewAudienceDetails = ({ film, type }) => {
               </CustomStack>
             </FormContainer>
 
-            {type !== "season" && (
-              <>
-                {/** share link */}
-                <FormContainer className="gap-2 pb-4">
-                  <CustomStack className="flex-col">
-                    <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
-                      Share Link
-                    </Typography>
-                    <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
-                      {copied
-                        ? "Link copied to clipboard"
-                        : film?.slug
-                        ? "Public link for this title"
-                        : "No link yet. Edit details to set one."}
-                    </Typography>
-                  </CustomStack>
+            {/** share link */}
+            <FormContainer className="gap-2 pb-4">
+              <CustomStack className="flex-col">
+                <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                  Share Link
+                </Typography>
+                <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                  {copied
+                    ? "Link copied to clipboard"
+                    : !film?.slug
+                    ? "No link yet. Edit details to set one."
+                    : shareLink
+                    ? "Public link for this title"
+                    : "This link needs the series and season slug, which appear once this episode is saved."}
+                </Typography>
+              </CustomStack>
 
-                  {film?.slug && (
-                    <CustomStack className="flex-row items-center gap-3 mt-2">
-                      <input
-                        id="filmShareLink"
-                        type="text"
-                        readOnly
-                        value={shareLink}
-                        onFocus={(event) => event.target.select()}
-                        className="flex-1 font-[Inter-Regular] text-sm text-whites-40"
-                      />
-                      <Button
-                        type="button"
-                        onClick={handleCopy}
-                        title="Copy link"
-                        aria-label="Copy link"
-                        className="h-[43px] w-[43px] flex items-center justify-center px-0 rounded-md"
-                      >
-                        <span
-                          className={`w-5 h-5 ${copied ? "icon-[solar--copy-bold]" : "icon-[solar--copy-linear]"}`}
-                        ></span>
-                      </Button>
-                      <Button
-                        type="button"
-                        onClick={handleOpen}
-                        title="Open link"
-                        aria-label="Open link"
-                        className="h-[43px] w-[43px] flex items-center justify-center px-0 rounded-md"
-                      >
-                        <span className="icon-[solar--maximize-square-linear] w-5 h-5"></span>
-                      </Button>
-                    </CustomStack>
-                  )}
-                </FormContainer>
-              </>
-            )}
+              {film?.slug && shareLink && (
+                <CustomStack className="flex-row items-center gap-3 mt-2">
+                  <input
+                    id="recordShareLink"
+                    type="text"
+                    readOnly
+                    value={shareLink}
+                    onFocus={(event) => event.target.select()}
+                    className="flex-1 font-[Inter-Regular] text-sm text-whites-40"
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleCopy}
+                    title="Copy link"
+                    aria-label="Copy link"
+                    className="h-[43px] w-[43px] flex items-center justify-center px-0 rounded-md"
+                  >
+                    <span
+                      className={`w-5 h-5 ${copied ? "icon-[solar--copy-bold]" : "icon-[solar--copy-linear]"}`}
+                    ></span>
+                  </Button>
+                  <Button
+                    type="button"
+                    onClick={handleOpen}
+                    title="Open link"
+                    aria-label="Open link"
+                    className="h-[43px] w-[43px] flex items-center justify-center px-0 rounded-md"
+                  >
+                    <span className="icon-[solar--maximize-square-linear] w-5 h-5"></span>
+                  </Button>
+                </CustomStack>
+              )}
+            </FormContainer>
 
             {type !== "episode" && (
               <>

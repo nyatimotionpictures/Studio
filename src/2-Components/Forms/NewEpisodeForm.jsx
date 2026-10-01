@@ -5,9 +5,12 @@ import * as yup from "yup";
 import CustomStack from "../Stacks/CustomStack";
 import { FormContainer } from "../Stacks/InputFormStack";
 import ErrorMessage from "./ErrorMessage";
-import { Autocomplete, TextField } from "@mui/material";
+import { Autocomplete, TextField, Typography } from "@mui/material";
+import Button from "../Buttons/Button";
+import { buildShareLink } from "../../config";
+import { slugifyTitle } from "../../lib/shareLink";
 
-const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) => {
+const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId, parentSlugs }) => {
 
     // episode {
     //     id        String    @id @default(auto()) @map("_id") @db.ObjectId
@@ -35,6 +38,12 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
     genre: yup.array().min(1, "required"),
     overview: yup.string().required("required"),
     plotSummary: yup.string().required("required"),
+    slug: yup
+      .string()
+      .matches(
+        /^[a-z0-9]+(?:-[a-z0-9]+)*$/,
+        "Use lowercase letters, numbers and hyphens only"
+      ),
   });
 
   const initialValues = editdata ? {
@@ -53,6 +62,7 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
     tags: film?.tags ?? [],
     overview: film?.overview ?? "",
     plotSummary: film?.plotSummary ?? "",
+    slug: film?.slug ?? "",
   } : 
     {
         episode: null,
@@ -68,6 +78,7 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
     releaseDate: "",
     overview: "",
     plotSummary: "",
+    slug: "",
   };
 
   const LanguageOptions = [
@@ -367,6 +378,60 @@ const NewEpisodeForm = ({ innerref, handleStepNext, editdata, film, seasonId }) 
                      errors={touched?.overview && errors?.overview ? true : false}
                      name="overview"
                      message={errors?.overview && errors.overview} 
+                   />
+                 </FormContainer>
+
+                 {/** share link */}
+                 <FormContainer className="gap-2">
+                   <Typography className="text-[#F2F2F2] font-[Inter-SemiBold] text-base">
+                     Share Link
+                   </Typography>
+                   <Typography className="text-[#76757A] font-[Inter-Regular] text-sm">
+                     {parentSlugs?.seriesSlug && parentSlugs?.seasonSlug
+                       ? "The public link for this episode"
+                       : "The public link needs the series and season, which are set once this episode is saved."}
+                   </Typography>
+
+                   <CustomStack className="flex-col gap-2 mt-2 text-[#f2f2f2]">
+                     <input
+                       id="episodeSlug"
+                       name="slug"
+                       type="text"
+                       placeholder="e.g the-first-episode"
+                       value={values?.slug ?? ""}
+                       onChange={handleChange}
+                     />
+
+                     <div className="flex items-center gap-2">
+                       <Button
+                         type="button"
+                         onClick={() =>
+                           setFieldValue("slug", slugifyTitle(values?.title))
+                         }
+                         disabled={!values?.title}
+                         variant={!values?.title ? "disabled" : "default"}
+                         className="px-3 py-1 text-sm rounded-md"
+                       >
+                         Generate from title
+                       </Button>
+                     </div>
+
+                     {values?.slug &&
+                       parentSlugs?.seriesSlug &&
+                       parentSlugs?.seasonSlug && (
+                         <Typography className="text-[#76757A] font-[Inter-Regular] text-xs break-all pt-1">
+                           {buildShareLink(
+                             { slug: values?.slug, type: "episode" },
+                             parentSlugs
+                           )}
+                         </Typography>
+                       )}
+                   </CustomStack>
+
+                   <ErrorMessage
+                     errors={touched?.slug && errors?.slug ? true : false}
+                     name="slug"
+                     message={errors?.slug && errors.slug}
                    />
                  </FormContainer>
                </CustomStack>

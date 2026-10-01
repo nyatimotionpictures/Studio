@@ -10,7 +10,7 @@ import { updateEpisodeContent, updateFilmContent } from "../../5-Store/TanstackS
 import { useMutation } from "@tanstack/react-query";
 import { queryClient } from "../../lib/tanstack";
 
-const ContentTab = ({ film, type }) => {
+const ContentTab = ({ film, type, parentSlugs }) => {
   const [editing, setEditing] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState(null);
   let params = useParams();
@@ -63,6 +63,7 @@ const ContentTab = ({ film, type }) => {
               handleStepNext={handleAPISubmission}
               editdata={true}
               film={film}
+              parentSlugs={parentSlugs}
             />   : <ContentDetails
             innerref={formRef}
             handleStepNext={handleAPISubmission}
@@ -76,7 +77,7 @@ const ContentTab = ({ film, type }) => {
       ) : (
         <div>
           {
-            type === "episode" ? <ViewEpisodeData film={film} /> : <ViewContentDetails film={film} />
+            type === "episode" ? <ViewEpisodeData film={film} parentSlugs={parentSlugs} /> : <ViewContentDetails film={film} />
           }
         </div>
       )}
