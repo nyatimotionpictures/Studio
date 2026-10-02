@@ -114,7 +114,6 @@ const ViewEpisodeContent = () => {
                 type="episode"
                 film={episodeData}
                 parentSlugs={{
-                  seriesSlug: filmsQuery?.data?.film?.slug,
                   seasonSlug: seasonData?.slug,
                 }}
               />

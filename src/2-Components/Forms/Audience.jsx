@@ -86,12 +86,12 @@ const Audience = ({ innerref, handleStepNext, editdata, film, type, parentSlugs 
           parentSlugs
         );
 
-        // an episode url cannot be built until the series and season slugs are
-        // known, so the preview stays hidden rather than showing a broken link
+        // an episode url cannot be built until its season slug is known, so the
+        // preview stays hidden rather than showing a broken link
         const shareUnavailable =
           String(values?.type ?? type ?? "")
             .toLowerCase()
-            .includes("episode") && !parentSlugs?.seriesSlug;
+            .includes("episode") && !parentSlugs?.seasonSlug;
 
         const handleSuggestSlug = () => {
           const suggested = slugifyTitle(film?.title);

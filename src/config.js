@@ -12,12 +12,12 @@ export const PUBLIC_APP_URL = 'https://stream.nyatimotionpictures.com';
  *
  *  - a feature film lives under /film, a series under /series
  *  - a season is called a "segment" publicly, /segments/:id
- *  - an episode needs its series and season in the path to resolve the film it
- *    belongs to, /episode/:episodeid/:seriesid/:seasonid
+ *  - an episode has no page of its own, it opens as a modal on its season page,
+ *    so the link carries the season in the path and the episode as ?ep=
  *
  * @param {{slug?: string, type?: string}} resource the record being shared
- * @param {{seriesSlug?: string, seasonSlug?: string}} [parents] slugs of the
- *   parent season and film, only used for episodes
+ * @param {{seasonSlug?: string}} [parents] slug of the parent season, only used
+ *   for episodes
  * @returns {string} the public url, or an empty string when required slugs are
  *   missing so a half built link is never copied
  */
@@ -32,10 +32,10 @@ export const buildShareLink = (resource, parents = {}) => {
   }
 
   if (type.includes('episode')) {
-    // the episode page has to fetch its film, so the series and season slugs
-    // are part of the path and cannot be left out
-    if (!parents.seriesSlug || !parents.seasonSlug) return '';
-    return `${PUBLIC_APP_URL}/episode/${slug}/${parents.seriesSlug}/${parents.seasonSlug}`;
+    // the season page already has the episode list, so only the season is
+    // needed to resolve it
+    if (!parents.seasonSlug) return '';
+    return `${PUBLIC_APP_URL}/segments/${parents.seasonSlug}?ep=${slug}`;
   }
 
   const segment = type.includes('series') ? 'series' : 'film';
