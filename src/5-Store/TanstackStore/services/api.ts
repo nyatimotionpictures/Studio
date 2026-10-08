@@ -337,7 +337,7 @@ export const deleteEpisode = async (
         try {
           let { orderId, type } = purchaseData
 
-          let path = type?.toLowerCase()?.includes('pesapal') ? `v1/film/pesapal/checkpaymentstatus?OrderTrackingId=${orderId}` : `v1/film/checkpaymentstatus/${orderId}`
+          let path = type?.toLowerCase()?.includes('pesapal') ? `v1/film/pesapal/checkpaymentstatus?OrderTrackingId=${orderId}` : `v2/film/checkpaymentstatus/${orderId}`
           const response = await apiRequest.get(
             path
           );
